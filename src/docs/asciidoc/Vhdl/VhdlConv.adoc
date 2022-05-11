@@ -1,0 +1,101 @@
+= Converter Java 2 Vhdl Technical description
+:toc:
+:toclevels: 5
+:sectnums:
+:sectlinks:
+:max-width: 52em
+:prewrap!:
+:cpp: C++
+:cp: C/++
+
+
+
+See also:
+
+link:Java2Vhdl_Approach.html[] Approach for Java for Fpga logic
+
+link:Java2Vhdl_StyleGuide.html[] How to work with Java for Fpga logic
+
+This is a preliminary information. The tool Java2Vhdl translator is in progress.
+
+== Approach
+
+See link:Java2Vhdl_Approach.html[].
+
+This document contains details of implementation of the translator. 
+
+== Converting of an expression
+
+The expression parsed from Java follows the approach described in
+link:../RWTrans/Calculator_RPN.html[]. 
+It means the parsed expression is supplied as Reverse Polish Notation in prepared execute order.
+This allows to build the expression in VHDL to the VHDL precedence rules of the operators, independent of the Java ones.
+General the back conversion to a infix notation from RPN is described also in the link above.
+
+The problematic for VHDL source code generation is the necessary distinguish between boolean and the SIGNAL types.
+See link:Java2Vhdl.html#boolIf[Java2Vhdl, chapter boolean expression and SIGNAL types with view to VHDL].
+
+=== General algorithm to prepare the VHDL expression
+
+The `genExpression(...)` is called whenever an expression is expected in the translated code. 
+That is as statement (can be an assignment) or also as condition in `if`.
+
+----
+//In source: main/java/srcJava_vishiaBase/org/vishia/fpga/VhdlConv.java
+include::../../../main/java/srcJava_vishiaBase/org/vishia/fpga/VhdlConv.java[tag=genExpressionHead]
+----
+
+With the last shown `for` the `ExprPart` from the expression are processed in order of the RPN. 
+The order of operands is the order in the original Java source.
+But the operations are sorted to stack operations and active operations.
+
+----
+//In source: main/java/srcJava_vishiaBase/org/vishia/fpga/VhdlConv.java
+include::../../../main/java/srcJava_vishiaBase/org/vishia/fpga/VhdlConv.java[tag=genExpressionParts]
+----
+
+* If one `ExprPart` is a start of a new term, then the current content is pushed into a Stack for further usage.
+Now firstly this term is prepared straight forward.
+* If the __accumulator__ should be used as following argument, then this is the currently prepared term,
+used now right side. The left side term is popped from stack. The part does not contain an operand, 
+because even, it is the __accumulator__, the till now prepared term used as operand. 
+* Either the `exprRight` or the operand in the `part` is used for the operation which is added to `exprLeft`.
+* If the operator is an assignment, this needs special handling. 
+An assignment can also be a part in the expression, in form `y = a & ( x = c | d) ^ e;`.
+Then first the inner assignment is generated: `x = c | d;` as extra statement. 
+The assign-variable `x` remains in the `exprLeft`, so the outer assignment is executed furthermore with
+`y = a & x ^ e`.
+
+The following example should demonstrate the stack push and pop.
+
+The original term is: 
+
+ y = a | b & c;
+ 
+The RPN form is:
+
+ @y; @a; @b; &c; |@; =@;
+ 
+It means 
+
+* `y` is taken and stored. 
+* `a` is taken and stored.
+* `b` is taken, combined with with `& c` which produces `b AND c`.
+* `|@` means, the stored term should be combined with the current term (__accu__).
+** It means `b AND c` is the accu, used as right part of the term, 
+** it is wrapped with `( )` because it is prior in execution and has not a higher precedence in VHDL.
+** `a` is popped from stack, it is now the `leftExpr`
+** The expression is built with the operator and the `rightExpr` as `a OR (b AND c)`
+* `=@` means, the stored term should be combined with the current term (__accu__).
+** The __accu__ contains `a OR (b AND c)`, used as right part of the term.
+** Because it is an assignment, the `genAssignment(...)` is called.
+** This produces as new line `y <= a OR (b AND c)`.
+
+The necessary parenthesis arround the `AND` term are produced for VHDL 
+because `AND` has not a higher precedence as `OR` in VHDL, but it is produced as unit before (__accu__),
+hence should be wrapped. In Java `&` has a higher precedence in comparison to `|`. 
+That's why the stack operation is used. 
+
+
+=== Distinguish between boolean and BIT from Java to VHDL
+

@@ -1,0 +1,476 @@
+= Java as basis language for logic translated to VHDL
+:toc:
+:toclevels: 4
+:sectnums:
+:sectlinks:
+:max-width: 52em
+:prewrap!:
+:cpp: C++
+:cp: C/++
+:wildcard: *
+
+
+== Notes
+
+
+< 1 Seite deutsches exposé Kurzdarstellung
+5-Zeiler für mail ankündigung
+
+Simulation-Fokus
+
+Test! Universum der Testumgebung
+
+Vergleich mit num. Integration ist zu wenig verständlich für erstes Paper
+aber final als Zwang führt zu klarer Ternnung von alt und neu.
+
+Kein Medienbruch
+
+Freie Nutzbarkeit
+
+Bessere Nutzbarkeit vorhandener Designelemente indem direkt das Designelement als Java-Funktionsaufruf selbst formuliert wird. 
+
+Keine geschlossene Welt. Interoperabel
+
+Trennen was ist Beispiel, was ist Prinzip
+
+== Approach
+
+VHDL is the first language for FPGA logic. All routing tools are based on VHDL (beside other for example Verilog).
+VHDL is a traditional language, in the past first used for ASIC description.
+
+Sometimes VHDL may be seen as too complicated, specific tools are necessary. 
+Not everything is futuristic. Hence searching to other concepts may be appropriate. 
+
+Java is, in comparison to C or {cpp}, is a proper clarified language. 
+The basics and past of C may be commonly known, {cpp} is sometimes known as too over engineered. 
+True, the overloadable operators make C++ interesting for other usage, and such concepts are existing for hardware description,
+but some other disadvantages like moving the focus away from {cpp}.
+ 
+Generally, a language such as VHDL is not comparable with a programming language.
+A programming language is free to set and use variables, also as intermediate store.
+Whereas in a hardware design the assignment is not a "set value in this moment".
+it is a persistent relation. The order of writing these relations in the code (assignments) have no meaning. 
+A second approach for hardware is "synchronous state machines". 
+For this, one edge of a central clock determines setting of the next state
+calculated from the state before usual with logic relations from the own state and inputs. 
+It means an assignment in a VHDL "__PROCESS__" is valid only for the next __PROCESS__ entry. 
+This is a special construct of hardware description languages.
+
+But, exactly the last approach, significant for FPGA logic, is used in the same kind
+for a specific programming in embedded control: For stepping control algorithm. 
+This stepping control algorithm can be seen as numeric integration of differential equations.
+The next state for the new step is calculated from the given state and the inputs. 
+The exactness of solving differential equations with numeric should use the same approach
+as calculating a state machine from its current to the new state in hardware logic.
+
+Hence, common programming language such as Java can be used for a specific kind of software writing for the above mentioned approach. 
+
+Last but not the least Java has a proper feature, which is missing in {cpp}: Usage of `final` variables. 
+
+`final` in Java means, that the value of this variable can be set anywhere in the algorithm,
+but only exact one time. This is true on instance variables (defined in the class)
+in the constructor execution, or for stack variables (defined in an operation).
+This `final` approach of Java can be used to check that the new value of a state is calculated
+only ones, unique, and complete. That is also necessary for VHDL in a "__PROCESS__".
+
+It means using of Java to calculate synchronous state machines as well as logic relations is possible
+as a specific style guide of programming. 
+Java is preferred against {cpp} because it is more concise.
+
+
+
+== Some negligibilities
+
+**Allocation and freeing memory:** If a new state (variable values) using the `final` approach can be calculated 
+only in a constructor, any step time needs a new instance. 
+It seems to be a wasting of memory. 
+But: Using dynamic memory is properly organized in Java. 
+Get memory is a cheap operation.
+The amount of memory for one step is less, for example 1 kByte in comparison to the GByte size of the RAM.
+It means execution of 100'000 steps needs ~100 MByte of RAM if the allocated memory is not recycled. 
+The ability to recycle (garbage collector) is fast executable, if the allocated memory is even.
+It means the garbage collector is fast. All in all it is not a problem. 
+
+**Tool and language support:** Java is one of the most used language worldwide.
+The tooling, for example using __Eclipse__ is familiar. 
+Also, some libraries for auxiliary functions such as processing input data from measurements
+or otherwise specified from calculations as also evaluation of data including printing and graphic presentations
+are well supported. 
+
+
+
+== Basic frame to write assignments to hardware state machines in Java
+
+----
+import org.vishia.fpga.AnnotationVhdl;
+import org.vishia.fpga.AnnotationVhdl.BITRANGE;
+
+public class MyVhdlModule {
+
+  public final static class In {
+    boolean frameIn;
+    boolean spiClk;
+    boolean spiMoSi;
+  }
+  
+  public static class Out {
+    public boolean spiMiSo;
+    @BITRANGE("15 DOWNTO 0") public int spiWrData;
+    static final int m_spiWrData = 0xffff; 
+    public boolean ceCmd, ceData;
+  }
+----
+
+A Java class as one file is the basic for one module in the FPGA logic (one VHDL module).
+Modularity is a strongly recommended concept.
+
+The inputs and the outputs of the module are written as `public` variables in the named inner classes. That's names are convention. 
+
+`boolean` in Java is `BIT` or `STD_LOGIC` (firstly `BIT`) in VHDL.
+An `int` variable with 32 bit in Java, as well as `long` (64 bit), `short` and `byte` (16/8 bits) are a `BIT_VECTOR` or `STD_LOGIC_VECTOR`. 
+
+The size is defined by the additional annotation. 
+The possibility of annotations is another important feature of Java which can be properly used. 
+These annotations can be evaluated on runtime as static property of a variable, but it is used here especially for translating to VHDL.
+
+The non-public `static final` definition is used in the Java algorithm to limit the number of used bits. 
+It can also be used to determines the number of bits in a vector. 
+But: The bits are always started from 0 and they are `DOWNTO`. 
+That is a limitation in comparison to freedom in VHDL, which should be proper. 
+
+
+----  
+  public static class Ref {
+    final SpiData data;
+
+    public Ref(SpiData data) {
+      this.data = data;
+    }
+  }
+----
+
+Such a '__Reference__' class is possible in Java. It is not mapped immediately to VHDL.
+Hereby there is an approach: Generating a flat design from several modules.
+Then the '__referenced__' data are immediately states (flipflops) which are placed in other modules
+but determined in this module. For a module generation in VHDL - this is more complicated. 
+Then all referenced data should be present in the output part of the module.
+
+----  
+  public final void init(SpiData spiData) {
+    this.ref = new Ref(spiData);
+  }
+----
+
+The initialization is used to join modules on Java level. 
+Here the reference `spiData` is set, an aggregation in UML thinking. 
+In words of hardware logic: The other module with this name is used or connected.
+`init(...)` should be executed only one time on startup of simulation. 
+It is a static information for generating VHDL.  
+  
+----  
+  private static class Q {
+    
+    /**shift register for SPI data, shift to left for SPIclk. SPIMOSI set to bit 0, SPIMISO set from bit 15. @BIT 15..0.*/
+    @BITRANGE("15 DOWNTO 0") final int shRdData; 
+    
+    @BITRANGE("15 DOWNTO 0") final int wrData;
+    //.....
+----
+
+
+Such a static class with name excluding "`In`", "`Out`" or "`Ref`"  builds a __PROCESS__ related with a __RECORD__ in VHDL. 
+
+Each __PROCESS__ have its __RRCORD__. It is the FF (Flipflop) group of the __PROCESS__ with this same Clock and maybe **__Clock Enable__**.
+
+
+
+----
+    public Q() {
+      this.shRdData = 0;
+      this.wrData = 0;
+----   
+
+The argument free constructor of this inner class presents the reset state, usual all 0.
+That are the initial values for the __RECORD__ instance. 
+
+----
+    //The process of Q
+    Q(In in, Q z, SpiSlave thiz) {
+      if( !in.frameIn && z.frameInQ1) {    //falling edge on frameIn:
+        //this.shRdData = this.ref.data.cmd;
+        this.ctBits = 0b10000;
+        this.ctWords = 0;
+        this.shRdData = 0;
+        this.wrData = 0;
+        this.ceCmd = false; 
+        this.ceData = false;
+      }
+      else if(in.spiClk && !z.spiClkQ1) {       // rising edge of spiClk
+        if( (z.ctBits & 0x10) !=0) {            // new bit0
+          this.ctWords = z.ctWords +1;
+          this.wrData = z.shRdData;
+          switch(z.ctWords & (Q.m_ctWords >> 1)) {  //load data in shRdData
+          case 0: this.shRdData = thiz.ref.data.cmd; this.ceCmd = false; this.ceData = false; break;
+          case 1: this.shRdData = thiz.ref.data.data1; this.ceData = false; this.ceCmd=true;  break;
+          case 2: this.shRdData = thiz.ref.data.cmd; this.ceCmd = false; this.ceData = true; break;
+          default: this.shRdData = thiz.ref.data.cmd; this.ceCmd = this.ceData = false; 
+          }
+----
+
+This is the constructor with arguments `in`: the input of the module, 
+`z`: The current state of the module (the current instance) 
+and `thiz`, the module as a whole to access other record values.
+
+This constructor uses the final approach: 
+All values of the own instance (here `Q`) should be set only one time, nothing should be forgotten. It means all should be set unique, only one time in each branch. 
+Using a newly calculated value is not possible. 
+It is not existing, in the hardware only existing after the clock edge, after the __PROCESS__,
+and in Java not existing because it cannot be used before setting. 
+In this kind cyclically dependencies in logic are prevented. 
+
+
+Also, local variable can be used in such a constructor for intermediate values.  That local variable should be also defined as `final`, so they should be set first time before usage, and set only one time. 
+It is a branch in logic for several D inputs. 
+In VHDL it is presented by local variables of the __PROCESS__. 
+But Java is stronger in usage. 
+`final` variables can be set only one time and not used before set.
+That makes the logic clearer and more obvious. 
+
+----
+  final In in = new In();
+  final Out out = new Out();
+  Ref ref;
+  Q q = new Q();//, dq = new Q();;
+----  
+
+Now this is the data creation in the Java class. 
+`in` and `out` are created ones. 
+`ref` is also created ones, but in the init operation. 
+That's why it cannot be determined as `final`, which is a little disadvantage of Java. 
+It is the known discussion about __aggregations__ and the moment of its initialization which cannot be done often in the pure construction phase, instead in a __initialization__ phase
+after construction before running mode. 
+
+`Q q` is one __RECORD__ for one __PROCESS__ (more is possible). 
+The `q` reference is not `final`
+but initialized in the construction of the module instance with the a instance
+with initial values (argument free `Q()`).
+ 
+ 
+----
+  void step() {
+    //assignments
+    this.q = new Q(this.in, this.q, this);
+    this.out.spiMiSo = (this.q.shRdData & 1) !=0 ? true: false;
+    this.out.ceCmd = this.q.ceCmd;
+    this.out.ceData = this.q.ceData;
+    this.out.spiWrData = this.q.wrData;
+  }
+----
+
+This is the whole simulation of this module. 
+
+If the module is triggered only synchronous with exact one clock, 
+here all __PROCESS__es should be executed. 
+In Java Simulation this is the step for the active clock edge. 
+The new state will be calculated in the constructor of `Q` for one __PROCESS__.
+After that this new state is stored in the `q` reference. 
+
+If more as one __PROCESS__ is defined in this class, care must be taken that values from another process should not be used after calculation for the other process for the calculation.
+Both __PROCESSES__es have the same clock edge. 
+
+But if different clocks for several __PROCESS__es are used, it is more complicated but also possible in Java by style guides. 
+Maybe the execution of the `q = new Q...` should be written in a `if` condition which checks the clock source. 
+Also, the usage of a central __clock enable__ should be regarded here. 
+
+That is all for one module. Outside of the module, in the frame, 
+the module instances should be initialized (created) and their `step(...)` 
+should be called.
+Furthermore, the signals for stimulation and output should be regarded,
+in a Java specific form (organization of the test frame).
+
+
+
+== How to translate in VHDL
+
+Of course, for translation of this Java code into VHDL 
+an approach with "__evalating the source code with regular expression__" in any proper language
+is not sufficient. 
+Only a complete parsing of the Java code with the known Java language syntax
+and the synthesis of the VHDL code from the parsed data is sufficient. 
+
+For parsing Java the __ZBNF__ parser is used. The '__Z__' means __semantic__ as reversed '__S__'
+because the parse result is presented in the output immediately semantically prepared.
+This simplifies the generation of VHDL. 
+The __ZBNF__ parser was developed by the author himself in ~2007, frequently used 
+for different approaches, see also link:https://www.vishia.org/Java/html/RWTrans/ZbnfParser.html[].
+
+Of course, the precedence of operators is a little bit different between Java and VHDL and writing rules for assignments and check of booleans is different. 
+Hence, these parts are especially prepared in a Java class as part of the translation, 
+see a code snippet:
+
+----
+  public String getType(JavaSrc.VariableInstance var) {
+    JavaSrc.Type type = var.get_type();
+    String typeName = type.get_name();
+    String varName = var.get_variableName();
+    String sElemJava = this.nameInnerClassVariable + "." + varName;
+    Variable varDescr = this.idxVars.get(sElemJava);
+    
+    if(varDescr.isBool) { //typeName.equals("boolean")) {
+      return "BIT";
+    } else { // if(typeName.equals("int")) {
+      String sBitRange = varDescr.downto;
+      return "STD_LOGIC_VECTOR(" + sBitRange + ")";
+    }
+  }
+----  
+
+This operation returns the VHDL type as String from the parsed type. 
+`isBool` is set if `boolean` in Java parsing is detected. 
+Not implemented yet (TODO): Distinguish between `BIT` and `STD_LOGIC` for a Java `boolean`.
+The distinction should be done by an annotation in the Java source code by the user.
+
+For bitwise types (`int`, `long`) the above shown annotation in java can/should be used.
+It is parsed and applied to the variable, and used here.
+
+The following code snippet shows the translation of a `if` statement in Java:
+
+----
+  void genStmnt ( Appendable out, JavaSrc.Statement stmnt, int indent) throws IOException, NoSuchFieldException, SecurityException {
+    JavaSrc.If_statement ifStmnt = stmnt.get_if_statement();
+    if(ifStmnt !=null) {
+      out.append(indents.substring(0, 2*indent+1)).append("IF ");
+      JavaSrc.Expression cond = ifStmnt.get_Expression();
+      genCondition(out, cond);
+      out.append(" THEN");
+      JavaSrc.Statement stmnt1 = ifStmnt.get_statement();
+      if(stmnt1 !=null) { genStmnt(out, stmnt1, indent+1); }
+      JavaSrc.Statement stmnt2 = ifStmnt.get_elseStatement();
+      if(stmnt2 !=null) { 
+        out.append(indents.substring(0, 2*indent+1)).append("ELSE");
+        genStmnt(out, stmnt2, indent+1); 
+      }
+      out.append(indents.substring(0, 2*indent+1)).append("END IF");
+----
+
+This snippet shows that the text is stitched together for VHDL by `out.append` operations.
+For the whole VHDL code this is not sufficient, not obviously, obscure. 
+That`s why for the whole a so named __JZtxtcmd__ script (link:https://www.vishia.org/Java/html/RWTrans/RWTrans.html#_jztxtcmd[])
+is used, shown as code snippet:
+
+----
+sub vhdlFrame(Obj data){
+  <::>
+==library IEEE;
+==use IEEE.STD_LOGIC_1164.ALL;
+==use ieee.numeric_std.all;
+==use ieee.std_logic_unsigned.all;
+==
+==ENTITY <&data.classident> IS
+==PORT (
+==<.>
+  for(iclass:data.classDefinition) {
+    if(iclass.classident=="In") {
+      for(var:iclass.variableDefinition) {
+        <:>
+========  SIGNAL <&var.variableName> : IN <&VhdlConv.getType(var)>;<.>         
+  } } }    
+----
+
+Both approaches are used together, the JZtxtcmd for the outer frame, and the Java preparation with `out.append(...)` for inner parts.
+
+The chunking of `out.append(...)` inside Java can be improved also using the `OutTextPreparer`
+(see next chapter in the link above), which organizes the output text with text templates with placeholder.
+It is a similar solution (with a part of the same syntax) as the JZtxtcmd. 
+
+With the free given text templates, details of the generation can be adapted  by a specific usage approach if necessary, without programming. 
+
+The translation is not the fastest one, needs less than or some seconds per module on a modern PC.  
+
+
+
+== Example resulting VHDL
+
+Proper to the Java code above the following VHDL is generated just now,
+the generator is not ready to use in the moment, but it works in principle:
+
+----
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use ieee.numeric_std.all;
+use ieee.std_logic_unsigned.all;
+
+ENTITY SpiSlave IS
+PORT (
+
+  SIGNAL frameIn : IN BIT;
+  SIGNAL spiClk : IN BIT;
+  SIGNAL spiMoSi : IN BIT;
+  SIGNAL spiMiSo : OUT BIT;
+  SIGNAL spiWrData : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+  SIGNAL ceCmd : OUT BIT;
+  SIGNAL ceData : OUT BIT;  
+  SIGNAL clk, reset: IN BIT
+);
+END SpiSlave;  --ENTITY
+
+ARCHITECTURE STRUCTURE OF SpiSlave IS
+                                                                           
+
+TYPE Q_REC IS RECORD    
+  shRdData : STD_LOGIC_VECTOR(15 DOWNTO 0);    
+  wrData : STD_LOGIC_VECTOR(15 DOWNTO 0);    
+  spiClkQ1 : BIT;    
+  ceCmd : BIT;    
+  ceData : BIT;    
+  frameInQ1 : BIT;    
+  ctBits : STD_LOGIC_VECTOR(4 DOWNTO 0);    
+  ctWords : STD_LOGIC_VECTOR(8 DOWNTO 0);  
+END RECORD Q_REC;
+
+SIGNAL q: Q_REC;
+  
+  
+BEGIN
+
+SpiSlave_Q: PROCESS (clk)
+  BEGIN IF(clk'event AND clK='1') THEN                                                
+  
+  IF frameIn = '1' AND q.frameInQ1 = '1' THEN
+      q.ctBits <=  "10000";
+      q.ctWords <= "000000000";
+      q.shRdData <= x"0000";
+      q.wrData <= x"0000";
+      q.ceCmd <= '0';
+      q.ceData <= '0';
+  ELSE
+    IF spiClk = '1' AND q.spiClkQ1 = '1' THEN
+        IF  ( q.ctBits = "10000" ) THEN      --<<<<< till here yet ready.
+            q.ctWords <= q.ctWords;
+            q.wrData <= q.shRdData;
+              --unknown statement
+            q.ctBits <= "0000000000000000";
+        ELSE
+            q.ctBits <= q.ctBits +1;
+            q.shRdData <= q.shRdData(14 DOWNTO 0) + '0';
+            q.wrData <= q.wrData;
+            q.ctWords <= q.ctWords;
+            q.ceCmd <= q.ceData = '1' <= 0
+        END IF
+    ELSE
+      IF spiClk = '1' AND q.spiClkQ1 = '1' THEN
+----
+
+Some details are not ready in the moment. The last statements are manual adjusted yet,
+but all before the marker `--<<<<< till...` is as given generated yet. 
+All open problems are seen as able to clarify in the next time. 
+Also the `switch case` code in the Java example above should be able to translate proper. 
+It is in the moment output as `--unknown statement`.
+
+VHDL has the same precedence for `AND` and `OR` in opposite to Java `&&` is stronger than `||`.
+It means without parenthesis in Java should be written with parenthesis in VHDL. 
+But the Java syntax in the ZBNF parser evaluates the exact Java related precedence.
+It means the VHDL generator should only produce the parenthesis, no more is necessary.
+
+***** 2022-02-13 Hartmut Schorrig, Paulami Das
+ 
