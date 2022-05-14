@@ -37,13 +37,13 @@ public class ExmplVHDL {
       if(Fpga.getBit(stdv1, 3));
       if(!q1 || q2==q3 && !Fpga.getBit(bitv1,2));           // 4
       if(Fpga.getBit(bitv2, 2)==false);                    //5
+      if(q1 && q2 & q3);                                   // speciality: Using & for BIT AND in VHDL, && is for boolean AND
+      if(bitv1 == bitv2 && q1 & q2);
       bitv2 = Fpga.setBit(bitv2, 1, true);
       bitv1 = Fpga.setBits(bitv1, 5, 0, bitv2);
       bitv1 = Fpga.setBits(bitv1, 5, 0, bitv2);
       bitv1 = Fpga.setBits(bitv1, 5, 0, bitv2);
       bitv1 = Fpga.setBits(bitv1, 5, 0, bitv2);            //10
-      bitv1 = Fpga.setBits(bitv1, 5, 0, bitv2);
-      bitv1 = Fpga.setBits(bitv1, 5, 0, bitv2);
       bitv1 = Fpga.setBits(bitv1, 5, 0, bitv2);
       bitv1 = Fpga.setBits(bitv1, 5, 0, bitv2);
       bitv1 = Fpga.setBits(bitv1, 5, 0, bitv2);

@@ -362,8 +362,8 @@ public final class VhdlExprTerm extends SrcInfo {
   boolean genSimpleValue(JavaSrc.SimpleValue val, boolean genBool, J2Vhdl_ModuleInstance mdlArg, String nameIclassArg, CharSequence indent) throws Exception {
     if(VhdlConv.d.dbgStop) {
       int[] lineColumn = new int[2];
-      String file = val.getSrcInfo(lineColumn);
-      if(file.contains("BlinkingLed_Fpga") && lineColumn[0] >= 105 && lineColumn[0] <= 105)
+      String file = val.getSrcInfo(lineColumn); //BlinkingLed_Fpga
+      if(file.contains("SpiMaster") && lineColumn[0] >= 214 && lineColumn[0] <= 214)
         Debugutil.stop();
     }
     boolean bOk = true;
@@ -371,6 +371,7 @@ public final class VhdlExprTerm extends SrcInfo {
     String sNameIclass = nameIclassArg;                    // Generally use nameIclass, maybe other referenced process class in the module or in another module. 
     JavaSrc.Reference ref = val.get_reference();
     String sRef = null;                                    // String which is used to find the correct variables
+    boolean bReferencedModule = false;
     while(ref !=null) {
       boolean bIsThis = ref.get_isThis()!=null;
       JavaSrc.SimpleVariable var = ref.get_referenceAssociation();
@@ -388,12 +389,14 @@ public final class VhdlExprTerm extends SrcInfo {
       if(sRef ==null) {
       } else if(sRef.equals("z")) {
       } else if(sRef.equals("mdl")) {
-        sNameIclass = sRefNext;            // maybe null if operation of the module is called.
-        bRefNextUsed = true;
+        sNameIclass = null;             // maybe null if operation of the module is called.
+        //bRefNextUsed = true;
       } else if(sRef.equals("ref")) {
         mdlRef = mdlRef.idxAggregatedModules.get(sRefNext);
         if(mdlRef == null) {
           VhdlConv.vhdlError("Reference not found: " + sRefNext, ref);
+        } else {
+          bReferencedModule = true;
         }
         sNameIclass = "";
         bRefNextUsed = true;
@@ -486,7 +489,8 @@ public final class VhdlExprTerm extends SrcInfo {
         this.b.append(src);                  // it is usual "0", TODO save info for type of scanned number, as attribute
       }
     } //if constNr
-    else if(val.get_simpleMethodCall() !=null) {
+    //    -------------------------------------------------------------------------------------------
+    else if(val.get_simpleMethodCall() !=null) {           // operation(), either Fpga.getBits(..) ... or interface()
       final JavaSrc.SimpleMethodCall sFn = val.get_simpleMethodCall();
       final JavaSrc.ActualArguments args = sFn.get_actualArguments();
       final Iterator <JavaSrc.Expression> iArgs = args ==null ? null: args.get_Expression().iterator();
@@ -503,9 +507,10 @@ public final class VhdlExprTerm extends SrcInfo {
         } catch(NoSuchElementException exc) {
           System.err.println(exc.getMessage());
         }
-      } else if(name.equals("update")) {     // do nothing, it is a update operation in the update operation.
+      } else if(name.equals("update")) {                   // do nothing, it is a update operation in the update operation.
         // Hint the update operation is evaluated to find assignments to the output.
-      } else {
+        // operation of mdl level are for testing, not intent to be interface calls.
+      } else if(bReferencedModule) {                       // operation call via ref module is an interface operation
         J2Vhdl_ModuleType.IfcConstExpr ifcDef = mdlRef.type.idxIfcExpr.get(name);
         if(ifcDef == null) {
           VhdlConv.vhdlError("Interface operation not found: " + name, val);
@@ -521,6 +526,10 @@ public final class VhdlExprTerm extends SrcInfo {
           this.exprType_.nrofElements = ifcTerm.exprType_.nrofElements;
           this.b.append(ifcTerm.b);
         }
+      }
+      else {
+        // do nothing on all other operation calls, without ref.module and without Fpga.
+        // this operations are for simulation. (TODO what about functions in VHDL, solution, use specific annotation and build a list of functions. 
       }
     }
     else {
