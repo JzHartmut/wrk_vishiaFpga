@@ -59,7 +59,7 @@ public class VhdlConv {
   
   public boolean dbgStop = true;
   
-  public boolean bAppendLineColumn = true;
+  public boolean bAppendLineColumn = false;
 
 
 
@@ -173,8 +173,9 @@ public class VhdlConv {
   public JavaSrc.ConstructorDefinition getCtorProcess ( JavaSrc.ClassDefinition clazz, String nameInnerClassVariable) {
     String namePrc = clazz.get_classident();     // name of the process
     //this.nameInnerClassVariable = Character.toLowerCase(namePrc.charAt(0))+ namePrc.substring(1);
-    if(clazz.getSize_constructorDefinition()>0) {
-      for(JavaSrc.ConstructorDefinition ctor: clazz.get_constructorDefinition()) {
+    JavaSrc.ClassContent clazzC = clazz.get_classContent();
+    if(clazzC.getSize_constructorDefinition()>0) {
+      for(JavaSrc.ConstructorDefinition ctor: clazzC.get_constructorDefinition()) {
         JavaSrc.ModifierMethod modif = ctor.get_ModifierMethod();
         if(modif !=null) {
           String annot = modif.get_Annotation();
@@ -829,12 +830,12 @@ public class VhdlConv {
     }
     else {
       String refVar = var.get_variableName();
-      J2Vhdl_ModuleInstance aggrModule = mdl.idxAggregatedModules.get(refVar);
+      J2Vhdl_ModuleInstance.InnerAccess aggrModule = mdl.idxAggregatedModules.get(refVar);
       String instanceVar;
       if(aggrModule != null) {
-        instanceVar = aggrModule.nameInstance;
+        instanceVar = aggrModule.mdl.nameInstance;
         if(oper4ifc) {
-          String access = XXXevalIfcOper(instanceVar, aggrModule, name, 0);
+          String access = XXXevalIfcOper(instanceVar, aggrModule.mdl, name, 0);
           if(access !=null) {
             return access;
           } else {
@@ -869,8 +870,8 @@ public class VhdlConv {
         int posDot = access.lastIndexOf('.');
         String nameRef = access.substring(1, posDot);
         String nameOper2 = access.substring(posDot+1, access.length()-2);
-        J2Vhdl_ModuleInstance aggr2 = aggrModule.idxAggregatedModules.get(nameRef);
-        return XXXevalIfcOper(nameRef, aggr2, nameOper2, recursion +1);
+        J2Vhdl_ModuleInstance.InnerAccess aggr2 = aggrModule.idxAggregatedModules.get(nameRef);
+        return XXXevalIfcOper(nameRef, aggr2.mdl, nameOper2, recursion +1);
       } else {
         return instanceVar + access;
       }
@@ -1042,13 +1043,6 @@ public class VhdlConv {
   
   
   
-  /**Set from the yet translated class.
-   * @param idxAggregatedModules see {@link #idxAggregatedModules}
-   */
-  public void setAggregatedModules ( Map<String, J2Vhdl_ModuleInstance> aggregatedModules) {
-    //this.idxAggregatedModules = aggregatedModules;
-  }
-    
   
   
   /**Gather or variable of this module instance for common usage.
@@ -1064,8 +1058,9 @@ public class VhdlConv {
     final String sObjJava = nameModule == null ? className : nameModule + "." + varClassName + ".";
     final String namefulliClass = nameOuterClass == null ? className : nameOuterClass + "_" + className;
     //
-    if(clazz.getSize_variableDefinition() >0) {
-      for( JavaSrc.VariableInstance varzp: clazz.get_variableDefinition()) {
+    JavaSrc.ClassContent clazzC = clazz.get_classContent();
+    if(clazzC.getSize_variableDefinition() >0) {
+      for( JavaSrc.VariableInstance varzp: clazzC.get_variableDefinition()) {
         createVariable(varzp, sRecVhdl, sObjJava, namefulliClass, this.fdata.idxVars, this.fdata.idxRecordVars);
     } }
     return this.fdata.idxVars;
@@ -1085,7 +1080,8 @@ public class VhdlConv {
 //    final String sObjJava = varClassName + ".";
 //    final String namefulliClass = className;
     //
-    for( JavaSrc.VariableInstance varzp: clazz.get_variableDefinition()) {
+    JavaSrc.ClassContent clazzC = clazz.get_classContent();
+    for( JavaSrc.VariableInstance varzp: clazzC.get_variableDefinition()) {
       //createVariable(varzp, sRecVhdl, sObjJava, namefulliClass, this.fdata.idxVars);
       createVariable(varzp, sRecVhdl, mdl.nameInstance + ".", mdl.nameInstance, this.fdata.idxVars, this.fdata.idxRecordVars);
     }
@@ -1104,28 +1100,35 @@ public class VhdlConv {
       String sNrBits = null;
       final VhdlExprTerm.ExprType eType = new VhdlExprTerm.ExprType();
       JavaSrc.ModifierVariable modzp = varzp.get_ModifierVariable();
-      String annot = modzp == null ? null : modzp.get_Annotation();
-      if(annot !=null) {
-        if(annot.startsWith("Fpga.BITVECTOR")) {
-          eType.etype = VhdlExprTerm.ExprTypeEnum.bitVtype;
-          int pos1 = annot.indexOf('(')+1;        // after "
-          int pose = annot.lastIndexOf(')');      // this characters should be present by Java syntax check.
-          sNrBits = annot.substring(pos1, pose).trim();
-          eType.nrofElements = Integer.parseInt(sNrBits);
+      boolean bTypeAnnot = false;
+      if(modzp !=null && modzp.getSize_Annotation() >0) //...for
+      for(String annot: modzp.get_Annotation()) {
+        if(annot !=null) {
+          if(annot.startsWith("Fpga.BITVECTOR")) {
+            eType.etype = VhdlExprTerm.ExprTypeEnum.bitVtype;
+            int pos1 = annot.indexOf('(')+1;        // after "
+            int pose = annot.lastIndexOf(')');      // this characters should be present by Java syntax check.
+            sNrBits = annot.substring(pos1, pose).trim();
+            eType.nrofElements = Integer.parseInt(sNrBits);
+            bTypeAnnot = true;
+          }
+          else if(annot.startsWith("Fpga.STDVECTOR")) {
+            eType.etype = VhdlExprTerm.ExprTypeEnum.stdVtype;
+            int pos1 = annot.indexOf('(')+1;        // after "
+            int pose = annot.lastIndexOf(')');      // this characters should be present by Java syntax check.
+            sNrBits = annot.substring(pos1, pose).trim();
+            eType.nrofElements = Integer.parseInt(sNrBits);
+            bTypeAnnot = true;
+          }
+          else {
+            eType.etype = VhdlExprTerm.ExprTypeEnum.bitVtype;
+            sNrBits = "32";
+            eType.nrofElements = 32;
+            bTypeAnnot = true;
+          }
         }
-        else if(annot.startsWith("Fpga.STDVECTOR")) {
-          eType.etype = VhdlExprTerm.ExprTypeEnum.stdVtype;
-          int pos1 = annot.indexOf('(')+1;        // after "
-          int pose = annot.lastIndexOf(')');      // this characters should be present by Java syntax check.
-          sNrBits = annot.substring(pos1, pose).trim();
-          eType.nrofElements = Integer.parseInt(sNrBits);
-        }
-        else {
-          eType.etype = VhdlExprTerm.ExprTypeEnum.bitVtype;
-          sNrBits = "32";
-          eType.nrofElements = 32;
-        }
-      } else {
+      }// for annotation
+      if(!bTypeAnnot) {
         eType.etype = typezp.get_name().equals("boolean") ? VhdlExprTerm.ExprTypeEnum.bittype :  VhdlExprTerm.ExprTypeEnum.bittype;
       }
       final String sElemVhdl = sRecVhdl.equals("Trenz_SpeA_InputPins.") ? name :  sRecVhdl + name;

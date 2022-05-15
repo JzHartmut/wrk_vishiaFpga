@@ -187,6 +187,10 @@ public class Fpga {
    */
   public @interface GetterVhdl{  }
 
+  /**Defines a sub module in another module which is only responsible to implement an interface
+   * as access point to the containing module. */
+  public @interface IfcAccess{  }
+
   /**Defines an numeric variable in VHDL as BIT_VECTOR(<value-1> DOWNTO 0)
    * This allows only specific routines in this class or assignments.
    * Arithmetic operations are not supported.

@@ -371,6 +371,7 @@ public final class VhdlExprTerm extends SrcInfo {
     String sNameIclass = nameIclassArg;                    // Generally use nameIclass, maybe other referenced process class in the module or in another module. 
     JavaSrc.Reference ref = val.get_reference();
     String sRef = null;                                    // String which is used to find the correct variables
+    String sNameRefIfcAccess = null;
     boolean bReferencedModule = false;
     while(ref !=null) {
       boolean bIsThis = ref.get_isThis()!=null;
@@ -392,10 +393,13 @@ public final class VhdlExprTerm extends SrcInfo {
         sNameIclass = null;             // maybe null if operation of the module is called.
         //bRefNextUsed = true;
       } else if(sRef.equals("ref")) {
-        mdlRef = mdlRef.idxAggregatedModules.get(sRefNext);
-        if(mdlRef == null) {
-          VhdlConv.vhdlError("Reference not found: " + sRefNext, ref);
+        J2Vhdl_ModuleInstance.InnerAccess mdlRef2 = mdlRef.idxAggregatedModules.get(sRefNext);
+        if(mdlRef2 == null) {
+          VhdlConv.vhdlError("In VhdlExpTerm.genSimpleValue - Reference not found: " + sRefNext + " searched in: " + mdlRef.nameInstance , ref);
         } else {
+          mdlRef = mdlRef2.mdl;
+          sNameRefIfcAccess = mdlRef2.sAccess;
+          assert(sNameRefIfcAccess == null || sNameRefIfcAccess.length() >0);
           bReferencedModule = true;
         }
         sNameIclass = "";
@@ -511,9 +515,10 @@ public final class VhdlExprTerm extends SrcInfo {
         // Hint the update operation is evaluated to find assignments to the output.
         // operation of mdl level are for testing, not intent to be interface calls.
       } else if(bReferencedModule) {                       // operation call via ref module is an interface operation
-        J2Vhdl_ModuleType.IfcConstExpr ifcDef = mdlRef.type.idxIfcExpr.get(name);
+        String sIfcName = (sNameRefIfcAccess == null ? "" : sNameRefIfcAccess + "." ) + name;
+        J2Vhdl_ModuleType.IfcConstExpr ifcDef = mdlRef.type.idxIfcExpr.get(sIfcName);
         if(ifcDef == null) {
-          VhdlConv.vhdlError("Interface operation not found: " + name, val);
+          VhdlConv.vhdlError("VhdlExprTerm.genSimpleValue() - Interface operation not found: " + sIfcName + " in module: " + mdlRef.nameInstance, val);
         } else if(ifcDef.constVal !=null) {
           J2Vhdl_Variable cvar = ifcDef.constVal.var;
           this.exprType_.etype = cvar.type.etype;

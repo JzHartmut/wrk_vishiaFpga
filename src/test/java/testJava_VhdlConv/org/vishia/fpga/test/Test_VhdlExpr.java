@@ -179,10 +179,12 @@ public class Test_VhdlExpr {
       StringBuilder sb = new StringBuilder(100);
       for(JavaSrc.ClassDefinition theClass: res.get_classDefinition()) {
         String nameTheClass = theClass.get_classident();
-        for(JavaSrc.ClassDefinition iClass : theClass.get_classDefinition()) { // get inner class of public module class  
+        JavaSrc.ClassContent theClassC = theClass.get_classContent();
+        for(JavaSrc.ClassDefinition iClass : theClassC.get_classDefinition()) { // get inner class of public module class  
           this.vhdlConv.setInnerClass("prc", "test");         // should know which class is currently in focus to build names from gloable view     
           this.vhdlConv.mapVariables("test", nameTheClass, iClass);  // records from all inner classes, same name as type
-          for(JavaSrc.MethodDefinition rOper: iClass.get_methodDefinition()) {
+          JavaSrc.ClassContent iClassC = iClass.get_classContent();
+          for(JavaSrc.MethodDefinition rOper: iClassC.get_methodDefinition()) {
             StringBuilder sbLocals = new StringBuilder();
             this.vhdlConv.createProcessVar(sbLocals, rOper.get_methodbody());     // gather and output definition of local process variables
             

@@ -19,7 +19,7 @@ public class J2Vhdl_ModuleInstance {
   final J2Vhdl_ModuleType type;
   
   /**Associations between the used internal name name as key and the aggregated module. */
-  Map<String, J2Vhdl_ModuleInstance> idxAggregatedModules = new TreeMap<String, J2Vhdl_ModuleInstance>();
+  Map<String, J2Vhdl_ModuleInstance.InnerAccess> idxAggregatedModules = new TreeMap<String, J2Vhdl_ModuleInstance.InnerAccess>();
 
   public J2Vhdl_ModuleInstance(String nameInstance, J2Vhdl_ModuleType type, boolean bInOutModule) {
     this.type = type;
@@ -27,6 +27,19 @@ public class J2Vhdl_ModuleInstance {
     this.bInOutModule = bInOutModule;
   }
 
-  @Override public String toString() { return nameInstance + ": "+ type.toString(); }
+  @Override public String toString() { return this.nameInstance + ": "+ this.type.toString(); }
   
+  
+  /**Used for referenced Modules, additional with an inner access.
+   *
+   */
+  public static class InnerAccess {
+    
+    final J2Vhdl_ModuleInstance mdl;
+    final String sAccess;
+    
+    public InnerAccess(J2Vhdl_ModuleInstance mdl, String sAccess) { 
+      this.mdl = mdl; this.sAccess = sAccess; 
+    }
+  }
 }
