@@ -1,8 +1,6 @@
 package org.vishia.fpga.test;
 
 
-import org.vishia.parseJava.test.TestParseJava;
-import org.vishia.parseJava.test.ParseExample.Prc;
 import org.vishia.fpga.Fpga;
 
 public class ExmplVHDL {

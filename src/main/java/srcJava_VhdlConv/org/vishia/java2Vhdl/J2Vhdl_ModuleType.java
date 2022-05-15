@@ -1,9 +1,9 @@
-package org.vishia.fpga;
+package org.vishia.java2Vhdl;
 
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.vishia.fpga.J2Vhdl_ConstDef;
+import org.vishia.java2Vhdl.J2Vhdl_ConstDef;
 import org.vishia.parseJava.JavaSrc;
 import org.vishia.parseJava.JavaSrc.Expression;
 

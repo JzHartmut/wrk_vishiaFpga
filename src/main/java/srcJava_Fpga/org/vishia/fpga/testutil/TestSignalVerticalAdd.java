@@ -1,6 +1,5 @@
-package org.vishia.fpga;
+package org.vishia.fpga.testutil;
 
-import org.vishia.util.StringFormatter;
 
 public abstract class TestSignalVerticalAdd {
 

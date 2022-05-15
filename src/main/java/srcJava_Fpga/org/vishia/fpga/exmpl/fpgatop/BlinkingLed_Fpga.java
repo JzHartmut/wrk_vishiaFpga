@@ -1,12 +1,12 @@
 package org.vishia.fpga.exmpl.fpgatop;
 
-import org.vishia.fpga.Fpga;
-import org.vishia.fpga.FpgaModule_ifc;
 import org.vishia.fpga.exmpl.modules.BlinkingLedCfg_ifc;
 import org.vishia.fpga.exmpl.modules.BlinkingLedCt;
 import org.vishia.fpga.exmpl.modules.ClockDivider;
 import org.vishia.fpga.stdmodules.Reset;
 import org.vishia.fpga.stdmodules.Reset_Inpin_ifc;
+import org.vishia.fpga.Fpga;
+import org.vishia.fpga.FpgaModule_ifc;
 
 
 /**Extra configuration class associated to the top level FPGA definition, 

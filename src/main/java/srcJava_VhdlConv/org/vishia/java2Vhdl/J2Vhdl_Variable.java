@@ -1,4 +1,4 @@
-package org.vishia.fpga;
+package org.vishia.java2Vhdl;
 
 /**Describes a variable defined in a RECORD used as remaining variable for a PROCESS.
  * The type, search key and VHDL name is stored.

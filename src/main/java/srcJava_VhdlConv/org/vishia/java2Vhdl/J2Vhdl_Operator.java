@@ -1,4 +1,4 @@
-package org.vishia.fpga;
+package org.vishia.java2Vhdl;
 
 import java.util.Map;
 import java.util.TreeMap;

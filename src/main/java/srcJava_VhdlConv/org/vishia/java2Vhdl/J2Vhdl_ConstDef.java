@@ -1,4 +1,4 @@
-package org.vishia.fpga;
+package org.vishia.java2Vhdl;
 
 
 public class J2Vhdl_ConstDef {

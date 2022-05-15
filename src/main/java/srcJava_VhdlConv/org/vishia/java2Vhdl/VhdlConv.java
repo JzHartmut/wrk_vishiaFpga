@@ -1,4 +1,4 @@
-package org.vishia.fpga;
+package org.vishia.java2Vhdl;
 
 import java.io.IOException;
 import java.util.Map;

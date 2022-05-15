@@ -1,8 +1,8 @@
 package org.vishia.fpga.exmpl.modules;
 
+import org.vishia.fpga.stdmodules.Reset_ifc;
 import org.vishia.fpga.Fpga;
 import org.vishia.fpga.FpgaModule_ifc;
-import org.vishia.fpga.stdmodules.Reset_ifc;
 
 public class BlinkingLedCt implements FpgaModule_ifc, BlinkingLed_ifc {
 

@@ -1,11 +1,11 @@
-package org.vishia.fpga;
+package org.vishia.java2Vhdl;
 
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import org.vishia.fpga.J2Vhdl_Variable;
 import org.vishia.genJavaOutClass.SrcInfo;
+import org.vishia.java2Vhdl.J2Vhdl_Variable;
 import org.vishia.parseJava.JavaSrc;
 import org.vishia.util.Debugutil;
 import org.vishia.util.StringFunctions;

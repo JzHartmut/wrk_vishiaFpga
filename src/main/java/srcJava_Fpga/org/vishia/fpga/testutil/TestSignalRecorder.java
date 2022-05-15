@@ -1,4 +1,4 @@
-package org.vishia.fpga;
+package org.vishia.fpga.testutil;
 
 import java.io.IOException;
 

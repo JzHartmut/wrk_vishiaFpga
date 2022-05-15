@@ -6,13 +6,12 @@ import java.io.IOException;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 
-import org.vishia.fpga.J2Vhdl_FpgaData;
-import org.vishia.fpga.J2Vhdl_ModuleInstance;
-import org.vishia.fpga.J2Vhdl_ModuleType;
-import org.vishia.fpga.VhdlConv;
-import org.vishia.fpga.VhdlExprTerm;
+import org.vishia.java2Vhdl.J2Vhdl_FpgaData;
+import org.vishia.java2Vhdl.J2Vhdl_ModuleInstance;
+import org.vishia.java2Vhdl.J2Vhdl_ModuleType;
+import org.vishia.java2Vhdl.VhdlConv;
+import org.vishia.java2Vhdl.VhdlExprTerm;
 import org.vishia.parseJava.JavaSrc;
-import org.vishia.parseJava.test.TestParseJava;
 import org.vishia.util.Debugutil;
 import org.vishia.util.StringFunctions;
 import org.vishia.util.TestOrg;

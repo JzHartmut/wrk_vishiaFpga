@@ -1,8 +1,8 @@
 package org.vishia.fpga.exmpl.modules;
 
+import org.vishia.fpga.stdmodules.Reset;
 import org.vishia.fpga.Fpga;
 import org.vishia.fpga.FpgaModule_ifc;
-import org.vishia.fpga.stdmodules.Reset;
 
 public class ClockDivider implements FpgaModule_ifc {
 
