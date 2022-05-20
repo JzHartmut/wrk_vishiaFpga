@@ -15,7 +15,8 @@ public class J2Vhdl_Operator {
     forceBool(true, false, false),
     maybeBool(false, true, false),
     indepBool(false, false, false),
-    isAssign(false, false, true);
+    isAssign(false, false, true),
+    isBool(false, true, false)
     ;
     OpBool(boolean forceBool, boolean maybeBool, boolean bAssign){
       this.bForceToBool = forceBool; this.bMaybeBool = maybeBool; this.bAssign = bAssign;
@@ -76,12 +77,12 @@ public class J2Vhdl_Operator {
     operatorMap.put("@",   new J2Vhdl_Operator( "@",  15, " @ ",  " @ ",  10, false, OpBool.indepBool, null ));     // start of expression is highest precedence
     operatorMap.put("=",   new J2Vhdl_Operator( "=",   2, " <= ", " <= ",  2, false, OpBool.isAssign, null ));
     operatorMap.put("?",   new J2Vhdl_Operator( "?",   3, " #? ", " #? ",  3, false, OpBool.indepBool, null , -1));
-    operatorMap.put("||",  new J2Vhdl_Operator( "||",  4, " OR ", " OR ",  4, true,  OpBool.maybeBool, null ));
-    operatorMap.put("&&",  new J2Vhdl_Operator( "&&",  5, " AND "," AND ", 4, true,  OpBool.maybeBool, null ));
-    operatorMap.put("|",   new J2Vhdl_Operator( "|",   6, " OR ", " OR ",  4, true,  OpBool.indepBool, null ));
+    operatorMap.put("||",  new J2Vhdl_Operator( "||",  4, " OR ", " OR ",  4, true,  OpBool.isBool, null ));
+    operatorMap.put("&&",  new J2Vhdl_Operator( "&&",  5, " AND "," AND ", 4, true,  OpBool.isBool, null ));
+    operatorMap.put("|",   new J2Vhdl_Operator( "|",   6, " OR ", " OR ",  4, true,  OpBool.maybeBool, null ));
     operatorMap.put("^",   new J2Vhdl_Operator( "^",   7, " XOR "," XOR ", 4, true,  OpBool.maybeBool, null ));
     operatorMap.put("=^",  new J2Vhdl_Operator( "^=",  7," XNOR "," XNOR ",4, true,  OpBool.maybeBool, null ));
-    operatorMap.put("&",   new J2Vhdl_Operator( "&",   8, " AND "," AND ", 4, true,  OpBool.indepBool, null ));
+    operatorMap.put("&",   new J2Vhdl_Operator( "&",   8, " AND "," AND ", 4, true,  OpBool.maybeBool, null ));
     operatorMap.put("==",  new J2Vhdl_Operator( "==",  9, " = "  , " = " , 5, false, OpBool.forceBool, "=^" ));
     operatorMap.put("!=",  new J2Vhdl_Operator( "!=",  9, " /= " , " /= ", 5, false, OpBool.forceBool, "^" ));
     operatorMap.put(">=",  new J2Vhdl_Operator( ">=", 10, " >= ", " >= ",  5, false, OpBool.forceBool, null ));

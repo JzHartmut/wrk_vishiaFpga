@@ -49,7 +49,7 @@ public class TestSignalRecorderVertical {
     }
     ix = 0;
     if(changeMax >=0 ) {
-      this.wr.append(Integer.toString(time)).append(":");
+      this.wr.append(Float.toString(time * 0.001f)).append(" µs:");
     }
     while(changeMax >=ix) {
       this.wr.append(this.sOut[ix]);

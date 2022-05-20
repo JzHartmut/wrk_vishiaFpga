@@ -48,8 +48,8 @@
 2022-04-19 19:02:36  x     Reset_ifc.java                           ::           .166 -1522399267 
 
 ============================== src/main/java/srcJava_Fpga/org/vishia/fpga/testutil/ ================
-2022-05-15 23:48:40  x     TestSignalRecorder.java                  ::           .609 -1986437628 
-2022-05-15 23:48:36  x     TestSignalRecorderVertical.java          ::          1.611  1627074833 
+2022-05-19 16:05:46  x     TestSignalRecorder.java                  ::          2.695 -0654957104 
+2022-05-16 17:19:25  x     TestSignalRecorderVertical.java          ::          1.622 -0828855472 
 2022-05-15 23:48:53  x     TestSignalVerticalAdd.java               ::           .322 -0057543795 
 
 ============================== src/main/java/srcJava_VhdlConv/ =====================================
@@ -63,11 +63,11 @@
 2022-05-15 23:42:59  x     J2Vhdl_FpgaData.java                     ::          1.340 -0140695618 
 2022-05-15 23:43:00  x     J2Vhdl_ModuleInstance.java               ::          1.409  0745099488 
 2022-05-15 23:42:59  x     J2Vhdl_ModuleType.java                   ::          3.497  1515506153 
-2022-05-15 23:42:59  x     J2Vhdl_Operator.java                     ::          5.287 -1890599773 
+2022-05-20 17:42:15  x     J2Vhdl_Operator.java                     ::          5.312  0498757600 
 2022-05-15 23:42:59  x     J2Vhdl_Variable.java                     ::          1.936  1915599024 
 2022-05-15 23:43:00  x     Java2Vhdl.java                           ::         59.743 -1525552244 
-2022-05-15 23:43:00  x     VhdlConv.java                            ::         59.423 -1898986309 
-2022-05-15 23:42:59  x     VhdlExprTerm.java                        ::         25.577 -1280512220 
+2022-05-20 17:32:19  x     VhdlConv.java                            ::         59.727  1327139206 
+2022-05-20 17:45:21  x     VhdlExprTerm.java                        ::         25.924 -1957432659 
 2022-05-01 19:36:22  x     VhdlTemplate.txt                         ::           .333 -0888383234 
 
 ============================== src/test/ ===========================================================

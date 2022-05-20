@@ -529,7 +529,12 @@ public final class VhdlExprTerm extends SrcInfo {
           VhdlExprTerm ifcTerm = VhdlConv.d.genExpression(null, ifcDef.expr, genBool, bInsideProcess, mdlRef, sNameIclass, indent, null);
           this.exprType_.etype = ifcTerm.exprType_.etype;
           this.exprType_.nrofElements = ifcTerm.exprType_.nrofElements;
-          this.b.append(ifcTerm.b);
+          this.nrOperands += ifcTerm.nrOperands;
+          if(ifcTerm.nrOperands >1) {                      // use parenthesis to clarify precedence problems.
+            this.b.append(" (").append(ifcTerm.b).append(") ");
+          } else {
+            this.b.append(ifcTerm.b);
+          }
         }
       }
       else {
@@ -540,6 +545,8 @@ public final class VhdlExprTerm extends SrcInfo {
     else {
       this.b.append("0");   //it seems to be an integer value with 0. Nothing is detected else.
     }
+//    if(this.b.toString().contains("FpgaTop_SpeA_dataStateRx"))
+//      Debugutil.stop();
     return bOk;
   }
 
