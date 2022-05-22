@@ -113,7 +113,7 @@ Java is often proper known from a large spread of persons. The tool support is w
 That are detail advantages.
 
 
-
+[#BasicFuncSim]
 === Principle of functional simulation of synchronous state machines
 
 Typically, the bulk of the content of an FPGA should be a synchronous design. 
@@ -215,6 +215,8 @@ image:../../img/Fpga/CEsteadySynchrLogic.png[synchron logic with CE, align="righ
 Above you see which may be produced by the router, drawn with ordinary gatter logic.
 In the real FPGA LUTs (Look Up Tables) are used instead gatter, of course. 
 
+
+[#BasicTiming]
 === Timing constraints for CE and steadyState
 
 Because the CE is built fastly which each clock edge, it should have a less delay. 
@@ -528,7 +530,7 @@ Example start of an inner class in a module MyModule.java:
 [source,Java]
 ----
 //fpga/exmpl/modules/ClockDivider.java
-include::../../../test/java/org/vishia/fpga/exmpl/modules/ClockDivider.java[tag=Q-data]
+include::../../../main/java/srcJava_Fpga/org/vishia/fpga/exmpl/modules/ClockDivider.java[tag=Q-data]
 ----
 
 Builds the record in VHDL:
@@ -562,7 +564,7 @@ But instead, the Java sources can work with aggregations. The adequate line in J
 [source,Java]
 ----
 //fpga/exmpl/modules/BlinkingLedCt.java
-include::../../../test/java/org/vishia/fpga/exmpl/modules/BlinkingLedCt.java[tag=Q-Process-ce]
+include::../../../main/java/srcJava_Fpga/org/vishia/fpga/exmpl/modules/BlinkingLedCt.java[tag=Q-Process-ce]
 ----
  
 * In Java the access is not done immediately to the variable in the other class. Instead a `ref` is used.
@@ -578,7 +580,7 @@ Any module can contain a `Ref` class with a `Ref ref` instance, here:
 [source,Java]
 ----
 //fpga/exmpl/modules/BlinkingLedCt.java
-include::../../../test/java/org/vishia/fpga/exmpl/modules/BlinkingLedCt.java[tag=Ref]
+include::../../../main/java/srcJava_Fpga/org/vishia/fpga/exmpl/modules/BlinkingLedCt.java[tag=Ref]
 ----
 
 That are aggregations in UML wording (Unified Modeling Language for Object Orientated software technology). 
@@ -593,7 +595,7 @@ The constructor of the `Ref` have to be called in the constructor of the module,
 [source,Java]
 ----
 //fpga/exmpl/modules/BlinkingLedCt.java
-include::../../../test/java/org/vishia/fpga/exmpl/modules/BlinkingLedCt.java[tag=ctor]
+include::../../../main/java/srcJava_Fpga/org/vishia/fpga/exmpl/modules/BlinkingLedCt.java[tag=ctor]
 ----
 
 Here it is important that the name of the arguments in the constructor is the same as the name of the aggregation reference
@@ -606,7 +608,7 @@ For that there is a `Modules` inner class:
 [source,Java]
 ----
 //fpga/exmpl/modules/BlinkingLedCt.java
-include::../../../test/java/org/vishia/fpga/exmpl/fpgatop/BlinkingLed_Fpga.java[tag=Modules]
+include::../../../main/java/srcJava_Fpga/org/vishia/fpga/exmpl/fpgatop/BlinkingLed_Fpga.java[tag=Modules]
 ----
 
 Here three modules are defined which are used in the top level of the FPGA. 
@@ -626,7 +628,7 @@ which associates the intern name of a reference to a module with the real used m
 This index is internally used for translation, but also reported in the report file (option `-rep:path/to/file.txt`)
 
 ----
-include::../../../test/testResult_Ref/Java2Vhdl/BlinkingLed_Fpga_report.txt[tag=ct-Ref]
+include::../../../test/testResult_Ref/Java2Vhdl/BlinkingLed2Vhdl_report.txt[tag=ct-Ref]
 ----
 
 Now, while generating the `PROCESS` for the module `ct`, this association index is used 
@@ -673,14 +675,14 @@ Look to another part of the example:
 [source,Java]
 ----
 //fpga/exmpl/modules/BlinkingLedCt.java
-include::../../../test/java/org/vishia/fpga/exmpl/modules/BlinkingLedCt.java[tag=Q-Process-ifcUsg]
+include::../../../main/java/srcJava_Fpga/org/vishia/fpga/exmpl/modules/BlinkingLedCt.java[tag=Q-Process-ifcUsg]
 ----
 
 This is a snippet from the `BlinkingLedCt PROCESS` in Java:
 A reset information is requested. If reset is given, then the counter `ct` is set to its reload value.
 
-But it is not designated here from where reset is comming and how it is built, 
-and also from where the reload value is comming and how it is built.
+But it is not designated here from where reset is coming and how it is built, 
+and also from where the reload value is coming and how it is built.
 This should be clarified outside of the module. The module only needs connection for it. 
 
 The translated VHDL design looks like:
@@ -721,7 +723,7 @@ Look on the definition of the
 [source,Java]
 ----
 //fpga/exmpl/modules/BlinkingLedCt.java
-include::../../../test/java/org/vishia/fpga/exmpl/modules/BlinkingLedCt.java[tag=Ref]
+include::../../../main/java/srcJava_Fpga/org/vishia/fpga/exmpl/modules/BlinkingLedCt.java[tag=Ref]
 ----
 
 As you see, the type of the [J]`ref.reset` is [J]`Reset_ifc`, as also the type of [J]`ref.cfg` is [J]`BlinkingLedCfg_ifc`.
@@ -731,7 +733,7 @@ Look firstly to the defintion of the [J]`Reset_ifc`:
 [source,Java]
 ----
 //fpga/exmpl/stdmodules/Reset_ifc.java
-include::../../../test/java/org/vishia/fpga/stdmodules/Reset_ifc.java[]
+include::../../../main/java/srcJava_Fpga/org/vishia/fpga/stdmodules/Reset_ifc.java[]
 ----
 
 Using of interfaces is very proven in Java (as also another Object Orientated Languages),
@@ -746,7 +748,7 @@ For this example the reference is clarified on the outer level of modularity, on
 [source,Java]
 ----
 //fpga/exmpl/modules/BlinkingLedCt.java
-include::../../../test/java/org/vishia/fpga/exmpl/fpgatop/BlinkingLed_Fpga.java[tag=Modules]
+include::../../../main/java/srcJava_Fpga/org/vishia/fpga/exmpl/fpgatop/BlinkingLed_Fpga.java[tag=Modules]
 ----
 
 The inner reference name [J]`ref.reset` is associated to the module [J]`Reset res`, 
@@ -759,9 +761,9 @@ Now, the module [J]`Reset` implements the following operation:
 [source,Java]
 ----
 //fpga/exmpl/stdmodules/Reset.java
-include::../../../test/java/org/vishia/fpga/stdmodules/Reset.java[tag=classdef]
+include::../../../main/java/srcJava_Fpga/org/vishia/fpga/stdmodules/Reset.java[tag=classdef]
   .....
-include::../../../test/java/org/vishia/fpga/stdmodules/Reset.java[tag=reset()]
+include::../../../main/java/srcJava_Fpga/org/vishia/fpga/stdmodules/Reset.java[tag=reset()]
 ----
 
 It's very simple: If accesses the variable [J]`res` in its own inner class [J]`q` 
@@ -803,7 +805,7 @@ But, let's have a look to the second interface usage of this example.
 [source,Java]
 ----
 //fpga/exmpl/modules/BlinkingLedCt.java
-include::../../../test/java/org/vishia/fpga/exmpl/modules/BlinkingLedCt.java[tag=Q-Process-ifcUsg]
+include::../../../main/java/srcJava_Fpga/org/vishia/fpga/exmpl/modules/BlinkingLedCt.java[tag=Q-Process-ifcUsg]
 ----
 
 The request is adequate, a value should be accesses. It is not first intendet that this is a constant value.
@@ -825,7 +827,7 @@ The interface to access the [J]`time_BlinkingLed()` is implemented here in the m
 [source,Java]
 ----
 //fpga/exmpl/modules/Fpga_BlinkingLed.java
-include::../../../test/java/org/vishia/fpga/exmpl/fpgatop/BlinkingLed_Fpga.java[tag=time_BlinkingLed_topImpl]
+include::../../../main/java/srcJava_Fpga/org/vishia/fpga/exmpl/fpgatop/BlinkingLed_Fpga.java[tag=time_BlinkingLed_topImpl]
 ----
 
 The here written comment is firstly not important for the general explaination. The essence is:
@@ -898,7 +900,7 @@ Both alternatives are then stored module-type-related in
 On translation this table is reported in the `-rep:reportfile.txt` for this example as:
 
 ----
-include::../../../test/testResult_Ref/Java2Vhdl/BlinkingLed_Fpga_report.txt[tag=Type-Reset]
+include::../../../test/testResult_Ref/Java2Vhdl/BlinkingLed2Vhdl_report.txt[tag=Type-Reset]
 ----
 
 
@@ -939,6 +941,143 @@ That is all possible on Java level, not translated to VHDL.
 For VHDL anytime the simple access to the record signal with the same name as the access operation is translated.
 
  
+
+== Timing constrains for place and route
+
+The next examples are related to the Lattice Diamond tool. 
+Whether constrains should be given in the same syntax form for other tools (Xilinx & co) is not yet clarified.
+
+See also basic considerations in the chapter <<#BasicTiming>>
+
+Simple, the whole FPGA design should have the same clock. 
+That is a basic mentioned in chapter <<#BasicFuncSim>>, and it makes sometimes easier to manage timing and functionality.
+But this is precisely why a higher clock frequency is usually used as the base clock, even though certain functions can operate in slower cycles.
+
+The basic in VHDL for this use case is:
+
+----
+--From example: BlinkingLed_Fpga.vhd
+include::../../../test/testResult_Ref/Java2Vhdl/BlinkingLed_Fpga.vhd[tag=ct_Q_PRC-ce]
+  --.... logic working only if ce is set
+  END IF;
+----
+
+It is a clock enable strategy. The Flipflops remains unchanged if `ce='0'`.
+
+The adequate form in the Java src is similar:
+
+.Java: constructor for a PROCESS in VHDL using ce
+[source,Java]
+----
+//fpga/exmpl/modules/BlinkingLedCt.java
+include::../../../main/java/srcJava_Fpga/org/vishia/fpga/exmpl/modules/BlinkingLedCt.java[tag=Q-Process-ce]
+      //.... logic working only if ce is set
+    }
+----
+
+Supposed, this `ce` signal comes with a cycle of 160 ns as in the example, you can write a constrain
+in the lpf file of the lattice Diamond tool:
+
+----
+PERIOD PORT "clk" 10.000000 ns ;
+MULTICYCLE FROM GROUP "ct_q" TO GROUP "ct_q" 16.0 X;
+----
+
+It means that the routing regards the basic clock frequency of 100 MHz or 10 ns cycle,
+but between the members of the `GROUP "ct_q"` the timing path can have till 16 times slower, 160 ns. 
+With this information the place and route tool can route firstly the fast paths, then with the remaining resources the slower paths.
+The place and route tool is specialized for that requirement. 
+In result you have a proper routing result without timing violations if your requirements to timings are not too hard.
+But it is precisely because slower paths are allowed, because the possible cycle is slower, that this is possible.
+
+But the remaining quest is: How to build the groups?
+
+Here the Java notification and the test at Java level helps. 
+
+TODO supplement the example with timing check, to document. 
+
+
+
+== Test
+
+The Test of the logic is a very important part. 
+
+General a test should be done in two categories: 
+
+* Test under exact defined conditions expecting dedicated results. This is important for two situations:
+** Test of features which are assumed in requirements.
+** Repeated tests after changes to fast and automatic clarify, all is ok.
+
+* Test under accidently conditions. This tests are important to study the behavior independent of planned tests
+and exactly defined requirements. 
+** It is possible that some conditions are not exactly defined, but that definitions should be intrinsinc necessary.
+
+
+Furthermore, the tests should be done in three situations:
+
+* Test of the ready to use logic in the routed FPGA under several conditions (several input signals),
+of course in both categories as above presented, planned tests and accident tests (sometimes denoted by "__white noise tests__").
+
+* Test of the whole logic on Java level with dedicated test cases,
+or maybe also for accident inputs. Whereas a random value generator may be used in software.
+But of course the accident situations follows only the programmed randomizations, this is not a "__white noise test__".
+
+* Test of modules ("__unit test__"). Usual for that only planned tests are determined.
+The behavior of a module should follow exactly situations, this follows the denotation "__design by contract__".
+The contract of the behavior of a module should be well defined. A module should be manageable (rather than a complex system).
+
+These are pure basics about tests that are generally applicable.
+
+
+=== step and update operations
+
+The content of the `step(int time)` and `update()` operations are not used for the VHDL translation. 
+Essential for the VHDL translation are only the existence of the inner classes designated by the annotation `@Fpga.VHDL_PROCESS`
+in the modules and the instantiation of the modules in a `class Modules` in the top level file and also possible in modules for sub modules.
+
+It means the (manually programmed) content of this routines should follow the existing module instances and process classes. 
+Then only the behavior of the test is identically with the original FPGA behavior. 
+It means, intrinsic, this operations should be generated also for Java level. But this is not done yet. 
+
+The step routine prepares the states before the next clock. 
+The update routine is the clock, it is the manifestation for the next state.
+
+
+=== Input signals for test simulation in Java
+
+If you are **testing the whole FPGA design** usual the top level file has a `Input` and `Output` inner class 
+with the designated `input` and `output` instance which presents the pins of the FPGA. 
+Hence should only set the elements of the `input` with the appropriate values.
+This input values can come from simple test bed algorithm, or from more complex algorithm maybe also fet from values in tables,
+the test cases. 
+
+If you are **testing a module** usual the module has interface connections. 
+You should satisfy this interface requirements by implementations in the test bed, for the appropriate input signals. 
+
+
+=== Output signals for manually evaluation  of the test results
+
+With given tools of FPGA simulation a graphical output is usual for instance: 
+
+image:../../img/Fpga/ExampleUsual_wave.png[]
+
+Of course an adequate approach is possible for Java simulation because Java has graphical possibilities,
+it can be programmed in a specific way, or given routines in libraries of from other tools are usable.
+But is this the best one?
+
+The very simple solution presented below is also satisfactory:  
+
+----
+----
+
+
+=== Test of modules or the whole design on Java level
+
+
+
+=== Output of test signals for manually study
+
+
 
 
 
@@ -1235,6 +1374,7 @@ such a VHDL code as generated parallel code can be built also especially in run 
 The executed statements are not executed, instead they produce VHDL code.
 
 This is another approach, currently not supported by the Java2VHDL concept, maybe done in future.   
+
 
 
 == Literatur

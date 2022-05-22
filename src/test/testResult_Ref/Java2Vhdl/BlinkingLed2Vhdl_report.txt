@@ -24,12 +24,13 @@
   ifcOperation()    | access    {@link J2Vhdl_ModuleType#idxIfcOperation}
 --------------------+----------------
 --------------------+----------------
-
+##tag::Type-Reset[]
 == J2Vhdl_ModuleType: Reset
   ifcOperation()    | access    {@link J2Vhdl_ModuleType#idxIfcOperation}
 --------------------+----------------
   reset()           | this.q..??refres @; 
 --------------------+----------------
+##end::Type-Reset[]
 
 == Module: BlinkingLedCfg
   localName         | accessed module     {@link J2Vhdl_ModuleInstance#idxAggregatedModules}
@@ -64,7 +65,7 @@
   localName         | accessed module     {@link J2Vhdl_ModuleInstance#idxAggregatedModules}
 --------------------+----------------
 --------------------+----------------
-
+##tag::ct-Ref[]
 == Module: ct
   localName         | accessed module     {@link J2Vhdl_ModuleInstance#idxAggregatedModules}
 --------------------+----------------
@@ -72,7 +73,7 @@
   clkDiv            | ce : ClockDivider
   reset             | res : Reset
 --------------------+----------------
-
+##end::ct-Ref[]
 == Module: res
   localName         | accessed module     {@link J2Vhdl_ModuleInstance#idxAggregatedModules}
 --------------------+----------------

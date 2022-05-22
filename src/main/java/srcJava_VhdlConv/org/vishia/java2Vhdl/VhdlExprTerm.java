@@ -516,9 +516,9 @@ public final class VhdlExprTerm extends SrcInfo {
         // operation of mdl level are for testing, not intent to be interface calls.
       } else if(bReferencedModule) {                       // operation call via ref module is an interface operation
         String sIfcName = (sNameRefIfcAccess == null ? "" : sNameRefIfcAccess + "." ) + name;
-        J2Vhdl_ModuleType.IfcConstExpr ifcDef = mdlRef.type.idxIfcExpr.get(sIfcName);
+        J2Vhdl_ModuleType.IfcConstExpr ifcDef = mdlRef ==null ? null : mdlRef.type.idxIfcExpr.get(sIfcName);
         if(ifcDef == null) {
-          VhdlConv.vhdlError("VhdlExprTerm.genSimpleValue() - Interface operation not found: " + sIfcName + " in module: " + mdlRef.nameInstance, val);
+          VhdlConv.vhdlError("VhdlExprTerm.genSimpleValue() - Interface operation not found: " + sIfcName + " in module: " + (mdlRef == null ? "??unknown" : mdlRef.nameInstance), val);
         } else if(ifcDef.constVal !=null) {
           J2Vhdl_Variable cvar = ifcDef.constVal.var;
           this.exprType_.etype = cvar.type.etype;
@@ -564,6 +564,9 @@ public final class VhdlExprTerm extends SrcInfo {
     final String sRef;
     final String sElemJava;
     final String dbg;
+    if(nameInnerClassVariable !=null && nameInnerClassVariable.equals("time")) {
+      return null;                                         // access to a time sub structure such as this.time.varName is not part of VHDL
+    }
     name = var.get_variableName(); 
     if(  name.startsWith("m_")                           // variables m_ are masks for Java, not relevant. 
       || name.equals("time") || name.startsWith("time_") || name.equals("_time_")) {

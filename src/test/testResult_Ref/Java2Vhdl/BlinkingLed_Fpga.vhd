@@ -20,24 +20,30 @@ TYPE BlinkingLedCt_Q_REC IS RECORD
   led : BIT;
 END RECORD BlinkingLedCt_Q_REC;
 
+--tag::ClockDivider_Q_REC[]
 TYPE ClockDivider_Q_REC IS RECORD
   ct : STD_LOGIC_VECTOR(3 DOWNTO 0);
   ce : BIT;
 END RECORD ClockDivider_Q_REC;
+--end::ClockDivider_Q_REC[]
 
 TYPE Reset_Q_REC IS RECORD
   resetCount : STD_LOGIC_VECTOR(3 DOWNTO 0);
   res : BIT;
 END RECORD Reset_Q_REC;
 
+--tag::RecordSignals[]
 SIGNAL ce_Q : ClockDivider_Q_REC;
 SIGNAL ct_Q : BlinkingLedCt_Q_REC;
 SIGNAL res_Q : Reset_Q_REC;
+--end::RecordSignals[]
 
 CONSTANT BlinkingLedCfg_onDuration_BlinkingLed : INTEGER := 10;
 CONSTANT BlinkingLedCfg_time_BlinkingLed : BIT_VECTOR(7 DOWNTO 0) := x"64";
+--tag::BlinkingLedConstants[]
 CONSTANT BlinkingLed_Fpga_onDuration_BlinkingLed : INTEGER := 100;
 CONSTANT BlinkingLed_Fpga_time_BlinkingLed : BIT_VECTOR(7 DOWNTO 0) := x"c8";
+--end::BlinkingLedConstants[]
 
 
 
@@ -57,13 +63,16 @@ BEGIN IF(clk'event AND clK='1') THEN
 END IF; END PROCESS;
 
 
-
+--tag::ct_Q_PRC-ce[]
 ct_Q_PRC: PROCESS ( clk )
 BEGIN IF(clk'event AND clK='1') THEN
 
   IF ce_Q.ce='1' THEN
+--end::ct_Q_PRC-ce[]  
+--tag::ct_Q_PRC-ifcUsg[]
       IF res_Q.res='1' THEN
           ct_Q.ct <= TO_STDLOGICVECTOR(BlinkingLed_Fpga_time_BlinkingLed);            -- BlinkingLedCt.java, line:51
+--end::ct_Q_PRC-ifcUsg[]
           ct_Q.ctLow <=  x"0000";            -- BlinkingLedCt.java, line:53
       ELSE
         IF ct_Q.ctLow(15)='1' THEN

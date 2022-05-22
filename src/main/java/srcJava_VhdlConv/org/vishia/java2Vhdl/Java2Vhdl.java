@@ -488,9 +488,14 @@ public class Java2Vhdl {
    * @throws Exception
    */
   private void evaluateModules ( ) throws Exception {
+    //add new detected inner types after evaluate the container idxModuleTypes:
+    List<J2Vhdl_ModuleType> newInnerTypes = new LinkedList<J2Vhdl_ModuleType>();
     for(Map.Entry<String, J2Vhdl_ModuleType> e : this.fdata.idxModuleTypes.entrySet()) {
       J2Vhdl_ModuleType mdlt = e.getValue();
       String sClassName = mdlt.nameType;
+      if(sClassName.equals("RxSpe")) {
+        Debugutil.stop();
+      }
       JavaSrc.ClassContent mdlClassC = mdlt.moduleClass.get_classContent();
       if(mdlClassC.getSize_classDefinition()>0) //...for
       for(JavaSrc.ClassDefinition iclass: mdlClassC.get_classDefinition()) {
@@ -528,10 +533,12 @@ public class Java2Vhdl {
           String name = sClassName + "." + sIclassName;
           String nameType = sClassName + "_" + iClassName;  // J2Vhdl_ModuleType ToplevelType_Input
           J2Vhdl_ModuleType inoutType = new J2Vhdl_ModuleType(nameType, null, iclass, false);
+          newInnerTypes.add(inoutType);
           //this.fdata.idxModuleTypes.put(name, inoutType); //concurrentmodificationException
           prepareIfcOperationsInModuleType(inoutType, inoutType, null, iclass.get_classContent());
           J2Vhdl_ModuleInstance inoutModule = new J2Vhdl_ModuleInstance(name, inoutType, true);  // J2Vhdl_ModuleInstance ToplevelType_input
           this.fdata.idxModules.put(name, inoutModule);
+          searchForIfcAccess(iclass.get_classContent(), inoutType);
         }
         else if(iClassName.equals("Ref")) {
           
@@ -540,7 +547,19 @@ public class Java2Vhdl {
 //          this.vhdlConv.mapVariables(nameModule, iclass);
         }
       }
-      if(mdlClassC.getSize_variableDefinition()>0) //... for
+      searchForIfcAccess(mdlClassC, mdlt);
+      
+    } //for this.fdata.idxModuleTypes
+    for(J2Vhdl_ModuleType newInnerType : newInnerTypes) {  // an inner type does not need evaluated again.
+      this.fdata.idxModuleTypes.put(newInnerType.nameType, newInnerType);
+    }
+  }
+
+  
+  
+  
+  private void searchForIfcAccess ( JavaSrc.ClassContent mdlClassC, J2Vhdl_ModuleType mdlt) throws Exception {
+    if(mdlClassC.getSize_variableDefinition()>0) //... for
       for(JavaSrc.VariableInstance pVar: mdlClassC.get_variableDefinition()) {
         JavaSrc.ModifierVariable modif = pVar.get_ModifierVariable();
         if(modif !=null && modif.getSize_Annotation() >0) //...for
@@ -554,17 +573,15 @@ public class Java2Vhdl {
           }
         }
       }
-    }
   }
-
-  
-  
   
   
   private void evaluateInterfacesInModules ( ) throws Exception {
     for(Map.Entry<String, J2Vhdl_ModuleType> e : this.fdata.idxModuleTypes.entrySet()) {
       J2Vhdl_ModuleType mdlt = e.getValue();
-//      String sClassName = mdlt.nameType;
+      String sClassName = mdlt.nameType;
+      if(sClassName.equals("RxSpe"))
+        Debugutil.stop();
 //      if(mdlt.moduleClass.getSize_classDefinition()>0) //...for
 //      for(JavaSrc.ClassDefinition iclass: mdlt.moduleClass.get_classDefinition()) {
 //        
@@ -699,6 +716,12 @@ public class Java2Vhdl {
   
   private void associateActualWithTypeArgumentRefs ( J2Vhdl_ModuleInstance module, JavaSrc.ActualArguments actArgs, Iterator<JavaSrc.Argument> formalArgs ) {
     for(JavaSrc.Expression aggrArgExpr: actArgs.get_Expression() ) {  //the expression for the new Module(value, ...
+      if(VhdlConv.d.dbgStop) {
+        int[] linecol = new int[2];
+        String src = aggrArgExpr.getSrcInfo(linecol);
+        if(linecol[0] >= 121 && linecol[0] <= 121 && src.contains("FpgaTop_SpeA.java"))
+          Debugutil.stop();
+      }
       JavaSrc.ExprPart aggrArgExpr1 = aggrArgExpr.get_ExprPart().iterator().next();  //The only one part of the expression
       JavaSrc.SimpleValue aggrVal = aggrArgExpr1.get_value();
       //StringBuilder sbAggrRef = new StringBuilder();
@@ -707,7 +730,9 @@ public class Java2Vhdl {
       while(aggrRef !=null) {
         JavaSrc.SimpleVariable aggrRefVar = aggrRef.get_referenceAssociation();
         if(aggrRefVar !=null) {
-          sAggrRef = aggrRefVar.get_variableName(); // + ".";  // The variable name of the last ref is used only. All other is Java internally
+          String sAggrRef2 = aggrRefVar.get_variableName();// The variable name of the last ref is used only. All other is Java internally
+          if(sAggrRef == null) { sAggrRef = sAggrRef2; }   // this.mdl => "mdl", FpgaTop.this => "FpgaTop"
+          else { sAggrRef = sAggrRef + "." + sAggrRef2; }  // FpgaTop.this.input => "FpgaTop.input" used as name of referenced module. 
         }
         aggrRef = aggrRef.get_reference();     // next ref in chain ref.refNext
       }
@@ -763,7 +788,12 @@ public class Java2Vhdl {
       JavaSrc.ModifierMethod modif = oper.get_ModifierMethod();
       String sAnnot = modif == null ? null: modif.get_Annotation();
       String name = oper.get_name();
-      String a_Override = oper.get_A_Override();
+      String a_Override = modif == null ? null : modif.get_A_Override();
+      if(a_Override ==null) {
+        a_Override = oper.get_A_Override();  //TODO yet problem in syntax, do not quest @Override outside of the modifier.
+        if(a_Override !=null)
+          Debugutil.stop();
+      }
       //String sAnnotation = modif == null ? null :modif.get_Annotation();       // only search for interface implementig operations
       if( a_Override !=null /*&& sAnnotation.startsWith("@Override") */  
           && !name.equals("step")                          // but not from the FpgaModule_ifc
@@ -1209,8 +1239,8 @@ public class Java2Vhdl {
       for(Map.Entry<String, J2Vhdl_ModuleInstance.InnerAccess> eIfc : mdl.idxAggregatedModules.entrySet()) {
         String innerName = eIfc.getKey();
         J2Vhdl_ModuleInstance.InnerAccess refMdl = eIfc.getValue();
-        String sType = refMdl !=null ? refMdl.mdl.type.moduleClass.get_classident(): "???refModuleNotFound";
-        String sName = refMdl !=null ? refMdl.mdl.nameInstance + "." + refMdl.sAccess: "not found";
+        String sType = refMdl !=null && refMdl.mdl !=null ? refMdl.mdl.type.moduleClass.get_classident(): "???refModuleNotFound";
+        String sName = refMdl !=null && refMdl.mdl !=null  ? refMdl.mdl.nameInstance + "." + refMdl.sAccess: "not found";
         sf.reset();
         sf.add("  ").add(innerName).pos(20).add("| ").add(sName).add(" : ").add(sType);
         sf.flushLine("\n");
