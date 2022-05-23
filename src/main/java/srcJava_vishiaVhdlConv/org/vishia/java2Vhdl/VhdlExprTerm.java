@@ -363,7 +363,7 @@ public final class VhdlExprTerm extends SrcInfo {
     if(VhdlConv.d.dbgStop) {
       int[] lineColumn = new int[2];
       String file = val.getSrcInfo(lineColumn); //BlinkingLed_Fpga
-      if(file.contains("SpiMaster") && lineColumn[0] >= 214 && lineColumn[0] <= 214)
+      if(file.contains("BlinkingLedCt.java") && lineColumn[0] >= 52 && lineColumn[0] <= 52)
         Debugutil.stop();
     }
     boolean bOk = true;
@@ -392,14 +392,14 @@ public final class VhdlExprTerm extends SrcInfo {
       } else if(sRef.equals("mdl")) {
         sNameIclass = null;             // maybe null if operation of the module is called.
         //bRefNextUsed = true;
-      } else if(sRef.equals("ref")) {
+      } else if(sRef.equals("ref")) {                      // get the referenced module, and maybe an inner sAccess
         J2Vhdl_ModuleInstance.InnerAccess mdlRef2 = mdlRef.idxAggregatedModules.get(sRefNext);
         if(mdlRef2 == null) {
           VhdlConv.vhdlError("In VhdlExpTerm.genSimpleValue - Reference not found: " + sRefNext + " searched in: " + mdlRef.nameInstance , ref);
         } else {
           mdlRef = mdlRef2.mdl;
-          sNameRefIfcAccess = mdlRef2.sAccess;
-          assert(sNameRefIfcAccess == null || sNameRefIfcAccess.length() >0);
+          sNameRefIfcAccess = mdlRef2.sAccess;             // set if a interface agent is used to access, 
+          assert(sNameRefIfcAccess == null || sNameRefIfcAccess.length() >0);  //null if the interface is implemented in the module.
           bReferencedModule = true;
         }
         sNameIclass = "";

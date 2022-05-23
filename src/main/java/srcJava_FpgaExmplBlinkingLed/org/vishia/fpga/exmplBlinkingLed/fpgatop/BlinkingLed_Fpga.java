@@ -1,12 +1,12 @@
-package org.vishia.fpga.exmpl.fpgatop;
+package org.vishia.fpga.exmplBlinkingLed.fpgatop;
 
-import org.vishia.fpga.exmpl.modules.BlinkingLedCfg_ifc;
-import org.vishia.fpga.exmpl.modules.BlinkingLedCt;
-import org.vishia.fpga.exmpl.modules.ClockDivider;
 import org.vishia.fpga.stdmodules.Reset;
 import org.vishia.fpga.stdmodules.Reset_Inpin_ifc;
 import org.vishia.fpga.Fpga;
 import org.vishia.fpga.FpgaModule_ifc;
+import org.vishia.fpga.exmplBlinkingLed.modules.BlinkingLedCfg_ifc;
+import org.vishia.fpga.exmplBlinkingLed.modules.BlinkingLedCt;
+import org.vishia.fpga.exmplBlinkingLed.modules.ClockDivider;
 
 
 /**Extra configuration class associated to the top level FPGA definition, 
@@ -30,10 +30,10 @@ class BlinkingLedCfg implements BlinkingLedCfg_ifc {
 
 
 
-//org.vishia.fpga.exmpl.fpgatop.BlinkingLed_Fpga
-
+//tag::theClassDef[]
 public class BlinkingLed_Fpga implements FpgaModule_ifc, BlinkingLedCfg_ifc {
   
+//end::theClassDef[]
   
   
   public class Input implements Reset_Inpin_ifc {

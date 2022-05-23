@@ -1,0 +1,334 @@
+= Java2Vhdl translator - tools and example
+:toc:
+:toclevels: 4
+:sectnums:
+:sectlinks:
+:max-width: 52em
+:prewrap!:
+:cpp: C++
+:cp: C/++
+:wildcard: *
+:stylesheet: my.css
+
+
+See also:
+
+link:Java2Vhdl_Approaches.html[] - Basically information about the concept
+
+link:Java2Vhdl_StyleGuide.html[] - How to work with Java for Fpga logic
+
+link:VhdlConv.html[] internal docu how does it work
+
+link:../../../spe/html/SpeA-FPGA/SpeA-JavaFPGA.html[] This is the description of a FPGA design for SinglePairEthernet PHY layer. Work in progress.
+
+link:../../../spe/html/SpeA-FPGA/SpeA-FPGA.html[] The older description based on only VHDL and Aldec-HDL simulation tool using.
+Comparing both descriptions you can also see advantages in the documentation of the behavior of the FPGA.
+
+This is a preliminary information. The tool Java2Vhdl translator is in progress.
+
+== Approach
+
+This document describes the tools for translation Java to VHDL, test at Java level using an example. 
+
+== Working tree organization for sources and tools
+
+There is an example given as zip downloadable: link:Example1_BlinkingLed.zip[].
+The content of this file may be but need not be the template for the file tree organization. 
+
+Generally the idea of the link:../../../SwEng/html/srcFileTree.html[SwEng/srcFileTree.html] is used, a file tree similar as the familiar used maven or gradle file tree, whereas maven or gradle itself is not used here.
+
+----
+Path/to/myWorkingTree
+ +-src                all sources should be versioned
+ +-tools              tools loadable from internet
+ +-build              output directory for build outputs (may be in RAM disk, or temp location)
+----
+
+The example contains some more files and directories on root level, but this files are really only for the simple example.
+It should be assembled with adequate content in a user project inside the src tree.
+
+----
+Path/to/myWorkingTree
+ +-src
+ +-genVHDL_cmp              directory creates the generated files for compare with build
+ +- +clean.bat              batch helper file to clean all
+ +- +clean_mkLinkBuild.bat  batch helper file to create the build directory
+ +- +gen_Vhdl_Example1.bat  batch file for start generation
+----
+
+The `tools` and `build` sub directory are created with batch files (Windows-oriented) or adequate shell scripts.
+The empty `build` directory will be created and removed by the above shown `+clean.bat` and `+clean_mkLinkBuild.bat`.
+This files may be assembled in your user source tree at adequate positions in the `src/...` with adequate content.  
+
+The following files are given, to load the tools from internet, see also link:../../../SwEng/html/srcFileTree.html#libsTools[]
+and the following chapter <<#toolsJ2Vhdl>>
+
+----
+Path/to/myWorkingTree
+ +-src/load_tools
+        +-+loadTools.bat   script to create the tools directory and load tools
+        +-tools.bom        so named "bill of material" to determine which tools from where
+        +-vishiaMinisys.jar  a simple java executable to execute the load 
+----
+
+The `src` working tree is organized in the following form:
+
+----
+src
+ +-main              generally for the application (the main path, maven-like)
+ |  +-java
+ |  +-vhdl
+ +-test              support for test (maven like)
+ |  +-java
+ |  +-fpga...
+ +-load_tools        helper for the tools, not in maven concept.
+----
+
+`main` and `test` separates between the product relevant files (in `main`) and test files. 
+The next level below `main` and `test` is the kind of source files, here Java files or some VHDL files, or other if necessary.
+C and {cpp} files, maybe necessary for other parts of the whole project, are usual stored in a `cpp` subdir. 
+`fpga...` is a hint to any other test files, user specific.
+
+The level below should be determined by the components directory, see also link:../../../SwEng/html/srcFileTree.html#components[].
+For our example and tools we have:
+
+----
+src
+ +-main
+ |  +-java
+ |     +-srcJava_vishiaFpga              common necessary Java sources from vishia
+ |     +-srcJava_FpgaExmplBlinkingLed    the specific user sources, here the example 
+ +-test
+    +-java
+       +-testJava_FpgaExmplBlinkingLed   the specific test sources, here the example
+----       
+       
+It means, if you want to use Eclipse as environment for Java development (recommended),
+you need three linked folders to work.
+For organization of eclipse projects, see also link:../../..//SwEng/html/EclipseWrk.de.html[] (unfortunately yet only in German).
+
+Inside the Java components you have the familiar Java package tree, starting in this case all with `org/vishia`.
+The Java package tree is familiar since the first Java development in the 1990^th^.
+It is a world wide unique deterministic of packages using the revers internet address as first members.
+Hence all parts which are developed related to the link:https://www.vishia.org[] web page (Java related parts) 
+are denoted in the `org/vishia/...` package tree. For your own you should use your web presence as start path
+such as `com/siemens/department/...` if you are from the Siemens company or `com/bosch/department/...` if you are working in the Bosch company 
+or whatever else, as usual in your company. This should be only understand as hint or notice, may or may not be important.  
+
+
+
+[#toolsJ2Vhdl]
+== Tools necessary for Java to Vhdl translation and test support
+
+The necessary tools for Java to VHDL translation are really less. It is only jar files to work with Java.
+
+Java itself should be familiar for usage. This examples and tool files are related to the long term provided Java-8 version from Oracle,
+but also some open source Java may usable. 
+
+After loading the Java files from the internet via clicking on `src/load_tools/+loadTools.bat` you get the following files to work:
+
+----
+2022-05-23  14:14               502 +loadTools.bat
+2022-05-23  14:48               584 tools.bom
+2022-05-23  14:49         1.500.128 vishiaBase.jar
+2022-01-24  20:25            81.128 vishiaMinisys.jar
+2022-05-23  14:49            56.282 vishiaVhdlConv.jar
+               5 Datei(en),      1.638.624 Bytes
+---- 
+
+If you look on `src/load_tools/tools.bom` you see the following:
+
+----
+include::../../../load_tools/tools.bom[]
+----
+
+This textual file is executed by the Java class `org.vishia.minisys.GetWebfile` which is contained in the here also registered `vishiaMinisys.jar`.
+It contains the internet location for the jar file, the destination file name and a MD5 checksum. 
+You can do this actions also manually, build and compare the check sum. The files are able to view and load in the given location,
+this is link:https://www.vishia.org/Java/deploy[]. 
+You find also the source files beside the jar files with the same name, only with the extension `-source.zip`
+All is open source, you can study the algorithm, and also compile it newly. The source-zip archive contains a `_make` directory. 
+You should only place all depending jar files or sources (that is here `srcJava_vishiaBase`) side beside. 
+Depending jar files should be placed in a `tools` directory beside:
+
+After newly translation you get the same jar files with exactly the same binary content and hence the same check sum.
+This is the approach of reproducible build, see also link:../../../Java/html5/source+build/reproducibleJar.html[]
+and also link:https://reproducible-builds.org/reports/2020-03/[].
+It means you can both check the correctness of the MD5 check sum and check whether the sources are really valid for the given binary.
+
+As you see, the VhdlConv itself is only a small file consist of a few Java classes. No more is necessary. 
+But the basics, independent of the VHDL approach, the Parser, text generator etc. are all contained in the `vishiaBase.jar`.
+But this file has also only 1.5 MByte. The other used tools are only the Java-8 system from Oracle. 
+No other tools and executables are used. Nothing is stored in any temporary or `home/user` locations.
+Getting the core of the job done usually doesn't require sprawling tools.
+
+== The platform to edit the Java sources for VHDL
+
+It is recommended to use Eclipse, but also another IDE is possible as your choice.
+
+== The translation Java to VHDL
+
+This is only the start of a command line execution, for the example:
+
+----
+ java -cp tools/vishiaBase.jar;tools/vishiaVhdlConv.jar org.vishia.java2Vhdl.Java2Vhdl -sdir:src/main/java/srcJava_FpgaExmplBlinkingLed -sdir:src/main/java/srcJava_vishiaFpga org.vishia.fpga.exmplBlinkingLed.fpgatop.BlinkingLed_Fpga -o:build/BlinkingLed_Fpga.vhd -tmp:build/ -rep:build/BlinkingLed2Vhdl_report.txt
+----
+ 
+This is a very long line because of the arguments, not obviosly.
+Therefore a better solution is possible, given in the example:
+
+----
+java -cp tools/vishiaBase.jar;tools/vishiaVhdlConv.jar org.vishia.java2Vhdl.Java2Vhdl --@%0:convArgs 
+REM info: one space after the label, then trim all trailing spaces also without comment
+::convArgs ##             
+::-sdir:src/main/java/srcJava_FpgaExmplBlinkingLed            ##source dirs from current
+::-sdir:src/main/java/srcJava_vishiaFpga  
+::-top:org.vishia.fpga.exmplBlinkingLed.fpgatop.BlinkingLed_Fpga   ##top level file to translate in first source dir
+::-o:build/BlinkingLed_Fpga.vhd                               ##output
+::-tmp:build/  
+::-rep:build/BlinkingLed2Vhdl_report.txt                      ##report with meta information
+pause
+----
+
+General with the argument `--@path/to/argfile` some arguments can be read from a file. 
+Whereas each line of the file is one argument. That makes it also possible to use white spaces in arguments without quotation marks. 
+But often an extra file for that is not nice. 
+With a label after the argfile path after colon the argument processor searches this label in the argument file.
+The label should be places on beginning of the line, but after maximal 5 comment characters.
+The comment characters then must be written also leading before the arguments in the line. 
+This helps to separate comment lines from other content in any file, in this case in the batch file itself.
+The first line without these comment character, here the `pause` line is then the termination of argument lines.
+Additionally the arguments can be commented with the comment character given after the label. 
+One space between label and argument comment characters forces removing trailing spaces in the line, which is often sensible but not at all.
+Hence it can be controlled here.
+
+With this argument designation the arguments are well readable.
+
+A short explanation of the arguments comes if the converter is started without arguments:
+
+----
+Java2Vhdl made by HSchorrig, 2022-02-16 - 2022-05-23
+ see www.vishia.org/Fpga/html/Vhdl/Java2Vhdl_ToolsAndExample.html
+-i:path/to/template.vhd  ...optional, if given, read this file to insert
+-o:path/to/output.vhd
+-top:pkg.path.VhdlTopModule ... the top level java file (without .java, as class path) 
+-sdir:path/to/srcJava  ... able to use more as one
+-sl ... optional, if given, remark src and line
+-tmp:path/to/dirTmp
+-rep:path/to/fileReport.txt   ... optional
+---- 
+
+This is of course only a short description, with the link to this document. 
+
+* The `-i:path/to/template.vhd` can be used if only a part of the VHDL file should be generated, 
+the frame is given with this file. The generated parts are firstly the `TYPE ... RECORD` definitions and the `SIGNAL ....:_REC` instances, `
+and secondly the `PROCESS` . The given file should contain labels in the following form:
+
+----
+  ...start of the file, with heading, ENTITY, Ports
+ARCHITECTURE BEHAVIORAL OF ....
+  
+-- INSERT Java2Vhdl
+  ... This parts are replaced by the new generated one TYPE ... RECORD definitions
+  ... and SIGNAL ....:_REC` instances
+-- END Java2Vhdl
+  ... further content, SIGNAL and COMPONENT definiton, especially the 
+BEGIN
+  ... and more given content
+-- INSERT Java2Vhdl
+  ... This parts are replaced by the new generated processes
+-- END Java2Vhdl
+  ... finishing content
+----
+
+* `-o:path/to/output.vhd` is also used if `-i:...` is given. It means the `-i:...` file will not be replaced, only read.
+It may be recommended to generate a new file first to a temporary location in the file system, and then compare because of changes,
+at least replace.
+
+* `-top:pkg.path.VhdlTopModule` This is the class path with package path of the top level Java class for the FPGA design.
+Usual this class contains a `class Modules` inner class to determine all other sub modules.
+
+* `-sdir:path/to/srcJava` This argument can be given more as one (usual) as search path for the Java files.
+It contains the directory where the Java package path starts (with `org/...`), not the directory of the Java file itself.
+
+* `-sl` means "source line". If given then in the generated `-o:...` file the source file and the line of the Java source 
+for the appropriate generated VHDL line is written as `---path/to/src: line`. This helps to associate generated lines and Java source lines.
+However, using this feature makes it a little bit difficult to compare a newly created file 
+with the previous version because often the lines are shifted in the source, hence only all the line numbers are changed. 
+It makes really changes lesser obviously. It may be recommended to generate both versions, with and without this option, 
+and store both as second source, without line numbers for a simple version comparison and with line numbers to search assiciations with the Java sources.
+
+* `-tmp:path/to/dirTmp` It is possible to output intermediate files for parsing results etc. especially during development, 
+not used in the compiled version.
+
+* `-rep:path/to/fileReport.txt` This is an interesting report file about modules, interfaces, variables and should be stored
+beside the VHDL output file. 
+
+
+== The component srcJava_vishiaFpga
+
+This component contains some Java files. They are necessary in a user's project for test and for using annotations and call specific operations.
+It means this component should be used as source file tree.
+It is located for the example.zip in:
+
+----
+src
+ +-main
+   +-java
+      +-srcJava_vishiaFpga
+         +-org/vishia/fpga
+                       +-stdmodules/*.Java     useable in the design
+                       +-testutil/*.Java       useable for test on Java level
+                       +-Fpga.java             define some standard operations and annotations
+                       +-FpgaModule_ifc.java   the essential module interface
+----
+
+You don't need (must not) change the content of these files, only use it. It is also versioned (yet TODO Github)
+
+
+== The example Blinking LED, view to Java sources in respect to the FPGA description
+
+This is a study example or template for your own. 
+The sources are located for the exmaple.zip in:
+
+----
+src
+ +-main
+   +-java
+      +-srcJava_FpgaExmplBlinkingLed
+         +-org/vishia/fpga/exmplBlinkingLed    This should be your own package path for other projects
+            +-fpgatop/*.java
+            +-modules/*.java
+            +-test/*.java                      only for test on Java level, may be in test folder, see next chapter
+----
+
+The content of the files are partially described already in the approach document regarding interface concepts etc.
+
+link:Java2Vhdl_Approaches.html[]
+
+This chapter describes it from the view of the template for your own.
+
+=== The top level java file
+
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_Fpga.java[tag=theClassDef]
+----
+
+
+
+
+== The example Blinking LED, view to Java sources in respect to test on Java level
+
+If you want to separate test files (with a lot of complicated test cases) from the sources, 
+you can also place the test Java files in 
+
+----
+src
+ +-test                                        use the test sub folder
+   +-java
+      +-testJava_YourComponent
+         +-package/path/your/component         This should be your own package path for other projects
+            +-test/*.java                      only for test on Java level.
+----
+
+

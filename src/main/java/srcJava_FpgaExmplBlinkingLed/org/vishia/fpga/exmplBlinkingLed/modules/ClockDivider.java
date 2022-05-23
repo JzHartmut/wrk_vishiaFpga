@@ -1,4 +1,4 @@
-package org.vishia.fpga.exmpl.modules;
+package org.vishia.fpga.exmplBlinkingLed.modules;
 
 import org.vishia.fpga.stdmodules.Reset;
 import org.vishia.fpga.Fpga;

@@ -530,7 +530,7 @@ Example start of an inner class in a module MyModule.java:
 [source,Java]
 ----
 //fpga/exmpl/modules/ClockDivider.java
-include::../../../main/java/srcJava_Fpga/org/vishia/fpga/exmpl/modules/ClockDivider.java[tag=Q-data]
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/ClockDivider.java[tag=Q-data]
 ----
 
 Builds the record in VHDL:
@@ -564,7 +564,7 @@ But instead, the Java sources can work with aggregations. The adequate line in J
 [source,Java]
 ----
 //fpga/exmpl/modules/BlinkingLedCt.java
-include::../../../main/java/srcJava_Fpga/org/vishia/fpga/exmpl/modules/BlinkingLedCt.java[tag=Q-Process-ce]
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/BlinkingLedCt.java[tag=Q-Process-ce]
 ----
  
 * In Java the access is not done immediately to the variable in the other class. Instead a `ref` is used.
@@ -580,7 +580,7 @@ Any module can contain a `Ref` class with a `Ref ref` instance, here:
 [source,Java]
 ----
 //fpga/exmpl/modules/BlinkingLedCt.java
-include::../../../main/java/srcJava_Fpga/org/vishia/fpga/exmpl/modules/BlinkingLedCt.java[tag=Ref]
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/BlinkingLedCt.java[tag=Ref]
 ----
 
 That are aggregations in UML wording (Unified Modeling Language for Object Orientated software technology). 
@@ -595,7 +595,7 @@ The constructor of the `Ref` have to be called in the constructor of the module,
 [source,Java]
 ----
 //fpga/exmpl/modules/BlinkingLedCt.java
-include::../../../main/java/srcJava_Fpga/org/vishia/fpga/exmpl/modules/BlinkingLedCt.java[tag=ctor]
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/BlinkingLedCt.java[tag=ctor]
 ----
 
 Here it is important that the name of the arguments in the constructor is the same as the name of the aggregation reference
@@ -608,7 +608,7 @@ For that there is a `Modules` inner class:
 [source,Java]
 ----
 //fpga/exmpl/modules/BlinkingLedCt.java
-include::../../../main/java/srcJava_Fpga/org/vishia/fpga/exmpl/fpgatop/BlinkingLed_Fpga.java[tag=Modules]
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_Fpga.java[tag=Modules]
 ----
 
 Here three modules are defined which are used in the top level of the FPGA. 
@@ -675,7 +675,7 @@ Look to another part of the example:
 [source,Java]
 ----
 //fpga/exmpl/modules/BlinkingLedCt.java
-include::../../../main/java/srcJava_Fpga/org/vishia/fpga/exmpl/modules/BlinkingLedCt.java[tag=Q-Process-ifcUsg]
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/BlinkingLedCt.java[tag=Q-Process-ifcUsg]
 ----
 
 This is a snippet from the `BlinkingLedCt PROCESS` in Java:
@@ -723,7 +723,7 @@ Look on the definition of the
 [source,Java]
 ----
 //fpga/exmpl/modules/BlinkingLedCt.java
-include::../../../main/java/srcJava_Fpga/org/vishia/fpga/exmpl/modules/BlinkingLedCt.java[tag=Ref]
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/BlinkingLedCt.java[tag=Ref]
 ----
 
 As you see, the type of the [J]`ref.reset` is [J]`Reset_ifc`, as also the type of [J]`ref.cfg` is [J]`BlinkingLedCfg_ifc`.
@@ -733,7 +733,7 @@ Look firstly to the defintion of the [J]`Reset_ifc`:
 [source,Java]
 ----
 //fpga/exmpl/stdmodules/Reset_ifc.java
-include::../../../main/java/srcJava_Fpga/org/vishia/fpga/stdmodules/Reset_ifc.java[]
+include::../../../main/java/srcJava_vishiaFpga/org/vishia/fpga/stdmodules/Reset_ifc.java[]
 ----
 
 Using of interfaces is very proven in Java (as also another Object Orientated Languages),
@@ -748,7 +748,7 @@ For this example the reference is clarified on the outer level of modularity, on
 [source,Java]
 ----
 //fpga/exmpl/modules/BlinkingLedCt.java
-include::../../../main/java/srcJava_Fpga/org/vishia/fpga/exmpl/fpgatop/BlinkingLed_Fpga.java[tag=Modules]
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_Fpga.java[tag=Modules]
 ----
 
 The inner reference name [J]`ref.reset` is associated to the module [J]`Reset res`, 
@@ -761,9 +761,9 @@ Now, the module [J]`Reset` implements the following operation:
 [source,Java]
 ----
 //fpga/exmpl/stdmodules/Reset.java
-include::../../../main/java/srcJava_Fpga/org/vishia/fpga/stdmodules/Reset.java[tag=classdef]
+include::../../../main/java/srcJava_vishiaFpga/org/vishia/fpga/stdmodules/Reset.java[tag=classdef]
   .....
-include::../../../main/java/srcJava_Fpga/org/vishia/fpga/stdmodules/Reset.java[tag=reset()]
+include::../../../main/java/srcJava_vishiaFpga/org/vishia/fpga/stdmodules/Reset.java[tag=reset()]
 ----
 
 It's very simple: If accesses the variable [J]`res` in its own inner class [J]`q` 
@@ -805,7 +805,7 @@ But, let's have a look to the second interface usage of this example.
 [source,Java]
 ----
 //fpga/exmpl/modules/BlinkingLedCt.java
-include::../../../main/java/srcJava_Fpga/org/vishia/fpga/exmpl/modules/BlinkingLedCt.java[tag=Q-Process-ifcUsg]
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/BlinkingLedCt.java[tag=Q-Process-ifcUsg]
 ----
 
 The request is adequate, a value should be accesses. It is not first intendet that this is a constant value.
@@ -827,7 +827,7 @@ The interface to access the [J]`time_BlinkingLed()` is implemented here in the m
 [source,Java]
 ----
 //fpga/exmpl/modules/Fpga_BlinkingLed.java
-include::../../../main/java/srcJava_Fpga/org/vishia/fpga/exmpl/fpgatop/BlinkingLed_Fpga.java[tag=time_BlinkingLed_topImpl]
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_Fpga.java[tag=time_BlinkingLed_topImpl]
 ----
 
 The here written comment is firstly not important for the general explaination. The essence is:
@@ -970,7 +970,7 @@ The adequate form in the Java src is similar:
 [source,Java]
 ----
 //fpga/exmpl/modules/BlinkingLedCt.java
-include::../../../main/java/srcJava_Fpga/org/vishia/fpga/exmpl/modules/BlinkingLedCt.java[tag=Q-Process-ce]
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/BlinkingLedCt.java[tag=Q-Process-ce]
       //.... logic working only if ce is set
     }
 ----

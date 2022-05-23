@@ -51,7 +51,7 @@ public class Java2Vhdl {
    * <li>descr: Change of description of elements.
    * </ul> 
    */
-  public static final String sVersion = "2022-04-28";
+  public static final String sVersion = "2022-05-23";
 
   
   
@@ -139,15 +139,15 @@ public class Java2Vhdl {
     
     
     Args(){
-      super.aboutInfo = "Java2Vhdl made by HSchorrig, 2022-02-16 - 2022-02-16";
-      super.helpInfo=" all args obligate, see www.vishia.org/fpga/TODO";
-      addArg(new Argument("-i", ":path/to/template.vhd", this.setInVhdl));
+      super.aboutInfo = "Java2Vhdl made by HSchorrig, 2022-02-16 - " + Java2Vhdl.sVersion;
+      super.helpInfo=" see www.vishia.org/Fpga/html/Vhdl/Java2Vhdl_ToolsAndExample.html";
+      addArg(new Argument("-i", ":path/to/template.vhd  ...optional, if given, read this file to insert", this.setInVhdl));
       addArg(new Argument("-o", ":path/to/output.vhd", this.setOutVhdl));
+      addArg(new Argument("-top", ":pkg.path.VhdlTopModule ... the top level java file (without .java, as class path) ", this.setJavaVhdlSrc));
+      addArg(new Argument("-sdir", ":path/to/srcJava  ... able to use more as one", this.setDirJavaVhdlSource));
+      addArg(new Argument("-sl", " ... optional, if given, remark src and line", this.setSrcComment));
       addArg(new Argument("-tmp", ":path/to/dirTmp", this.setDirTmpVhdl));
-      addArg(new Argument("-sdir", ":path/to/srcJava", this.setDirJavaVhdlSource));
-      addArg(new Argument("-rep", ":path/to/fileReport.txt", this.setOutContentReport));
-      addArg(new Argument("-sl", " remark src and line", this.setSrcComment));
-      addArg(new Argument("", "pkg.path.VhdlModule", this.setJavaVhdlSrc));
+      addArg(new Argument("-rep", ":path/to/fileReport.txt   ... optional", this.setOutContentReport));
     }
 
     @Override
@@ -742,12 +742,16 @@ public class Java2Vhdl {
       if(sAggrRef == null) {
         sAggrName = sAggrVarName;                          // module inside Modules class
         sInnerName = null;
-      } else if(sAggrVarName.equals("input") ) {
-        sAggrName = sAggrRef + "." + sAggrVarName;
-        sInnerName = null;
+      } else if(sAggrVarName.equals("input") ) {           // It can be only the OwnClass.this.input
+        sAggrName = sAggrRef + "." + sAggrVarName;         // OwnClass.input is the name of the referenced module.
+        sInnerName = null;                                 // Note: OwnClass is usual the top level class, it has Input and Output as inner class
       } else {
-        sAggrName = sAggrRef;                              // either OwnClass.this or module.ifcModule, then use ref first.
-        sInnerName = sAggrVarName;
+        sAggrName = sAggrRef;                              // either OwnClass.this or this.module.ifcModule, then it is OwnClass or module.
+        if(sAggrVarName == null || sAggrVarName.equals("this")) {
+          sInnerName = null;                               // ownClass.this: ignore this is non relevant variable.
+        } else {
+          sInnerName = sAggrVarName;                       // onwClass.this.ifcAgent or this.module.ifcAgent, then use it.
+        }
       }
 //      if(sAggrVarName.equals("this") && sAggrRef !=null) {      // it is a reference to the enclosing class Type.this
 //        sAggrName = sAggrRef.substring(0, sAggrRef.length()-1);  //The own module is stored with the Type name.
@@ -768,6 +772,8 @@ public class Java2Vhdl {
       } else {
         System.out.println("    Aggregation: " + sNameFormalArg + "<--" + aggrModule.nameInstance);
       }
+      if(sInnerName !=null && sInnerName.equals("this"))
+        Debugutil.stop();
       module.idxAggregatedModules.put(sNameFormalArg, new J2Vhdl_ModuleInstance.InnerAccess(aggrModule, sInnerName));
     }
 
