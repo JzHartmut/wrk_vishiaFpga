@@ -378,8 +378,11 @@ public class Java2Vhdl {
   { 
     List<String> javaSrcToProcess = new LinkedList<String>();
     javaSrcToProcess.addAll(this.args.fJavaVhdlSrc);
-    boolean bTopLevel = true;
+    int nToplevelFiles = javaSrcToProcess.size();
+    //boolean bTopLevel = true;
+    J2Vhdl_ModuleInstance topMdl = null;
     while(javaSrcToProcess.size() >0) {
+      boolean bTopLevel = --nToplevelFiles >=0;            //the first added files are top level
       String pathSrcJava = javaSrcToProcess.remove(0);
       JavaSrc parseResult = parseSrc(this.args.dirJavaVhdlSrc, pathSrcJava);
       if(parseResult !=null) {
@@ -388,8 +391,7 @@ public class Java2Vhdl {
           String className = pclass.get_classident();          // should contain only one public class.
           J2Vhdl_ModuleType moduleType = new J2Vhdl_ModuleType(className, parseResult, pclass, bTopLevel);
           this.fdata.idxModuleTypes.put(className, moduleType);      // Store in idxModuleTypes with the simple className
-          J2Vhdl_ModuleInstance topMdl = null;
-          if(bTopLevel) {                                      // build an module instance also from the top level file as Module
+          if(topMdl ==null) { //bTopLevel) {                                      // build an module instance also from the top level file as Module
             topMdl = moduleType.topInstance;
             assert(topMdl !=null); // was created in ctor
             this.fdata.idxModules.put(className, topMdl);
@@ -422,7 +424,7 @@ public class Java2Vhdl {
                 
         } } } } 
       }
-      bTopLevel = false;
+//      bTopLevel = false;
     } //while(javaSrcToProcess.size() >0);
   }
 
@@ -527,7 +529,7 @@ public class Java2Vhdl {
           }
           evaluateModulesCtor(iClassC);                     // find init(ref, ref...) statement in ctor
         }
-        else if( mdlt.isTopLevel() && ( iClassName.equals("Input")
+        else if( /*mdlt.isTopLevel() &&*/ ( iClassName.equals("Input")
                || iClassName.equals("Output") )) {          // In/Output signals of the whole FPGA or a VHDL sub module.
           String sIclassName = Character.toLowerCase(iClassName.charAt(0)) + iClassName.substring(1); 
           String name = sClassName + "." + sIclassName;

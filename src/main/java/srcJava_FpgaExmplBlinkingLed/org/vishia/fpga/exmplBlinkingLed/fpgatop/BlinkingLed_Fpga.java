@@ -9,74 +9,39 @@ import org.vishia.fpga.exmplBlinkingLed.modules.BlinkingLedCt;
 import org.vishia.fpga.exmplBlinkingLed.modules.ClockDivider;
 
 
-/**Extra configuration class associated to the top level FPGA definition, 
- * hence in the same file
- * Other possibility: interface is implemented in the public main class of the top level FPGA.
- * See usage, comment one of the lines to evaluate it.
- */
-class BlinkingLedCfg implements BlinkingLedCfg_ifc {
-  @Override 
-  @Fpga.BITVECTOR(8) public int time_BlinkingLed() {
-    return 0x64;
-  }
-
-  @Override
-  public int onDuration_BlinkingLed() {
-    return 10;
-  }
-
-}
-
-
 
 
 //tag::theClassDef[]
-public class BlinkingLed_Fpga implements FpgaModule_ifc, BlinkingLedCfg_ifc {
+public class BlinkingLed_Fpga implements FpgaModule_ifc {
   
 //end::theClassDef[]
-  
-  
-  public class Input implements Reset_Inpin_ifc {
 
-    public boolean reset_Pin;
-    
-    @Override
-    public boolean reset_Pin() { return this.reset_Pin; }
+//  private BlinkingLed_FpgaInOutput inoutput;
+//  
+//  
+//  public final BlinkingLed_FpgaInOutput.Input input = this.inoutput.input; 
+//  
+//  public final BlinkingLed_FpgaInOutput.Output output = this.inoutput.output; 
+  
 
-  }
-
-  
-  
-  public class Output {
-    
-    public boolean led1, led2;
-    
-    
-  }
-  
-  
-  
-  public final Input input = new Input(); 
-  
-  public final Output output = new Output(); 
-  
 //tag::Modules[]
   /**The modules which are part of this Fpga for test. */
   public class Modules {
     
-    public BlinkingLedCfg blinkingLedCfg = new BlinkingLedCfg();
+    /**The i/o pins of the top level FPGA should have exact this name ioPins. 
+     * They are instantiated in this input output class*/
+    BlinkingLed_FpgaInOutput ioPins = new BlinkingLed_FpgaInOutput();
     
     /**Build a reset signal high active for reset. Initial or also with the reset_Pin. 
      * This module is immediately connected to one of the inputFpga pins
      * via specific interface, see constructor argument type.
      */
-    public final Reset res = new Reset(BlinkingLed_Fpga.this.input);
+    public final Reset res = new Reset(this.ioPins.reset_Inpin);
     
     public final ClockDivider ce = new ClockDivider();
     
     //Note: both lines are possible, comment only one: Using different implementations. 
-    //public final BlinkingLedCt ct = new BlinkingLedCt(this.res, this.blinkingLedCfg, this.ce);    //cfg implemented in extra class in this file.
-    public final BlinkingLedCt ct = new BlinkingLedCt(this.res, BlinkingLed_Fpga.this, this.ce);  //cfg implemented in main class
+    public final BlinkingLedCt ct = new BlinkingLedCt(this.res, BlinkingLed_Fpga.this.blinkingLedCfg, this.ce);    //cfg implemented in extra class in this file.
     
     
     Modules ( ) {
@@ -102,22 +67,30 @@ public class BlinkingLed_Fpga implements FpgaModule_ifc, BlinkingLedCfg_ifc {
     this.ref.res.update();
     this.ref.ce.update();
     this.ref.ct.update();
-    this.output.led1 = Fpga.getBits(this.ref.ct.ct(), 2,0) == 0b000;
-    this.output.led2 = this.ref.ct.ledBlinking();
+    this.ref.ioPins.output.led1 = Fpga.getBits(this.ref.ct.ct(), 2,0) == 0b000;
+    this.ref.ioPins.output.led2 = this.ref.ct.ledBlinking();
   }
   
-  //tag::time_BlinkingLed_topImpl[]
-  @Override 
-  public int time_BlinkingLed() {
-    return 0xc8;  //200 TODO should be use the type designation of the interface operation definition. 
-  }
-  //end::time_BlinkingLed_topImpl[]
   
+  /**Extra configuration class associated to the top level FPGA definition, 
+   * hence in the same file
+   * Other possibility: interface is implemented in the public main class of the top level FPGA.
+   * See usage, comment one of the lines to evaluate it.
+   */
+  @Fpga.IfcAccess BlinkingLedCfg_ifc blinkingLedCfg = new BlinkingLedCfg_ifc ( ) {
+    @Override 
+    @Fpga.BITVECTOR(8) public int time_BlinkingLed() {
+      return 0x64;
+    }
 
-  @Override
-  public int onDuration_BlinkingLed() {
-    return 100;
-  }
+    @Override
+    public int onDuration_BlinkingLed() {
+      return 10;
+    }
+
+  };
+
+
 
   
 }

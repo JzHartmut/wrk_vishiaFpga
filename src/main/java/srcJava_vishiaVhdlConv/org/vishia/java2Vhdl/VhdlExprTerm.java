@@ -576,8 +576,11 @@ public final class VhdlExprTerm extends SrcInfo {
       Debugutil.stop();
       //else { vhdlError("reference only with a variable possible", ref);  sRef = "??."; }
     dbg="refnull";
-    sElemJava = name;
-    sRef = mdl.nameInstance + "." + ( nameInnerClassVariable == null || nameInnerClassVariable.length()==0 ? "" : nameInnerClassVariable + '.');          
+    sElemJava = name;                                      // especially for the ioPins module: use the type to find the variable.
+    final String sMdlIdent = mdl.nameInstance.equals("ioPins") ? mdl.type.nameType 
+        : mdl.nameInstance;                                // else: The name of the variable is built with the instance name.
+    //
+    sRef = sMdlIdent + "." + ( nameInnerClassVariable == null || nameInnerClassVariable.length()==0 ? "" : nameInnerClassVariable + '.');          
     J2Vhdl_Variable varDescr = VhdlConv.d.fdata.idxProcessVars.get(sElemJava);
     final String sElemJava2 = sRef + sElemJava;
     if(varDescr == null) {
@@ -593,7 +596,7 @@ public final class VhdlExprTerm extends SrcInfo {
       }
     }
     if(varDescr == null) {
-      VhdlConv.vhdlError("unknown variable >>" + sElemJava + "<< :" + dbg, var);
+      VhdlConv.vhdlError("VhdlExprTerm.getVariableAccess() - unknown variable >>" + sElemJava2 + "<< :" + dbg, var);
       return null;
     } else {
       return varDescr;

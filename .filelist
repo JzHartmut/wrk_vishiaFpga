@@ -35,7 +35,8 @@
 ============================== src/main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/ ===
 
 ============================== src/main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/ ===
-2022-05-23 20:18:44  x     BlinkingLed_Fpga.java                    ::          3.100 -0272649979 
+2022-05-23 23:06:53  x     BlinkingLed_Fpga.java                    ::          2.756  0777848348 
+2022-05-23 22:42:36  x     BlinkingLed_FpgaInOutput.java            ::           .627  0302448434 
 
 ============================== src/main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/ ===
 2022-05-23 10:18:17  x     BlinkingLedCfg_ifc.java                  ::           .550 -1838957171 
@@ -84,9 +85,9 @@
 2022-05-23 12:22:24  x     J2Vhdl_ModuleType.java                   ::          3.452 -1626902326 
 2022-05-20 17:42:15  x     J2Vhdl_Operator.java                     ::          5.312  0498757600 
 2022-05-15 23:42:59  x     J2Vhdl_Variable.java                     ::          1.936  1915599024 
-2022-05-23 19:44:48  x     Java2Vhdl.java                           ::         62.144  0936222673 
+2022-05-23 22:47:10  x     Java2Vhdl.java                           ::         62.312  2058118378 
 2022-05-20 17:32:19  x     VhdlConv.java                            ::         59.727  1327139206 
-2022-05-23 13:25:32  x     VhdlExprTerm.java                        ::         26.406 -1947146581 
+2022-05-23 23:01:12  x     VhdlExprTerm.java                        ::         26.761  0981842569 
 2022-05-01 19:36:22  x     VhdlTemplate.txt                         ::           .333 -0888383234 
 
 ============================== src/test/ ===========================================================
