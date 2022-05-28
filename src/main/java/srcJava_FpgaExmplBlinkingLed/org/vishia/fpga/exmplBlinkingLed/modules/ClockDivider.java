@@ -14,13 +14,16 @@ public class ClockDivider implements FpgaModule_ifc {
   @Fpga.VHDL_PROCESS public static final class Q{
 
     @Fpga.STDVECTOR(4) final int ct;
-
+  
     /**This is the variable of the record accessed from outside. 
      * Note: Need public because here the interface technology is not used (negative, but simple understandable pattern).
-     * Compare with {@link Reset.Q#reset}
+     * Compare with {@link Reset.Q#res}
      */
     public final boolean ce;  
-  //end::Q-data[]
+  
+    /**Time of the latest set operation of any of the variables. */
+    public int time;
+    //end::Q-data[]
     
     public Q() {
       this.ct = 0;

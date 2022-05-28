@@ -1,11 +1,11 @@
 echo =========================================================================
 echo execute  $0
-echo " ... generates the vishiaBase.jar from srcJava_vishiaBase core sources"
+echo " ... generates the vishiaVhdlConv.jar from srcJava_vishiaVhdlConv core sources"
 
 #Do not change the version on repeated build, and check the checksum and content of jar.
 #If it is equal, it is a reproduces build. The $VERSIONSTAMP is important 
 #  because it determines the timestamp and hence the checksum in the jar file. 
-export VERSIONSTAMP="2022-05-23"
+export VERSIONSTAMP="2022-05-26"
 ## Determine a dedicated vishiaBase-yyyy-mm-dd.jar or deactivate it to use the current vishiaBase.jar:
 export VERSION_VISHIABASE="XX2021-07-01"
 
@@ -36,16 +36,15 @@ fi
 export SRCZIPFILE="$DSTNAME-$VERSIONSTAMP-source.zip"
 
 # Select the location and the proper vishiaBase
+# for generation with a given timestamp of vishiaBase in the vishia file tree:
 if test -f ../../../../../../../Java/deploy/vishiaBase-$VERSION_VISHIABASE.jar
 then export JAR_vishiaBase="../../../../../../../Java/deploy/vishiaBase-VERSION_VISHIABASE.jar"
-#elif test -f ../../deploy/vishiaBase-$VERSION_VISHIABASE.jar
-#then export JAR_vishiaBase="../../../Java/deploy/vishiaBase-$VERSION_VISHIABASE.jar"
-#elif test -f ../../../Java/jars/vishiaBase.jar
-#then export JAR_vishiaBase="../../../Java/jars/vishiaBase.jar"
+#for generation in the vishia file tree:
 elif test -f ../../../../../../../Java/tools/vishiaBase.jar
 then export JAR_vishiaBase="../../../../../../../Java/tools/vishiaBase.jar"
-#elif test -f ../../../../../../../Java/libs/vishiaBase.jar
-#then export JAR_vishiaBase="../../../../../../../Java/libs/vishiaBase.jar"
+# for generation side beside: 
+elif test -f ../../jars/vishiaBase.jar
+then export JAR_vishiaBase="../../jars/vishiaBase.jar"
 else
   echo vishiaBase.jar not found, abort
   exit

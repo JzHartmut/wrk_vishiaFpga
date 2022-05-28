@@ -3,22 +3,27 @@ use IEEE.STD_LOGIC_1164.ALL;
 use ieee.numeric_std.all;
 use ieee.std_logic_unsigned.all;
 
+--tag::Port[]
 ENTITY BlinkingLed_Fpga IS
 PORT (
   clk: IN BIT;
   reset_Pin : IN BIT;
   led1 : OUT BIT;
-  led2 : OUT BIT  --last line of port definition
+  led2 : OUT BIT;
+  led3 : OUT BIT  --last line of port definition
 );
 END BlinkingLed_Fpga;
+--end::Port[]
 
 ARCHITECTURE BEHAVIORAL OF BlinkingLed_Fpga IS
 
+--tag::BlinkingLedCt_Q_REC[]
 TYPE BlinkingLedCt_Q_REC IS RECORD
   ctLow : STD_LOGIC_VECTOR(15 DOWNTO 0);
   ct : STD_LOGIC_VECTOR(7 DOWNTO 0);
   led : BIT;
 END RECORD BlinkingLedCt_Q_REC;
+--end::BlinkingLedCt_Q_REC[]
 
 --tag::ClockDivider_Q_REC[]
 TYPE ClockDivider_Q_REC IS RECORD
@@ -38,11 +43,9 @@ SIGNAL ct_Q : BlinkingLedCt_Q_REC;
 SIGNAL res_Q : Reset_Q_REC;
 --end::RecordSignals[]
 
-CONSTANT BlinkingLedCfg_onDuration_BlinkingLed : INTEGER := 10;
-CONSTANT BlinkingLedCfg_time_BlinkingLed : BIT_VECTOR(7 DOWNTO 0) := x"64";
 --tag::BlinkingLedConstants[]
-CONSTANT BlinkingLed_Fpga_onDuration_BlinkingLed : INTEGER := 100;
-CONSTANT BlinkingLed_Fpga_time_BlinkingLed : BIT_VECTOR(7 DOWNTO 0) := x"c8";
+CONSTANT BlinkingLed_Fpga_onDuration_BlinkingLed : INTEGER := 10;
+CONSTANT BlinkingLed_Fpga_time_BlinkingLed : BIT_VECTOR(7 DOWNTO 0) := x"64";
 --end::BlinkingLedConstants[]
 
 
@@ -55,14 +58,14 @@ ce_Q_PRC: PROCESS ( clk )
 BEGIN IF(clk'event AND clK='1') THEN
 
   IF ce_Q.ct <  "1001" THEN
-      ce_Q.ct <=  ce_Q.ct + 1;            -- ClockDivider.java, line:32
+      ce_Q.ct <=  ce_Q.ct + 1 ;
   ELSE
-      ce_Q.ct <=   "0000";            -- ClockDivider.java, line:34
-  END IF;            -- ClockDivider.java, line:31
-  IF ce_Q.ct =  "0000" THEN ce_Q.ce  <=  '1'; ELSE ce_Q.ce  <=  '0'; END IF;            -- ClockDivider.java, line:36
+      ce_Q.ct <=   "0000";
+  END IF;
+  IF ce_Q.ct =  "0000"  THEN ce_Q.ce  <=  '1'; ELSE ce_Q.ce  <=  '0'; END IF;
 END IF; END PROCESS;
 
-
+--tag::ct_Q_PRC[]
 --tag::ct_Q_PRC-ce[]
 ct_Q_PRC: PROCESS ( clk )
 BEGIN IF(clk'event AND clK='1') THEN
@@ -70,44 +73,44 @@ BEGIN IF(clk'event AND clK='1') THEN
   IF ce_Q.ce='1' THEN
 --end::ct_Q_PRC-ce[]  
 --tag::ct_Q_PRC-ifcUsg[]
-      IF res_Q.res='1' THEN
-          ct_Q.ct <= TO_STDLOGICVECTOR(BlinkingLed_Fpga_time_BlinkingLed);            -- BlinkingLedCt.java, line:51
+      IF (res_Q.res)='1' THEN
+          ct_Q.ct <= TO_STDLOGICVECTOR(BlinkingLed_Fpga_time_BlinkingLed);
 --end::ct_Q_PRC-ifcUsg[]
-          ct_Q.ctLow <=  x"0000";            -- BlinkingLedCt.java, line:53
       ELSE
-        IF ct_Q.ctLow(15)='1' THEN
-            ct_Q.ctLow <=  x"61a7";            -- BlinkingLedCt.java, line:56
+        IF ct_Q.ctLow(15 DOWNTO 13) =  "111"  THEN
+            ct_Q.ctLow <=  x"61a7";
             IF ct_Q.ct = x"00"  THEN
-                ct_Q.ct <= TO_STDLOGICVECTOR(BlinkingLed_Fpga_time_BlinkingLed);            -- BlinkingLedCt.java, line:58
+                ct_Q.ct <= TO_STDLOGICVECTOR(BlinkingLed_Fpga_time_BlinkingLed);
         ELSE
-                ct_Q.ct <=  ct_Q.ct - 1 ;            -- BlinkingLedCt.java, line:60
-            END IF;            -- BlinkingLedCt.java, line:57
+                ct_Q.ct <=  ct_Q.ct - 1 ;
+            END IF;
         ELSE
-            ct_Q.ctLow <=  ct_Q.ctLow - 1 ;            -- BlinkingLedCt.java, line:64
-            END IF;            -- BlinkingLedCt.java, line:56
-      END IF;            -- BlinkingLedCt.java, line:50
+            ct_Q.ctLow <=  ct_Q.ctLow - 1 ;
+        END IF;
+      END IF;
+      IF ct_Q.ct < BlinkingLed_Fpga_onDuration_BlinkingLed  THEN ct_Q.led  <=  '1'; ELSE ct_Q.led  <=  '0'; END IF;
   ELSE
-  END IF;            -- BlinkingLedCt.java, line:47
-  IF ct_Q.ct < BlinkingLed_Fpga_onDuration_BlinkingLed  THEN ct_Q.led  <=  '1'; ELSE ct_Q.led  <=  '0'; END IF;            -- BlinkingLedCt.java, line:77
+  END IF;
 END IF; END PROCESS;
-
+--end::ct_Q_PRC[]
 
 
 res_Q_PRC: PROCESS ( clk )
 BEGIN IF(clk'event AND clK='1') THEN
 
   IF reset_Pin = '0' THEN
-      res_Q.resetCount <=   "0000";            -- Reset.java, line:39
+      res_Q.resetCount <=   "0000";
   ELSE
     IF res_Q.res='1' THEN
-        res_Q.resetCount <=  res_Q.resetCount + 1;            -- Reset.java, line:42
+        res_Q.resetCount <=  res_Q.resetCount + 1 ;
     ELSE
-    END IF;            -- Reset.java, line:42
-  END IF;            -- Reset.java, line:38
-  IF res_Q.resetCount <  "1110" THEN res_Q.res  <=  '1'; ELSE res_Q.res  <=  '0'; END IF;            -- Reset.java, line:47
+    END IF;
+  END IF;
+  IF res_Q.resetCount <  "1110"  THEN res_Q.res  <=  '1'; ELSE res_Q.res  <=  '0'; END IF;
 END IF; END PROCESS;
 
-led1  <=  '1' WHEN ct_Q.ct(2 DOWNTO 0) =  "000"  ELSE '0';            -- BlinkingLed_Fpga.java, line:105
-led2 <=  ct_Q.led;            -- BlinkingLed_Fpga.java, line:106
+led1 <=  ct_Q.led;
+led2  <=  '1' WHEN  (ct_Q.ct(2 DOWNTO 0) =  "000" )  ELSE '0';
+led3  <=  '1' WHEN ct_Q.ct(2 DOWNTO 0) /=  "000"  ELSE '0';
 
 END BEHAVIORAL;

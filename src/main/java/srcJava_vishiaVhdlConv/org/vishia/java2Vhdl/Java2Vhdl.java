@@ -791,71 +791,73 @@ public class Java2Vhdl {
     Iterable<JavaSrc.MethodDefinition> iter = zclassC.get_methodDefinition();
     if(iter !=null) for(JavaSrc.MethodDefinition oper: iter ) {
       String nameOper = oper.get_name();
-      if(nameOper.equals("ct"))
-        Debugutil.stop();
-      JavaSrc.ModifierMethod modif = oper.get_ModifierMethod();
-      String sAnnot = modif == null ? null: modif.get_Annotation();
-      String name = oper.get_name();
-      String a_Override = modif == null ? null : modif.get_A_Override();
-      if(a_Override ==null) {
-        a_Override = oper.get_A_Override();  //TODO yet problem in syntax, do not quest @Override outside of the modifier.
-        if(a_Override !=null)
+      if(! nameOper.equals("time")) {                      // ignore operation time(), it is not for VHDL output.
+        if(nameOper.equals("ct"))
           Debugutil.stop();
-      }
-      //String sAnnotation = modif == null ? null :modif.get_Annotation();       // only search for interface implementig operations
-      if( a_Override !=null /*&& sAnnotation.startsWith("@Override") */  
-          && !name.equals("step")                          // but not from the FpgaModule_ifc
-          && !name.equals("update") 
-        || sAnnot !=null 
-          && sAnnot.equals("Fpga.GetterVhdl")
-        ) {          
-        for(JavaSrc.Statement stmnt: oper.get_methodbody().get_statement()) {
-          if(stmnt.get_returnStmnt() !=null) {             // return expr found
-            J2Vhdl_ConstDef constDef = null;
-            JavaSrc.Expression expr = stmnt.get_Expression(); 
-            if(expr.getSize_ExprPart() ==1) {
-              JavaSrc.ExprPart exprPart = expr.get_ExprPart().iterator().next(); //first part
-              JavaSrc.SimpleValue val = exprPart.get_value();
-              if(val !=null) {
-                JavaSrc.ConstNumber constVal = val.get_constNumber();
-                if(constVal !=null) {                      // a constant returned from interface
-                  String nameVhdl = moduleType.nameType + "_" + name;
-                  constDef = createConst(nameVhdl, nameVhdl, expr);
-                  expr = null;  //no more necessary.
-            } } }
-            String sIfcOpName = (sAccess == null ? "" : sAccess + ".") + name;
-            mdlTypeIdx.idxIfcExpr.put(sIfcOpName, new J2Vhdl_ModuleType.IfcConstExpr(expr, constDef));
-
-            
-//            
-//            JavaSrc.ExprPart exprPart = expr.get_ExprPart().iterator().next(); //first part
-//            JavaSrc.SimpleValue val = exprPart.get_value();
-//            JavaSrc.Reference ref = val.get_reference();   // return processInstance. normally variable inside a process class
-//            while(ref !=null) {
-//              JavaSrc.SimpleVariable refVar = ref.get_referenceAssociation();
-//              String sRefVar = refVar == null? null : refVar.get_variableName();  // other than a variable in the reference is not expected.
-//              if(sRefVar !=null && !sRefVar.equals("this") && !sRefVar.equals("ref")) {
-//                sbAccess.append(".").append(sRefVar);      // this.ref. is ignroed
-//              }
-//              ref = ref.get_reference();                   // next member in reference
-//            }
-//            JavaSrc.SimpleVariable var = val.get_simpleVariable();
-//            if(var !=null) {                               // access to variable in a process data class, usual case
-//              sbAccess.append('.').append(var.get_variableName());
-//            } else {
-//              JavaSrc.SimpleMethodCall ifcOper = val.get_simpleMethodCall();
-//              if(ifcOper !=null) {                         // this is an access to another interface, resolve later.
-//                sbAccess.append('.').append(ifcOper.get_methodName()).append("()");
-//              } else {
-//                JavaSrc.ConstNumber constVal = val.get_constNumber();
-//                if(constVal !=null) {                      // a constant returned from interface
-//                  String nameVhdl = moduleType.nameType + "_" + name;
-//                  //String javaPath = name + "()";
-//                  createConst(nameVhdl, nameVhdl, expr);
-//                  sbAccess.append("#").append(nameVhdl);
-//              } }
-//            }
-//            moduleType.idxIfcOperation.put(name, sbAccess.toString());
+        JavaSrc.ModifierMethod modif = oper.get_ModifierMethod();
+        String sAnnot = modif == null ? null: modif.get_Annotation();
+        String name = oper.get_name();
+        String a_Override = modif == null ? null : modif.get_A_Override();
+        if(a_Override ==null) {
+          a_Override = oper.get_A_Override();  //TODO yet problem in syntax, do not quest @Override outside of the modifier.
+          if(a_Override !=null)
+            Debugutil.stop();
+        }
+        //String sAnnotation = modif == null ? null :modif.get_Annotation();       // only search for interface implementig operations
+        if( a_Override !=null /*&& sAnnotation.startsWith("@Override") */  
+            && !name.equals("step")                          // but not from the FpgaModule_ifc
+            && !name.equals("update") 
+          || sAnnot !=null 
+            && sAnnot.equals("Fpga.GetterVhdl")
+          ) {          
+          for(JavaSrc.Statement stmnt: oper.get_methodbody().get_statement()) {
+            if(stmnt.get_returnStmnt() !=null) {             // return expr found
+              J2Vhdl_ConstDef constDef = null;
+              JavaSrc.Expression expr = stmnt.get_Expression(); 
+              if(expr.getSize_ExprPart() ==1) {
+                JavaSrc.ExprPart exprPart = expr.get_ExprPart().iterator().next(); //first part
+                JavaSrc.SimpleValue val = exprPart.get_value();
+                if(val !=null) {
+                  JavaSrc.ConstNumber constVal = val.get_constNumber();
+                  if(constVal !=null) {                      // a constant returned from interface
+                    String nameVhdl = moduleType.nameType + "_" + name;
+                    constDef = createConst(nameVhdl, nameVhdl, expr);
+                    expr = null;  //no more necessary.
+              } } }
+              String sIfcOpName = (sAccess == null ? "" : sAccess + ".") + name;
+              mdlTypeIdx.idxIfcExpr.put(sIfcOpName, new J2Vhdl_ModuleType.IfcConstExpr(expr, constDef));
+  
+              
+  //            
+  //            JavaSrc.ExprPart exprPart = expr.get_ExprPart().iterator().next(); //first part
+  //            JavaSrc.SimpleValue val = exprPart.get_value();
+  //            JavaSrc.Reference ref = val.get_reference();   // return processInstance. normally variable inside a process class
+  //            while(ref !=null) {
+  //              JavaSrc.SimpleVariable refVar = ref.get_referenceAssociation();
+  //              String sRefVar = refVar == null? null : refVar.get_variableName();  // other than a variable in the reference is not expected.
+  //              if(sRefVar !=null && !sRefVar.equals("this") && !sRefVar.equals("ref")) {
+  //                sbAccess.append(".").append(sRefVar);      // this.ref. is ignroed
+  //              }
+  //              ref = ref.get_reference();                   // next member in reference
+  //            }
+  //            JavaSrc.SimpleVariable var = val.get_simpleVariable();
+  //            if(var !=null) {                               // access to variable in a process data class, usual case
+  //              sbAccess.append('.').append(var.get_variableName());
+  //            } else {
+  //              JavaSrc.SimpleMethodCall ifcOper = val.get_simpleMethodCall();
+  //              if(ifcOper !=null) {                         // this is an access to another interface, resolve later.
+  //                sbAccess.append('.').append(ifcOper.get_methodName()).append("()");
+  //              } else {
+  //                JavaSrc.ConstNumber constVal = val.get_constNumber();
+  //                if(constVal !=null) {                      // a constant returned from interface
+  //                  String nameVhdl = moduleType.nameType + "_" + name;
+  //                  //String javaPath = name + "()";
+  //                  createConst(nameVhdl, nameVhdl, expr);
+  //                  sbAccess.append("#").append(nameVhdl);
+  //              } }
+  //            }
+  //            moduleType.idxIfcOperation.put(name, sbAccess.toString());
+            }
           }
         }
       }

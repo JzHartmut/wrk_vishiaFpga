@@ -13,15 +13,19 @@
 
 See also:
 
-link:Java2Vhdl_Approaches.html[] - Basically information about the concept
+* link:Java2Vhdl_Approaches.html[] - Basically information about the concept
 
-link:Java2Vhdl_StyleGuide.html[] - How to work with Java for Fpga logic
+* link:../../deploy/Example1_BlinkingLed-2022-05-26.zip[] A zip file containing an example and link to the tool base.  
 
-link:VhdlConv.html[] internal docu how does it work
+//link:Java2Vhdl_StyleGuide.html[] - How to work with Java for Fpga logic
 
-link:../../../spe/html/SpeA-FPGA/SpeA-JavaFPGA.html[] This is the description of a FPGA design for SinglePairEthernet PHY layer. Work in progress.
+//link:VhdlConv.html[] internal docu how does it work
 
-link:../../../spe/html/SpeA-FPGA/SpeA-FPGA.html[] The older description based on only VHDL and Aldec-HDL simulation tool using.
+The next links describe a specific application where this approach is used:
+
+* link:../../../spe/html/SpeA-FPGA/SpeA-JavaFPGA.html[] This is the description of a FPGA design for SinglePairEthernet PHY layer. Work in progress.
+
+* link:../../../spe/html/SpeA-FPGA/SpeA-FPGA.html[] The older description based on only VHDL and Aldec-HDL simulation tool using.
 Comparing both descriptions you can also see advantages in the documentation of the behavior of the FPGA.
 
 This is a preliminary information. The tool Java2Vhdl translator is in progress.
@@ -32,7 +36,7 @@ This document describes the tools for translation Java to VHDL, test at Java lev
 
 == Working tree organization for sources and tools
 
-There is an example given as zip downloadable: link:Example1_BlinkingLed.zip[].
+Look in the given example `Example1_BlinkingLed.zip`.
 The content of this file may be but need not be the template for the file tree organization. 
 
 Generally the idea of the link:../../../SwEng/html/srcFileTree.html[SwEng/srcFileTree.html] is used, a file tree similar as the familiar used maven or gradle file tree, whereas maven or gradle itself is not used here.
@@ -308,15 +312,442 @@ link:Java2Vhdl_Approaches.html[]
 
 This chapter describes it from the view of the template for your own.
 
-=== The top level java file
+[#toplevel]
+=== The top level FPGA java file
 
+All following code snippets comes from the `main/java/srcJava_FpgaExmpl.../fpgatop/BlinkingLed_Fpga.java`.
+
+[#topclass]
+==== Package and class definition, import
+
+In Java always the name and path of the file itself should match to the package declaration and name of the only one `public` class inside the file:
+The Java file starts with the package declaration. The package names and also the appropriate directories on the file system 
+must be written starting with a lower case character.
+
+.Java: top level class definition
+[source,Java]
 ----
 include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_Fpga.java[tag=theClassDef]
 ----
 
+The `import` statements name all used classes from other packages. It is possible to use an asterisk to select all Files in the package. 
+But then the dependencies are not well documented. In this case anyway all files in the 'exmplBlinkingLed.modules' package should be part of,
+then it is ok.
+
+The module class should implement the `FpgaModule_ifc`. That is all necessary. This interface defines:
+
+.Java: FpgaModule_ifc definition as basic interface
+[source,Java]
+----
+include::../../../main/java/srcJava_vishiaFpga/org/vishia/fpga/FpgaModule_ifc.java[tag=classhead]
+include::../../../main/java/srcJava_vishiaFpga/org/vishia/fpga/FpgaModule_ifc.java[tag=body]
+----
 
 
 
+[#topModules]
+==== The modules in the top level 
+
+The class definition continues with the 
+
+.Java: used modules in the top level
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_Fpga.java[tag=Modules]
+----
+
+The modules are aggregated together as described in link:Java2Vhdl_Approaches.html#aggr[Java2Vhdl Approaches, chapter More possibilities with Java2VHDL: References (aggregations) in Object Orientation kind].
+
+Because you can generate a __Javadoc__ it is recommended to comment all modules in the given style (here not all are commented). 
+But also a non commented style is sufficient because you can use cross referencing in the IDE.
+
+The modules should be connected immediately here, either on instantiation with a parameterized constructor, or with the `init(...)` operation
+in the constructor of modules. It depends on circular referencing whether the immediately referenced instantiation can be done. 
+That is more simple. But using `init(...)` has more flexibility. 
+
+Firstly in this class the `ioPins` are defined. This is done in an extra class, see next chapter. 
+
+The writing style with the explicitly `this` is recommended. `this` is also implicitly accept (can be omitted), but then the relations are worse documented. 
+The `BlinkingLed_Fpga.this` writing style is necessary for the translator. 
+`BlinkingLed_Fpga.this` is the reference to the environment class. Java can automatically detect this relation, 
+it checks whether the following identifier is able to find either locally, or in the own class, or in all environment classes.
+This is more error prone because of confusion in identifier usage. 
+Hence the dedicated writing style `EnvironmentClass.this` prevents the confusion. For the Java2Vhdl translator it is also more simple. 
+
+[#topstep]
+==== step(...) and update() operations
+
+Following the both routines are defined:
+
+.Java: top level class step update
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_Fpga.java[tag=step_update]
+----
+
+See also link:Java2Vhdl_Approaches.html#stepupd[]
+
+Both routines should call all `step(time)` and `update()` of all sub modules. The `time` comes from the simulation environment
+useble for time checking, see link:Java2Vhdl_Approaches.html#timeCnstrn[] and for signal output, see link:Java2Vhdl_Approaches.html#testOutp[].
+
+[#topifcacc]
+==== interface agents in the top level
+
+The so named __**interface agents**__ are anonymous class definitions as interface implementation to access data in this module.
+They are usable for referencing. 
+
+.Java: top level class interface agent/access
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_Fpga.java[tag=time_BlinkingLed_ifcAccess]
+----
+
+In the top level they should be used either for stubs instead not implemented modules, for test designs or variations,
+but also for parameter of modules which should be determined in the top level. This is shown above. 
+The interface access implements a `...Cfg...` interface for configuration parameters. 
+It is used as reference for the [J]`ct(..., BlinkingLed_Fpga.this.blinkingLedCfg,...` module, see chapter <<#topModules>>
+
+
+[#toptest]
+==== test output in the top level
+
+The top level does not need test output if it has no own PROCESS sub classes.  
+
+
+
+[#ioPins]
+=== The FPGA pin description file
+
+It is a good idea to separate the Pin description source file from the top level file,
+because it is a possible use case that different inner FPGA designs are used with the same pinning. 
+This is typical if you have a hardware board with a given layout, but the content of the FPGA should be varied.
+Then you need define the pinning only one time for the given layout.
+
+Furthermore it is also possible to have more as one top level FPGA file for different parts,
+but you should have only one file for the pinning, because this is board layout related.
+
+==== How to designate the ioPins file
+
+The pin description file should be designated as [J]`ioPins` in the [J]`Modules` class of a top level:
+
+.Java: ioPins definition in the top level
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_Fpga.java[tag=ioPins]
+----
+
+The designated class file is searched and translated especially for IO pinning. 
+
+ 
+
+The ioPins file starts due to Java conventions with
+
+.Java: BlinkingLed_FpgaInOutput class definition head
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_FpgaInOutput.java[tag=classdef]
+----
+
+==== Input and Output inner classes
+
+For this example the pin classes are short, for more pins it is a little bit more, very simple:
+
+.Java: BlinkingLed_FpgaInOutput Input and Output
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_FpgaInOutput.java[tag=InOutput]
+----
+
+If the same pin should be used both as input and output, then the same pin name should be defined in the [J]`Input` and in the [J]`Output` inner class.
+
+If a pin should have tristate character (often necessary on input/output switch), it should be designated as [J]`char` type
+and set with [J]`'0'`, [J]`'1'` and [J]`'Z'`. (TODO for the 2022-05 version).
+
+==== Interface access to the pins
+
+For that the link:Java2Vhdl_Approaches.html#IfcAccess[] should be used, of course. 
+For specific pins a specific interface also with more as one bit can be used. For common ordinary pins the 
+
+.Java: Bit_ifc
+[source,Java]
+----
+include::../../../main/java/srcJava_vishiaFpga/org/vishia/fpga/stdmodules/Bit_ifc.java[]
+----
+
+can be used. 
+
+In this example only the access to the only one [J]`reset_Pin` is necessary
+
+.Java: BlinkingLed_FpgaInOutput Input and Output
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_FpgaInOutput.java[tag=ifcAccess]
+----
+
+This uses the [J]`Reset_Inpin_ifc` as used in the accessing module `org.vishia.fpga.stdmodules.Reset`, 
+see the [J]`Modules` definition in the top level file.
+
+The output pins are written immediately in the [J]`update()` operation on the top level:
+
+.Java: top level class using interface implementation and simple access operation for output
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_Fpga.java[tag=outPins]
+----
+
+Hence this variables are [J]`public`. The input variables are also [J]`public` because they may be accessed by simple assignments too
+depending on the top level design. 
+
+
+[#mdllevel]
+=== A module file
+
+All following code snippets comes from the 
+`main/java/srcJava_FpgaExmpl...../modules/BlinkingLedCt.java`.
+
+[#mdlclass]
+==== Package and class definition, import and module interface
+
+The principles in Java are already explained in <<#topclass>.
+
+.Java: module class definition
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/BlinkingLedCt.java[tag=theClassDef]
+----
+
+Here the advantage of dependency documentation of the `import` statements are shown. 
+In opposite to {cp} programming where the dependencies are documented with included headers, the used modules are immediately obviously.
+In {cp} maybe hidden dependencies may be existing because an header can include other headers, 
+and the association between header and implementation files is weak. 
+In Java it is strong, clarified and obviously.
+
+You see that external dependencies exists to one of standard modules, to test utils and to a special class for String preparation, 
+which is used for test output. 
+
+The module class implements the `BlinkingLed_ifc` which is a module interface, see 
+link:Java2Vhdl_Approaches.html#IfcModule[], the implementation is shown in the chapter <<#mdlifcimpl>> 
+
+[#mdlAggr]
+==== The references and sub modules of the module 
+
+The class definition continues with the 
+
+.Java: module class references
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/BlinkingLedCt.java[tag=Ref]
+----
+
+The meaning and the writing style of the references is also explained in link:Java2Vhdl_Approaches.html#aggr[].
+
+Also there is explained how the references are set. It is the same example.
+
+A module can also have sub modules to build a deeper tree of modules. It is adequate to the top level.
+(TODO 2022-05 not tested, should work)
+
+[#mdlPrc]
+==== PROCESS inner classes in a module
+
+The following code snippet shows one PROCESS as a whole. 
+
+.Java: module PROCESS class and instances
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/BlinkingLedCt.java[tag=Prc]
+----
+
+This is the core functionality for VHDL and hence explained elaborately:
+
+* The sub class should be marked with the [J]`@Fpga.VHDL_PROCESS` annotation to detect as such from the Java2Vhdl translator.
+* Variables in the sub class are generated in a type record with the class name:
+
+----
+include::../../../test/testResult_Ref/Java2Vhdl/BlinkingLed_Fpga.vhd[tag=BlinkingLedCt_Q_REC]
+----
+
+* Variables started with [J]`time` are ignored for VHDL conversion, there are for timing test on Java level.
+* `SIGNAL` definitions in VHDL with the `TYPE RECORD` (instances for this `RECORD`) are not created 
+because of the module PROCESS class definitions.
+Instead, they are defined only if the module class is used, and then with the module(s) name(s). 
+It is possible to have a module more as one time, then also more SIGNAL ... RECORD variable are defined. 
+Here for the usage in the `fpgatop/BlinkingLed_Fpga.java`:
+
+.Java: top level part of Modules definition:
+[source,Java]
+----
+  public class Modules {
+    .... 
+    public final BlinkingLedCt ct = new BlinkingLedCt(....
+----
+
+.Vhdl: SIGNAL definition for this PROCESS of a module:
+[source,Vhdl]
+----
+include::../../../test/testResult_Ref/Java2Vhdl/BlinkingLed_Fpga.vhd[tag=RecordSignals]
+----
+
+* You can see in the mid of this three signals the module name [J]`ct` from the module definition in [J]`Modules`
+combined with the name of the Process [J]`Q`. If you have more PROCESS classes in a module, of course you have more TYPE RECORD definitions
+and also more appropriate SIGNAL definitions. 
+
+* The constructor [J]`Q() {...}` is only for Java test. 
+It is (should be) related to the reset behavior of the FPGA: Signals are reset to 0-level.
+A specific reset behavior is not provided. It is also not full clarified in VHDL, depends on FPGA types.
+The 0-initialization is anyway applicable. For specific reset behavior the following process should use a reset signal functionality.
+
+* The constructor [J]`@Fpga.VHDL_PROCESS Q(Q z, Ref ref) { ...` now describes the process for VHDL translation and also for simulation.
+It should/could have the following arguments with fixed naming conventions:
+
+** [J]`int time` reference to a time value used for timing test in Java, not used for VHDL 
+** [J]`z` of the same type: It is the previous state for calculation, comes from the current state in step.
+** [J]`ref` reference to the [J]`Ref` class of this module, to access referenced modules.
+** [J]`mdl` reference to the whole module class (set with [J]`this` on call, see next chapter).
+** [J]`in` reference of a [J]`Input` class of the module for a simple wiring without references.
+** [J]`out` reference to an [J]`Output` class of this module, more exact to the `_d` instance (prepared values). 
+This allows the simple wiring and [J]`public` access in Java.  
+
+* The PROCESS inner class is `private`, should be used only in this module and not accessed from outside. 
+The elements are __package private__ (without designation in Java). 
+It can be accessed anyway only in this module because of the `private` nature of the class. 
+
+* The content of this constructor is immediately translated to the VHDL PROCESS. To see it for this example look on the translated code:
+
+.Vhdl: PROCESS due to the BlinkingLedCt.Q constructor:
+[source,Vhdl]
+----
+include::../../../test/testResult_Ref/Java2Vhdl/BlinkingLed_Fpga.vhd[tag=ct_Q_PRC]
+----
+
+** Variable with [J]`time...` are ignored for VHDL, they are for timing checks in Java.
+** Variable which are set with the same [J]`z.` variable are ignored for VHDL because this is the standard behavior for VHDL:
+Not assigned variables preserve there values. But that assigments are necessary for Java.
+** Because all variables should be [J]`final` a complete unique assignment of all variables is necessary for Java. 
+This helps preventing errors on forgotten not clarified functionality:
+** Because you should write [J]`this.var = z.var;` in Java
+it is clarified in the Java source that this is an unchanged value. 
+The place and route for the FPGA can use either the own Q output of the FF for the logic, or can work with the CE (clock enable) input
+for the FF groups.
+** You cannot forget variables, because Java checks setting of all [J]`final` variables.
+** Tip for writing sources with final variables: You can firstly remove all [J]`final` keywords, set it one after another. 
+Then the error messages for missing final are obviously step by step. You can set an assignment [J]`this.var = z.var;`
+in all branches, then set the variable to [J]`final`, 
+then you get an error message on this positions where the variable is defined twice. 
+Remove it and think about correct assignments due to the requested logic. At least you have all variables [J]`final` and no errors. 
+** If you use already assigned [J]`this.` variables on the right side for an assignment, this would be the value of the D-input of an FF.
+VHDL suggests using an internal variable for that. In the moment (2022-05) this is not regarded, but can be implemented in the Java2Vhdl translator.
+ 
+How statements and expressions are translated, see link:Java2Vhdl_TranslatorInternals.html[].
+
+* At last in the Java example with [J]`private Q q = new Q();` and [J]`private Q q_d;` two references for instances are defined.
+** The [J]`q` reference must have the same name as the PROCESS class, only start with a lower case character. Here it is only one character.
+This reference is used to access to the RECORD instances in VHDL both on [J]`public` immediately definition of this reference (possible)
+and also for interface accesses. 
+** In this example the reference [J]`q` is [J]`private`. 
+This means that you can be sure that there is no direct access from outside, both for the Java source level and for the VHDL record type.
+** The [J]`_d` instance is not used for translation and should only accessed in the [J]`step(time)` and [J]`update()` operations.
+It holds the prepared D-input values of the FlipFlops. It should be anytime [J]`private`
+** Note that Java knows for class instances only references (other than in {cp}). All is a reference. The instances are organized in the heap.
+
+
+
+[#mdlStep]
+==== step(...) and update() operations
+
+The step and update in a module should call the process execution. 
+It is not used for the VHDL translation, but for the test.
+
+.Java: module class step and update
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/BlinkingLedCt.java[tag=step_update]
+----
+
+See also link:Java2Vhdl_Approaches.html#stepupd[]
+
+You see here how does it work:
+
+* [J]`step(time)` creates new instances of all process variables with new combinatoric values and stores it in the [J]`private ..._d` instance.
+Therefore, it is blocked for third-party access. Other modules should use only the Q-state of the FlipFlops to preserve the exact timing.
+All [J]`step(time)` routines of all modules are executed firstly before [J]`update()`
+
+* [J]`update()` stores all prepared D-values in the real used instances for all immediately and interface accesses. 
+
+It means, any step in Java creates a new instance. The instance is allocated in the heap. If you have 120000000 steps for the BlinkingLed example,
+the Java simulation creates 120000000 instance of any PROCESS class type for any used module. 
+The simulation runs on a Notebook with normal modern equipment approximately 5 seconds, no more. 
+It needs approximately 0.3 GByte RAM (measured with the Task Manager on Windows-10). It means Java can proper deal with this request.
+
+If sub modules are present, of course this should be also called here. 
+
+[#mdlifcimpl]
+==== interface implementation of the module
+
+The next code snippet shows two accesses:
+
+.Java: module class interface implementation and simple access operation
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/BlinkingLedCt.java[tag=mdlifcimpl]
+----
+
+The first operation with the annotation [J]`@Override` overrides the declaration in the [J]`BlinkingLed_ifc`, see chapter <<mdlclass>>.
+It is used on the top level of the FPGA for the outputs in the `update()` operation of the top level in the first line, see code snippet below.
+  
+
+The second operation with the annotation [J]`@Fpga.GetterVhdl` is an access operation without an interface. 
+It means it cannot be used as univeral access, only for this module. 
+Hence it is not proper for an input reference of another module, because then another implementation and therefore access via an interface is necessary.
+But this operation is usable both for specific test outputs on the FPGA and to build output values only for the module specific implementation.
+It is used on the top level of the FPGA for the outputs in the [J]`update()` operation of the top level in the last line:
+
+.Java: top level class using interface implementation and simple access operation for output
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_Fpga.java[tag=outPins]
+----
+
+
+
+[#mdlifcacc]
+==== interface agents or access in a module
+
+The so named __**interface agents**__ are anonymous class definitions as interface implementation to access data in this module.
+They are usable for referencing. 
+
+.Java: module class interface agents/access
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/BlinkingLedCt.java[tag=mdlifcacc]
+----
+
+See the example in the top level, chapter <<#topifcacc>>
+In this case the interface access is used for the output, see the last code snippet in the chapter above: 'top level class using interface implementation and simple access operation for output'.
+
+The implementation accesses the [J]`ct` variable in the [J]`q` instance of the module class. 
+The writing style [J]`BlinkingLedCt.this.` means in Java the access to the (named) environment class.
+For debugging this reference is shown as `this$0` whereas `this$1` etc. are higher level environment classes. 
+In Java this can be omitted, but then it is lesser obviously. For the Java2Vhdl translator it is (yet 2022-05) necessary to write.
+
+[#mdltest]
+==== test output
+
+The module source.java is continued with 
+
+TestSignalRecorderHead
+
+.Java: module class TestSignalRecorder class definition
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/BlinkingLedCt.java[tag=TestSignalRecorderHead]
+    ....
+  }
+----
+
+This class is not used for the VHDL generation, but used for test. It is explained in the next main chapter. 
+
+ 
+[#JavaSrcTest]
 == The example Blinking LED, view to Java sources in respect to test on Java level
 
 If you want to separate test files (with a lot of complicated test cases) from the sources, 
@@ -330,5 +761,24 @@ src
          +-package/path/your/component         This should be your own package path for other projects
             +-test/*.java                      only for test on Java level.
 ----
+
+But for this simple example the test class is part of the same Java source tree:
+
+----
+src
+ +-main
+   +-java
+      +-srcJava_FpgaExmplBlinkingLed
+         +-org/vishia/fpga/exmplBlinkingLed
+                            +-test/*,java    only for test on Java level
+----
+
+The test classes offers test cases/pattern and checks. 
+
+The source code of the modules offers Test output signal generation functionality which are universal usable for the tests.
+
+=== The main test source
+
+Look firstly to that `org/vishia/fpga/exmplBlinkingLed/test/Test_BlinkingLed.java` which contains the [J]`main` start routine:
 
 

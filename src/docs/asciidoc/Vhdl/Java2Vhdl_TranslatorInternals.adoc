@@ -42,7 +42,7 @@ That is as statement (can be an assignment) or also as condition in `if`.
 
 ----
 //In source: main/java/srcJava_vishiaBase/org/vishia/fpga/VhdlConv.java
-include::../../../main/java/srcJava_vishiaBase/org/vishia/fpga/VhdlConv.java[tag=genExpressionHead]
+include::../../../main/java/srcJava_vishiaVhdlConv/org/vishia/java2Vhdl/VhdlConv.java[tag=genExpressionHead]
 ----
 
 With the last shown `for` the `ExprPart` from the expression are processed in order of the RPN. 
@@ -51,7 +51,7 @@ But the operations are sorted to stack operations and active operations.
 
 ----
 //In source: main/java/srcJava_vishiaBase/org/vishia/fpga/VhdlConv.java
-include::../../../main/java/srcJava_vishiaBase/org/vishia/fpga/VhdlConv.java[tag=genExpressionParts]
+include::../../../main/java/srcJava_vishiaVhdlConv/org/vishia/java2Vhdl/VhdlConv.java[tag=genExpressionParts]
 ----
 
 * If one `ExprPart` is a start of a new term, then the current content is pushed into a Stack for further usage.

@@ -15,4 +15,7 @@ public interface BlinkingLedCfg_ifc {
 
   /**Returns the duration for on in 100 ms unit, max, 15, should be less than time. */
   int onDuration_BlinkingLed ( );
+  
+  /**Returns the time for the simulation when all called values were last set. */
+  int time();
 }

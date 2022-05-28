@@ -13,9 +13,15 @@
 
 See also:
 
-link:Java2Vhdl_StyleGuide.html[] How to work with Java for Fpga logic
+* link:Java2Vhdl_ToolsAndExample.html[]
 
-link:VhdlConv.html[] internal docu how does it work
+* link:../../deploy/Example1_BlinkingLed-2022-05-26.zip[] A zip file containing an example and link to the tool base.  
+
+//link:Java2Vhdl_StyleGuide.html[] How to work with Java for Fpga logic
+
+//link:VhdlConv.html[] internal docu how does it work
+
+The next links describe a specific application where this approach is used:
 
 link:../../../spe/html/SpeA-FPGA/SpeA-JavaFPGA.html[] This is the description of a FPGA design for SinglePairEthernet PHY layer. Work in progress.
 
@@ -29,7 +35,7 @@ This is a preliminary information. The tool Java2Vhdl translator is in progress.
 VHDL was originally created in the 1980^th^ for timing simulations of the behavior of ASICs
 See link:https://en.wikipedia.org/wiki/VHDL[]:
 __In 1983, VHDL was originally developed at the behest of the U.S. Department of Defense 
-in order to document the behavior of the ASICs that supplier companies were including in equipment.__
+in order to document the behavior of the ASICs that supplier companies were including in equipment.__ ... (requested on 2022-05-25)
 
 As a second approach it was later used to determine the content of FPGAs (input for routing).
 
@@ -311,7 +317,7 @@ and this signal should have the less constrain for delay.
 * VHDL distinguishes between the `BIT` type which has two states '1' and '0' (similar as boolean in Java)
 and adequate also for the `STD_LOGIC` type which may have also only the both values '1' and '0' if no more is used
 on the one hand ...
-* And on the other hand VHDL knows a boolean type which is stronly used in `IF THEN` statements. 
+* And on the other hand VHDL knows a boolean type which is strongly used in `IF THEN` statements. 
 
 There is no automatic conversion between both. 
 
@@ -502,10 +508,16 @@ The modularity of VHDL is classic, it is a dataflow approach:
 * This definition part should be repeated on usage as **__COMPONENT__** definition with the same content (a disadvantage, In C header files for that are used).
 * On usage secondly in a **__PORT MAP__** signals should be connected. The connection of two modules needs extra signals. 
 
+image:../../img/ifc/CardsPluggedCable.png[float="right"]
 For that the writing and maintain effort is high. 
 This is especially a problem on refactoring. 
 The importance of refactoring in modern software technology is some more higher as in the 1980^th^,
 related with the topics agile program development, complexity of solutions. 
+
+The image right side is only an illustration. It shows how two cards with simple plugs can be connected in a simple way. 
+You are responsible to all by yourself, and you can do what ever you want, in this example have a resistor in the line.
+This is similar as wiring of modules in VHDL. You need an effort, but you can insert your own logic on module plugging level
+between the modules. 
 
 For hardware description in Java a similar approach is possible using an `In` and `Out` inner class for the input and output signals. 
 This is necessary if one module should translated as one module to VHDL. 
@@ -513,12 +525,7 @@ This is necessary if one module should translated as one module to VHDL.
 [#aggr]
 === More possibilities with Java2VHDL: References (aggregations) in Object Orientation kind
 
-The following example code snippet come from a small project in
-
- cmpnJava_vishiaBase/src/test/java/org/vishia/
-   fpga/exmpl/fpgatop/BlinkingLed_Fpga.java
- 
-and there used modules in this package tree.  
+The following example code snippet comes from the example project in the linked zip file on start of this document:
 
 The modules in Java can be implemented in a __flattend__ form in VHDL. 
 Then each inner class from one Java file (module) is one `TYPE RECORD` definition in VHDL. 
@@ -567,7 +574,8 @@ But instead, the Java sources can work with aggregations. The adequate line in J
 include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/BlinkingLedCt.java[tag=Q-Process-ce]
 ----
  
-* In Java the access is not done immediately to the variable in the other class. Instead a `ref` is used.
+* In Java the access is not done immediately to the variable in the other class. Instead a reference `ref.clkDiv` is used.
+* Whereby `ref` is a module specific instance which holds all references, `clkDiv` is the reference to the other module.
 * The name after `ref.clkDiv` is not related to Vhdl. It is a local name in the module class in Java, 
 not related to the really used instance. 
 * This is due to modularity. A module should not know which concrete instance of another module is used.
@@ -591,11 +599,12 @@ This is per se unknown, not determined which modules **and also which type of mo
 The constructor of the `Ref` have to be called in the constructor of the module, because `ref` is `final`:
 
 
-.Java: constructor for the Ref class
+.Java: constructor and init operation for the Ref class
 [source,Java]
 ----
 //fpga/exmpl/modules/BlinkingLedCt.java
 include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/BlinkingLedCt.java[tag=ctor]
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/BlinkingLedCt.java[tag=init]
 ----
 
 Here it is important that the name of the arguments in the constructor is the same as the name of the aggregation reference
@@ -636,9 +645,9 @@ to assign the `clkDiv` in Java with `ce` as name of the RECORD instance in VHDL.
 
 How is this index built:
 
-* The name of the instance in Java given as actual argument of the constructor `BlinkingLedCt` as `this.ce`.
+* The name of the instance in Java given as **actual argument** of the constructor respectively the `init(...)` operation `BlinkingLedCt` as `this.ce`.
 `this.` is only for Java internals, `ce` is used.
-* The name of the formal argument of the constructor of `BlinkingLedCt` is `clkDiv`. It is also gathered.  
+* The name of the **formal argument** of the constructor or `init(...)` of `BlinkingLedCt` is `clkDiv`. It is also gathered.  
 * This both names are stored in the index shown above. 
 * The name of the actual argument of the `Ref` constructor and also the name of the reference itself should be the same: `clkDiv`.
 This is necessary as style guide. It should not be a problem. 
@@ -655,6 +664,8 @@ That is necessary for flexibility in module usage (which combination) and also f
 
 There is one more approach: using interface technology.
 
+==== Basics of interface technology
+
 In the chapter above it is able to associate, which module is used. 
 But the access inside the module is inflexible. 
 The variable name of the module is immediately used, in the example `q.ce`.
@@ -668,6 +679,8 @@ That is also the basic idea of **private** encapsulation in the Object Orientati
 This idea is the abstraction and inheritance in Object Orientation. 
 It is like in daily life. You need a car to drive. Which car is not important. 
 All cars are basically similar, there are exactly equal in the required properties.  
+* The last point is also for test: You can replace a module with a test bed emulation of the original module
+to make an independent module or unit test. The test bed replacement has another inner structure.
 
 Look to another part of the example: 
 
@@ -713,11 +726,16 @@ the reload value can for example come from another Signal vector as for example
 ----
 
 
-==== How should the interface technology be used 
+==== References with interface type 
 
-The invocation of the interface relation uses the referenced modules [J]`ref.reset` and [J]`ref.cfg` for this both values. 
+Explained from hardware view: A simple signal or variable in Java with a dedicated type, `BIT` or `STD_LOGIC_VECTOR` or such in VHDL
+or [J]`boolean` or [J]`int` in Java is like a cable with a standard plug, which's properties are general defined, not specialized.
+Whereas an interface is a cable with a plug of a certain design which can only be plugged into the corresponding counterpart.  
+The conditions on the interface are well defined. But it is not defined how the implementing device behind the plug works.
 
-Look on the definition of the 
+The invocation of the interface relation uses the referenced modules [J]`ref.reset` and [J]`ref.cfg` for this both values from the chapter above.
+
+Look on the definition of all references for input values from outside of the `BlinkingLedCt` module:
 
 .Java: Reference class definition
 [source,Java]
@@ -739,10 +757,24 @@ include::../../../main/java/srcJava_vishiaFpga/org/vishia/fpga/stdmodules/Reset_
 Using of interfaces is very proven in Java (as also another Object Orientated Languages),
 and it is not so complex to translate it to VHDL, if some sensible simple style guides are additional regarded.
 
-Now, any module can implement this [J]`Reset_ifc`. 
-The reference goes to the module type or Java class [J]`Reset` as you can see in the module definition in the top level.
-How the referencing works, is explained in the chapter above. 
-For this example the reference is clarified on the outer level of modularity, on usage of the module:
+It means, to get an information about the reset state as [J]`boolean` value in Java or `BIT` in VHDL,
+the [J]`reset()` operation is called in the implementing module. That is the formal form of the plug.
+How this function is implemented - depends on the plugged module. 
+
+The association for [J]`ref.reset` is set on construction. For this example the [J]`init(...)` operation is responsible to plug:
+
+.Java: Reference class definition
+[source,Java]
+----
+//fpga/exmpl/modules/BlinkingLedCt.java
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/BlinkingLedCt.java[tag=init]
+----
+
+This operation creates the [J]`Ref` instance and sets the references with the outside given reference to the implementor, the supplier for this signal with the interface type.
+Alternatively this can be also done also with the constructor of the module.
+
+The value for the supplier of the reset signal in form of the [J]`Reset_ifc` comes from another module.
+The connection is done in the [J]`Moduls` class on top level:
 
 .Java: Module definition and relations
 [source,Java]
@@ -751,11 +783,24 @@ For this example the reference is clarified on the outer level of modularity, on
 include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_Fpga.java[tag=Modules]
 ----
 
-The inner reference name [J]`ref.reset` is associated to the module [J]`Reset res`, 
-and [J]`ref.cfg` is associated to the Fpga top level module class itself, mediated via the constructors
-as described in chapter above.
+Here you see the invocation of the [J]`init(...)` operation with the first argument [J]``this.res`. 
+It is the reference to the [J]`Reset` module which supplies the interface. 
+Adequate it is done for the others. 
+The implementor of the `BlinkingLedCfg_ifc` is here assembled in the environment class denoted by [J]`BlinkingLed_Fpga.this` 
+and their in [J]`blinkingLedCfg`, see following chapter <<#IfcAccessConst>>. 
+You see also here that the references are fulfilled for example for the [J]`Reset` module by construction, 
+here with reference to the pin of the Input interface on the FPGA. 
 
-Now, the module [J]`Reset` implements the following operation:
+
+[#IfcModule]
+==== Implementation of an Interface from the whole module
+
+image:../../img/ifc/Modul1Plug.png[float="right"]
+If you have a simple module, as here the [J]`Reset` which has only one task: Deliver the reset signal,
+this module can/should immediately implement this interface. 
+The image right shows a module, it has only one task, supply voltage 5 V, one interface, an USB plug, no more.
+
+The [J]`Reset` module in Java implements the interface on module level:
 
 .Java: Implementation of Reset.reset():
 [source,Java]
@@ -766,7 +811,7 @@ include::../../../main/java/srcJava_vishiaFpga/org/vishia/fpga/stdmodules/Reset.
 include::../../../main/java/srcJava_vishiaFpga/org/vishia/fpga/stdmodules/Reset.java[tag=reset()]
 ----
 
-It's very simple: If accesses the variable [J]`res` in its own inner class [J]`q` 
+It's very simple: It accesses the variable [J]`res` in its own inner class [J]`q` 
 which is the PROCESS class for the reset functionality. 
 This is the detail of this [J]`Reset` module.
 
@@ -785,7 +830,7 @@ For the ordenary software execution of interfaces concepts in Java as also other
 the interface operation can also change data and do anywhich else. 
 But this "__full freedom to do whatever you want__" is also criticized in some software writing guidelines.
 Normally it is a good style to prevent or forbid changes in another software module on only access operations. 
-Changes should be done with (also maybe interface-) operations which are named `do...` or `process...` or `exec...`
+Changes should be done with (also maybe interface-) operations which are named `set...`, `do...`, `process...` or `exec...`
 or such else. For that things the processes in VHDL are responsible. 
 It means execution routines cannot be invoked in the Java context for VHDL hardware descriptions. 
 
@@ -799,7 +844,81 @@ It means, the PROCESS of the module can prepare proper signals for simple access
 On the other hand the optimizer while routing can accomplish the aggregation of multiple equal accesses.
 How these accesses are to be designed is up to the Java description of the VHDL developers.
 
-But, let's have a look to the second interface usage of this example. 
+Now, any module can implement this [J]`Reset_ifc`. It means for testing, or for another design, you can use another module for the reset signal
+without change of the inner structure of the using module. The Java2Vhdl translator gets the correct access.
+
+[#IfcAccess]
+==== Interface agents or access instances
+
+image:../../img/ifc/Modul5Plugs.png[float="right"]
+If a module has more interface connections, especially connections of the same type more as one, 
+then it is not optimal or not possible for the same interface type to implement the interface with the module as a whole.
+For that Java offers an interesting possibility: 
+Implementing the interface in instances of anonymous inner classes. 
+The inner class has only the task to implement the interface with the possibility to access to the environment (outer) class
+which is the module. For that it can be seen as __agent__ which is responsible to access to inner details of the module
+from outside, without the necessity to regard this access in the module itself. 
+On the other hand it can be designated as __access point__.
+
+.Java: Example for interface access or agent
+[source,Java]
+----
+//fpga/exmplBlinkingLed/fpgatop/BlinkingLed_FpgaInOutput
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_FpgaInOutput.java[tag=classdef]
+.....
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_FpgaInOutput.java[tag=ifcAccess]
+----
+
+Such an anonymous class instance or agent is shown here for the access to the reset pin itself. 
+The pin is located in a [J]`static class Input` definition in this module with a [J]`final Input input = new Input()` instance. 
+This is used to generate the `PORT` definition in VHDL, but this is not the point of interest here.
+
+For the port definition, especially, there may be a lot of pins. 
+A flexibility is necessary because the same FPGA functionality may be necessary to implement in different environments,
+different card types etc. For that the interface access to the port pins is a very good idea and reduces adaption effort 
+and error possibilities because of pin confusion. 
+
+Hence, the port definition is associated to an own module (which can be replaced for different applications without replacing and adaption of other modules). This module contains:
+
+----
+public class MyPortsVersionXY_FPGA {
+  public static class Input {
+    //.... input pins
+  }
+  
+  public static class Output {
+    //.... output pins
+  }
+  
+  public final Input input = new Input();     //instantiation
+  public final Output output = new Output(); 
+
+  //some access operations:
+  @Fpga.IfcAccess public Type_Inpin_ifc access_Inpin = new Type_Inpin_ifc () {
+    @Override public boolean access_Pin() { .... }
+  };
+----
+
+Now this module can be connected with dedicated access instances to any module which needs an input pin.
+More as that: A module which needs primary an input pin can also be connected not immediately to the pin,
+but to another module may be with a filter functionality. This other module should only offer also such an interface access agent
+with the same interface type. 
+
+Of course this Port module is only an example. The interface access agents can be used anywhere for more complex applications.
+
+[#IfcAccessConst]
+==== Interface access instances for stubs (replacement for non existing module outputs)
+
+Especially for test, but also for variants of a FPGA design sometimes a functionality is not necessary. 
+Without adaption of the module, the inputs can be connected to constant signals driving `'0'` or `'1'`. 
+The place and route will be remove this unnecessary parts. But on source level an adaption should not be necessary.
+
+Adequate can be done if some constant values are necessary. 
+The constant values should not be set in a module itself to preserve flexibility, it should be delivered from outside.
+It's the same story: a module should not be modified and adapted for a specific use, 
+but the functionality should be defined externally with appropriate connections.
+
+For the Blinking Led example this is done with timing parameters:
 
 .Java: interface usage
 [source,Java]
@@ -812,25 +931,28 @@ The request is adequate, a value should be accesses. It is not first intendet th
 It can be also a signal which contains this __reload__ value as dynamic information. 
 
 Especially for tests sometimes signals are terminated by fix values, if this functionality is not in focus yet.
-The signals should be fullfilled, of course, but inputs may be always `false` or `'0'` for this test condition
+The signals should be fulfilled, of course, but inputs may be always `false` or `'0'` for this test condition
 or for more simple usage of a module. The last hint is also important:
-A module can contain more functinaltity as necessary for the amount of usages.
+A module can contain more functionality as necessary for the amount of usages.
 If inputs are terminated with constants and outputs are not used, then the routing process will remove this unnecessary parts.
 The sources can contain it, without disadvantages. 
 It means also that a module should not be prepared or adapted for specific usage situations.
-It can be uses "__as is__", and the outer signals and conncetions determine which is really implemented in the FPGA.
+It can be uses "__as is__", and the outer signals and connections determine which is really implemented in the FPGA.
 
-For that reason a second simple for of interface definition is supported by the Java2Vhdl converter. 
-The interface to access the [J]`time_BlinkingLed()` is implemented here in the main or top level, for simple determination:
+For that all reasons a second use cases and translation goal for interface access is supported by the Java2Vhdl converter:
+If the return expression delivers a constant value, then a `CONSTANT` definition in VHDL is created and used.
+ 
+Follow the example: The interface to access the [J]`time_BlinkingLed()` is implemented here in the main or top level file
+also with an access instance:
 
 .Java: interface implementation for a constant
 [source,Java]
 ----
 //fpga/exmpl/modules/Fpga_BlinkingLed.java
-include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_Fpga.java[tag=time_BlinkingLed_topImpl]
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_Fpga.java[tag=time_BlinkingLed_ifcAccess]
 ----
 
-The here written comment is firstly not important for the general explaination. The essence is:
+The essence is:
 The [J]`return ...` expression contains only one term, it is a constant. If this situation is detected,
 this constant value is generated in VHDL with the name of the module and the name of interface operation, it`s unique.
 The result is (already shown above): 
@@ -841,12 +963,10 @@ The result is (already shown above):
 include::../../../test/testResult_Ref/Java2Vhdl/BlinkingLed_Fpga.vhd[tag=BlinkingLedConstants]
 ----
 
-The other constant comes from a second similar interface operation. Also the access uses the name of the constant.
-
-The advantage of building a constant element is: It is obvious in VHDL. 
+The advantage of building a constant element instead the immediately constant value is: It is obvious in VHDL. 
 Elsewhere only the constant value will be written there as evaluation of the expression, and the back tracking to the Java code is difficult.
 
-If for example inputs are terminated by a constant to prevent usage, the generated VHDL code contains for instance:
+If for instance inputs are terminated by a constant to prevent usage, the generated VHDL code contains for instance:
 
 .VHDL: constants for input termination example
 [source,VHDL]
@@ -864,15 +984,27 @@ Hence, the router removes this part, proper for the use case.
 The idea to implement such termination interfaces on the top level comes from the idea, 
 that the top level, or the whole design decides about usages of details of some modules. 
 Another module as stub is not necessary. It simplifies the design.
-But of course also another module can be used. In the example design for the Blinking Led a secons solution can be activated:
-The stub for the constants are defined as extra class, but (at first) in the same module. 
-Java allows only one public class per file, but this class does not need to be public. 
-Of course an extra file can also be written, for example or especially for parameter values
-which also can be defined in this kind. This parameter Java file can be generated for example from a data base. 
-
+But of course a specific module can also be used for that. 
   
 
-==== How does the interface technology works 
+[#Ifcworks]
+==== How does the interface technology works for Java2Vhdl
+
+As you have seen in the chapters above: The references and interface operations are full resolved to simple accesses to the internals of another module.
+Here a question can be asked: Why is it so complicated to run the programs with virtual operations? 
+The interface usage in Java is the same as virtual or overridden operations with late linkage in {cpp}.
+
+The answer is: If references are not full clarified from beginning, the mechanism of the virtual table is necessary. 
+This is the common approach for software execution. 
+But if references are clarified from beginning in the construction phase, and they are never changed,
+then the execution level can use the simple immediate access. 
+It may be also in the same kind for a Java just-in-time (JIT) compiler: This is the translation from Java byte code to machine code on loading a class.
+After loading and preparing the immediate machine code is executed. Thats why Java execution needs more startup time, but then it runs fast.
+If references are organized as `final` in the constructor, the JIT can optimize it.  
+Whereas, {cpp} has not such an JIT compiler, and should use the virtual operation call anyway.
+
+Now, for the FPGA usage, the references are also clarified from beginning, with the adequate specific constructs also using the `init(...)`.
+Hence it can be resolved on translation time.
 
 There are two things to considerate:
 
@@ -941,7 +1073,7 @@ That is all possible on Java level, not translated to VHDL.
 For VHDL anytime the simple access to the record signal with the same name as the access operation is translated.
 
  
-
+[#timeCnstrn]
 == Timing constrains for place and route
 
 The next examples are related to the Lattice Diamond tool. 
@@ -997,7 +1129,7 @@ Here the Java notification and the test at Java level helps.
 TODO supplement the example with timing check, to document. 
 
 
-
+[#test]
 == Test
 
 The Test of the logic is a very important part. 
@@ -1028,7 +1160,7 @@ The contract of the behavior of a module should be well defined. A module should
 
 These are pure basics about tests that are generally applicable.
 
-
+[#stepupd]
 === step and update operations
 
 The content of the `step(int time)` and `update()` operations are not used for the VHDL translation. 
@@ -1042,7 +1174,7 @@ It means, intrinsic, this operations should be generated also for Java level. Bu
 The step routine prepares the states before the next clock. 
 The update routine is the clock, it is the manifestation for the next state.
 
-
+[#testInp]
 === Input signals for test simulation in Java
 
 If you are **testing the whole FPGA design** usual the top level file has a `Input` and `Output` inner class 
@@ -1054,8 +1186,8 @@ the test cases.
 If you are **testing a module** usual the module has interface connections. 
 You should satisfy this interface requirements by implementations in the test bed, for the appropriate input signals. 
 
-
-=== Output signals for manually evaluation  of the test results
+[#testOutp]
+=== Output signals for manually evaluation of the test results
 
 With given tools of FPGA simulation a graphical output is usual for instance: 
 
@@ -1068,19 +1200,64 @@ But is this the best one?
 The very simple solution presented below is also satisfactory:  
 
 ----
+ct.ctLow__________:0001 0000 ffff 61a7 ...0001 0000 ffff 61a7 ...0001 0000 ffff 61a7 ...0001 0000 ffff 61a7 ...0001 
+ct.ct_____________:63   63   63   62   62      62   62   61   61      61   61   60   60      60   60   5f   5f      
+ct.time___________:                    '5.001.20              '10.001.40             '15.001.60             '20.001.
+io.ledA___________:_____________________________________________________________AAAAAAAAAAAAAAAAAAAAAAA_____________
+io.ledB___________:_________________________________________________________________________________________________
+=========================================================================
+ok Test_BlinkingLed
 ----
 
+This is the content of a simple text file, able to view with any normal powerful text editor, for example link:https://notepad-plus-plus.org/[] or link:http://www.jedit.org/[]. 
+The original lines produces by the Blinking_Led example has a length of ~5000 character, no problem for viewing, shifting 
+and copy also a part to the clipboard using the "__rectangular selection__" mode in Jedit or the "__column selection mode__" on Nodepad++.
 
+The lines are time lines. Each column position in each line is the same time, more exact the start column of a longer information. 
+Of course you should use a monospace font in the editor. 
+
+But the time in the line may not be equidistant, depending of the output routines. 
+This is an advantage. You can show an incident in detail zoomed in time, whereas non interesting time spreads are condensed.
+The example shows it. The trigger for writing details is here the ctLow with the value `0x0001`. It is shortly before zero crossing.
+The `ct`, the higher count is shown, its value changes if the `ctLow` reaches `ffff` and the reload value is also set if `ffff` is reached before,
+and not as expectable, if `0000` is reached before. This is the written logic. 
+The time is also presented, only on end of this zoomed spread because it needs upto 13 character positions. 
+The time is a millisecond value, proper readable till 10 ns resolution. 
+As you can see the period of one count step of `ct` is not 5.00000 ms as expected than 5.00020 ms, 200 ns longer. 
+This is an effect which is better able to see with this numeric time information than in a diagram with measurement.
+
+The algorithm in Java to sort the output for this information is not complicated:
+
+.Java: Output routine for signals
+[source,Java]
+----
+//fpga/exmpl/modules/BlinkingLedCt.java
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/BlinkingLedCt.java[tag=addSignals]
+----
+   
+Generally, adding a signal is only done if `clkDiv.q.ce` is true, because: This module changes only its state with this `ce` clock enable.
+It saves calculation time if this is quest firstly. 
+Then the trigger for the output is `mdl.q.ctLow == 1`. With this condition the next 5 `ce` times are presented.
+
+Because 5 characters are appended to `sbCtLow`, this is the longest appendix, all lines are elongated to this legth, as you can see in the ouput.
+It means this time uses 5 column positions in the output, in all output lines.
+
+This horizontal output as also a vertical output, the time is continued in the lines than in columns, is organized by two classes
+in the package `org.vishia.fpga.testutil`. It is explained in detail in link:Java2Vhdl_TestOutput.html[] and for the Blinking Led example
+in chapter link:Java2Vhdl_ToolsAndExample.html#JavaSrcTest[] 
+
+[#mdlTest]
 === Test of modules or the whole design on Java level
 
+In Java programming also the environment, the "__test bed__" should be written. 
+In this test bed the inputs are determined and the outputs are gathered maybe in lists appropriate to states and times.
+This results can be compared with expected results in a very more proper way because Java is a safe and familiar language.
+
+You can use several test environment approaches. It is recommended to use the simple `org.vishia.util.TestOrg`,
+see link:../../../Java/docuSrcJava_vishiaBase/org/vishia/util/TestOrg.html[]
 
 
-=== Output of test signals for manually study
-
-
-
-
-
+[#wstyle]
 == Writing style of logic - data assignment versus situation thinking
 
 It is a general question, orientation to data assignment or situation evaluation. 

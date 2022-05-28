@@ -515,7 +515,10 @@ public final class VhdlExprTerm extends SrcInfo {
         // Hint the update operation is evaluated to find assignments to the output.
         // operation of mdl level are for testing, not intent to be interface calls.
       } else if(bReferencedModule) {                       // operation call via ref module is an interface operation
-        String sIfcName = (sNameRefIfcAccess == null ? "" : sNameRefIfcAccess + "." ) + name;
+        String sIfcName = ( sNameRefIfcAccess == null 
+                          ? (sNameIclass !=null && sNameIclass.length() >0 ? sNameIclass + "." : "") 
+                          : sNameRefIfcAccess + "." ) 
+                        + name;
         J2Vhdl_ModuleType.IfcConstExpr ifcDef = mdlRef ==null ? null : mdlRef.type.idxIfcExpr.get(sIfcName);
         if(ifcDef == null) {
           VhdlConv.vhdlError("VhdlExprTerm.genSimpleValue() - Interface operation not found: " + sIfcName + " in module: " + (mdlRef == null ? "??unknown" : mdlRef.nameInstance), val);

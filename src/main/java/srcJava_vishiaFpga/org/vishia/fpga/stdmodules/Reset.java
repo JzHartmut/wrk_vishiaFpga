@@ -29,12 +29,17 @@ public class Reset implements FpgaModule_ifc, Reset_ifc {
      */
     final boolean res;
     
+    final int time;
+    
     Q() {
       this.resetCount = 0;
       this.res = false;
+      this.time = 0;
     }
     
-    @Fpga.VHDL_PROCESS Q(Q z, Ref ref) {
+    @Fpga.VHDL_PROCESS Q(int time, Q z, Ref ref) {
+      Fpga.checkTime(time, z.time, 1);                 // need be a fast logic
+      this.time = time;
       if(ref.resetInp.reset_Pin() == false) {              // lo active clear pin
         this.resetCount = 0b0000;                
       }
@@ -70,7 +75,7 @@ public class Reset implements FpgaModule_ifc, Reset_ifc {
   
   @Override
   public void step(int time) {
-    this.d_q = new Q(this.q, this.ref);
+    this.d_q = new Q(time, this.q, this.ref);
   }
 
   @Override
@@ -79,7 +84,7 @@ public class Reset implements FpgaModule_ifc, Reset_ifc {
   }
 
   //tag::reset()[]
-  @Override public boolean reset ( ) { return this.q.res; }
+  @Override public boolean reset ( int time, int max) { return this.q.res; }
   //end::reset()[]
   
 

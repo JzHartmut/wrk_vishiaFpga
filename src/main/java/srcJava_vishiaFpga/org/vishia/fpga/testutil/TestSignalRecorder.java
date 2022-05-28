@@ -48,22 +48,44 @@ public abstract class TestSignalRecorder {
     this.sbs = new LinkedList<StringBuilder>();
   }
   
+  /**This operation can be overridden if the module should determine whether {@link #addSignals(int)}
+   * from all modules should be called, it means somewhat should be added.
+   * @param time
+   * @return
+   */
+  public boolean checkAdd(int time) {
+    return true;
+  }
+  
+  
+  
   /**This operation should be implemented to add all signals to all existing lines. 
    * Each line should have its own StringBuilder buffer.
+   * @param time the system time may be used for output
+   * @param bAdd true then other TestSignalsRecorders have added an information in this step time before.
+   *   This information can be used to decide whether to add.
+   *   But it depends of the order of registering in {@link TestSignalRecorderSet#addRecorder(TestSignalRecorder)}.
+   *   If you want to use this function, this test generator is subordinate, it accepts the behavior of the recorders before.
+   * @return 0 if no signal is added. Elsewhere the length of all the internal buffer.  
    * @throws IOException */
-  public abstract void addSignals() throws IOException;
+  public abstract int addSignals ( int time, boolean bAdd) throws IOException;
+  
+  public final int addSignals ( int time) throws IOException { return addSignals(time, true);}
+  
+  
+  
   
   /**This operation should be implemented to add all signals to all existing lines. 
    * Each line should have its own StringBuilder buffer.
    * @throws IOException */
-  public void addSignals(int pos) throws IOException {
+  protected void endSignals ( int pos) throws IOException {
     this.pos = pos;
     for(StringBuilder sb : this.sbs) {
       while(sb.length() < pos) { sb.append(' '); }
     }
   }
   
-  protected boolean checkLen(StringBuilder sb, int currentLength) {
+  protected boolean checkLen ( StringBuilder sb, int currentLength) {
     int zsb = sb.length();
     if(zsb == currentLength && sb.charAt(zsb-1) !='X') {
       sb.append('X');
@@ -73,13 +95,60 @@ public abstract class TestSignalRecorder {
   
   
   
-  /**This operation should implement all StringBuilder buffer to output all lines.
+  /**This operation outputs all lines.
+   * Special function: If no lines are registered, an empty line is outputted.
+   * This can be used to structure the output. 
    * @param out
    * @throws IOException
    */
-  public final void output(Appendable out) throws IOException {
-    for(StringBuilder sb: this.sbs) {
-      out.append(sb).append('\n');
+  public void output ( Appendable out) throws IOException {
+    if(this.sbs.size()==0) {
+      out.append('\n');
+    } else {
+      for(StringBuilder sb: this.sbs) {
+        out.append(sb).append('\n');
+      }
     }
   }
+  
+  
+  /**With this class a member of {@link TestSignalRecorderSet} can be built
+   * which produces a separation line. 
+   *
+   */
+  public static class Empty extends TestSignalRecorder {
+
+    private final String lineSep;
+    
+    /**ctor
+     * @param lineSep null or "", then an empty line will be output.
+     *   contains one character, then this character is repeated till the current length of all other lines.
+     *   contains a longer String: Writes this string as separation line.
+     */
+    public Empty(String lineSep) {
+      super(null);
+      this.lineSep = lineSep;
+    }
+
+    /**This operation is empty, does nothing, returns 0, no contribution for presentation.
+     *
+     */
+    @Override public int addSignals(int time, boolean bAdd) throws IOException {
+      return 0;
+    }
+    
+    
+    
+    @Override public void output ( Appendable out) throws IOException {
+      if(this.lineSep==null || this.lineSep.length()==0) {
+      } else if(this.lineSep.length()==1) {
+        super.endSignals(super.pos);
+      } else {
+        out.append(this.lineSep);
+      }
+      out.append("\n");
+      
+    }
+   }
+  
 }

@@ -161,9 +161,18 @@ public class Fpga {
   
   
   
-  public static void checkTime(int diff, int min) {
-    if(diff < min) {
+  /**Check the time. This operation is used to generate timing constrains, 
+   * and also used in simulation for check the time.
+   * @param time current time of access
+   * @param ztime time of the accessed variable
+   * @param min minimal difference.
+   */
+  public static void checkTime(int time, int ztime, int min) {
+    assert(time > ztime);        //detect errors with faulty call, 
+    if(time - ztime < min) {
       Debugutil.stop();
+      
+      //TODO set breakpoint, or conditional invoke a test assertion. 
     }
   }
   
