@@ -12,8 +12,8 @@ fi
 
 if ! test -d $DSTDIR; then export DSTDIR=../../; fi
 echo %DSTDIR%
-export DST=docuSrcJava_vishiaVhdlConv
 
+export DST=docuSrcJava_vishiaFpga
 export SRC="-subpackages org.vishia"
 export SRCPATH="..;$vishiaBase"
 export CLASSPATH="xxxxx"

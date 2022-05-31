@@ -11,7 +11,7 @@ import org.vishia.java2Vhdl.J2Vhdl_ModuleInstance;
 import org.vishia.java2Vhdl.J2Vhdl_ModuleType;
 import org.vishia.java2Vhdl.VhdlConv;
 import org.vishia.java2Vhdl.VhdlExprTerm;
-import org.vishia.parseJava.JavaSrc;
+import org.vishia.java2Vhdl.parseJava.JavaSrc;
 import org.vishia.util.Debugutil;
 import org.vishia.util.StringFunctions;
 import org.vishia.util.TestOrg;

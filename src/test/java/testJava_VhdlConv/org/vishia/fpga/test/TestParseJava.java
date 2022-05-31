@@ -16,8 +16,8 @@ import java.util.TreeMap;
 
 import org.vishia.mainCmd.MainCmdLoggingStream;
 import org.vishia.mainCmd.MainCmdLogging_ifc;
-import org.vishia.parseJava.JavaSrc;
-import org.vishia.parseJava.JavaSrc_Zbnf;
+import org.vishia.java2Vhdl.parseJava.JavaSrc;
+import org.vishia.java2Vhdl.parseJava.JavaSrc_Zbnf;
 import org.vishia.util.CalculatorExpr;
 import org.vishia.util.DataAccess;
 import org.vishia.util.Debugutil;

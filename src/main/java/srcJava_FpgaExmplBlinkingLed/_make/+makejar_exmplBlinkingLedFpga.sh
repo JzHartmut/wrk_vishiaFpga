@@ -1,7 +1,7 @@
 echo =========================================================================
 echo execute  $0
-export DSTNAME="vishiaVhdlConv"
-echo " ... generates the $DSTNAME.jar from srcJava_$DSTNAME core sources"
+export DSTNAME="exmplBlinkingLedFpga"
+echo " ... generates the $DSTNAME.jar from srcJava_exmplBlinkingLedFpga core sources"
 
 #Do not change the version on repeated build, and check the checksum and content of jar.
 #If it is equal, it is a reproduces build. The $VERSIONSTAMP is important 
@@ -27,21 +27,18 @@ if test "$VERSIONSTAMP" = ""; then export VERSIONSTAMP=$(date -I); fi   ## write
 ## Use this timestamp for file in jars, influences the MD5 check:
 export TIMEinJAR="$VERSIONSTAMP+00:00"
 
-export MAKEBASEDIR="../../../../../../../Java/cmpnJava_vishiaBase/src/main/java/srcJava_vishiaBase/_make"
+export MAKEBASEDIR="."
 if ! test -d $MAKEBASEDIR; then
-  export MAKEBASEDIR="../../srcJava_vishiaBase/_make"
+  export MAKEBASEDIR="."
 fi
 
 # It should have anytime the stamp of the newest file, independing of the VERSIONSTAMP
-export SRCZIPFILE="$DSTNAME-$VERSIONSTAMP-source.zip"
+export SRCZIPFILE=""
 
 # Select the location and the proper vishiaBase
 # for generation with a given timestamp of vishiaBase in the vishia file tree:
-if test -f ../../../../../../../Java/deploy/vishiaBase-$VERSION_VISHIABASE.jar
-then export JAR_vishiaBase="../../../../../../../Java/deploy/vishiaBase-VERSION_VISHIABASE.jar"
-#for generation in the vishia file tree:
-elif test -f ../../../../../../../Java/tools/vishiaBase.jar
-then export JAR_vishiaBase="../../../../../../../Java/tools/vishiaBase.jar"
+if test -f ../../../../../tools/vishiaBase.jar
+then export JAR_vishiaBase="../../../../../tools/vishiaBase.jar"
 # for generation side beside: 
 elif test -f ../../jars/vishiaBase.jar
 then export JAR_vishiaBase="../../jars/vishiaBase.jar"
@@ -57,13 +54,13 @@ if test "$OS" = "Windows_NT"; then export sepPath=";"; else export sepPath=":"; 
 export CLASSPATH="$JAR_vishiaBase"
 
 #It is also the tool for zip and jar used inside the core script
-export JAR_zipjar=$JAR_vishiaBase
+export JAR_zipjar="$JAR_vishiaBase"
 
 #determine the sources:
 # Note: include sources of vishiaRun are part of the source.zip
 export SRC_ALL=".."
-export SRC_ALL2=""
-export SRCPATH=".."
+export SRC_ALL2="../../srcJava_vishiaFpga"
+export SRCPATH="..$sepPath$SRC_ALL2"
 
 # Resourcefiles for files in the jar
 export RESOURCEFILES="..:**/*.zbnf ..:**/*.xml ..:**/*.png ..:**/*.txt"
@@ -71,21 +68,10 @@ export RESOURCEFILES="..:**/*.zbnf ..:**/*.xml ..:**/*.png ..:**/*.txt"
 
 # located from this workingdir as currdir for shell execution:
 export MANIFEST=$DSTNAME.manifest
-
-#$BUILD_TMP is the main build output directory. 
-#possible to give $BUILD_TMP from outside. On argumentless call determine in tmp.
-if test "$BUILD_TMP" = ""; then export BUILD_TMP="/tmp/BuildJava_$DSTNAME"; fi
-
-#to store temporary class files:
-export TMPJAVAC=$BUILD_TMP/javac
-
-if ! test -d $BUILD_TMP/deploy; then mkdir --parent $BUILD_TMP/deploy; fi                                                                                                     
-
+export JARFILE="../../../../../build/$DSTNAME.jar"
 
 #now run the common script:
 chmod 777 $MAKEBASEDIR/-makejar-coreScript.sh
-chmod 777 $MAKEBASEDIR/-deployJar.sh
 $MAKEBASEDIR/-makejar-coreScript.sh
-$MAKEBASEDIR/-deployJar.sh
 
 

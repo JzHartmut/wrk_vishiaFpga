@@ -7,24 +7,30 @@
 2022-05-28 10:48:57  x     genHtml.bat                              ::           .454 -0918078287 
 
 ============================== src/docs/asciidoc/Vhdl/ =============================================
-2022-05-27 19:42:26  x     Java2Vhdl_Approaches.adoc                ::         76.419  0047242661 
-2022-02-24 12:42:15  x     Java2Vhdl_FirstPaper.adoc                ::         19.492  0656647388 
+2022-05-31 10:09:29  x     Java2Vhdl_Approaches.adoc                ::         83.639  0964558074 
+2022-05-30 21:50:55  x     Java2Vhdl_FirstPaper.adoc                ::         19.489 -1302900141 
 2022-02-20 23:54:36  x     Java2Vhdl_StyleGuide.adoc                ::         10.011  1529218166 
-2022-05-28 10:56:50  x     Java2Vhdl_ToolsAndExample.adoc           ::         37.633 -1003652096 
-2022-05-28 10:55:54  x     Java2Vhdl_TranslatorInternals.adoc       ::          4.250 -0211878962 
+2022-05-31 16:27:47  x     Java2Vhdl_ToolsAndExample.adoc           ::         51.916  0621768906 
+2022-05-30 23:35:59  x     Java2Vhdl_TranslatorInternals.adoc       ::          7.595  1570938902 
 2022-03-26 12:00:06  x     Vhdl.zip                                 ::         12.808 -0796044082 
 2022-05-09 16:48:00  x     my.css                                   ::         30.044  1327990975 
 
 ============================== src/load_tools/ =====================================================
-2022-05-23 14:14:03  x     +checkAndLoadTools.bat                   ::           .502  0940922530 
-2022-05-26 18:33:59  x     tools.bom                                ::           .584  0911659545 
-2022-05-26 18:25:25  x     vishiaMinisys.jar                        ::         92.869  1356913473 
+2022-05-31 16:53:31  x     +checkAndLoadTools.bat                   ::           .668 -1184903984 
+2022-05-31 20:39:35  x     tools.bom                                ::           .584  0167575816 
+2022-05-31 20:25:32  x     vishiaMinisys.jar                        ::         85.297 -1538870130 
 
 ============================== src/main/ ===========================================================
 
 ============================== src/main/java/ ======================================================
 
 ============================== src/main/java/srcJava_FpgaExmplBlinkingLed/ =========================
+
+============================== src/main/java/srcJava_FpgaExmplBlinkingLed/_make/ ===================
+2022-05-31 20:23:40  x     +makejar_exmplBlinkingLedFpga.sh         ::          3.277 -1693425432 
+2022-05-31 22:29:49  x     -makejar-coreScript.sh                   ::          6.691 -1549028725 
+2021-06-28 23:34:15  x     JAVAC_HOME.sh                            ::          1.154 -1792697615 
+2020-03-18 20:51:28  x     exmplBlinkingLedFpga.manifest            ::           . 61 -2005899189 
 
 ============================== src/main/java/srcJava_FpgaExmplBlinkingLed/org/ =====================
 
@@ -36,19 +42,22 @@
 
 ============================== src/main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/ ===
 2022-05-28 09:19:37  x     BlinkingLed_Fpga.java                    ::          2.878 -1884154169 
-2022-05-28 08:46:47  x     BlinkingLed_FpgaInOutput.java            ::          1.352 -1680078970 
-2022-05-28 08:45:13  x     BlinkingLed_IoAcc.java                   ::           .487 -1795476248 
+2022-05-30 19:02:39  x     BlinkingLed_FpgaInOutput.java            ::          1.558 -1610774629 
+2022-05-30 19:04:04  x     BlinkingLed_IoAcc.java                   ::           .495 -2012932088 
 
 ============================== src/main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/ ===
 2022-05-28 09:04:09  x     BlinkingLedCfg_ifc.java                  ::           .649 -0680227105 
-2022-05-28 10:24:26  x     BlinkingLedCt.java                       ::          8.299  1285908018 
+2022-05-31 09:32:18  x     BlinkingLedCt.java                       ::          8.938  1086966836 
 2022-05-23 10:18:21  x     BlinkingLed_ifc.java                     ::           .369  2121074132 
 2022-05-28 09:22:16  x     ClockDivider.java                        ::          1.893 -0482708883 
 
 ============================== src/main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/test/ ===
-2022-05-28 10:27:18  x     Test_BlinkingLed.java                    ::          2.719  1846444983 
+2022-05-30 21:35:49  x     Test_BlinkingLed.java                    ::          4.964 -2086308226 
 
 ============================== src/main/java/srcJava_vishiaFpga/ ===================================
+
+============================== src/main/java/srcJava_vishiaFpga/_make/ =============================
+2022-05-28 11:49:28  x     +genjavadoc_vishiaFpga.sh                ::           .775  1678536902 
 
 ============================== src/main/java/srcJava_vishiaFpga/org/ ===============================
 
@@ -65,16 +74,17 @@
 2022-05-28 09:06:45  x     Reset_ifc.java                           ::           .380  0036476361 
 
 ============================== src/main/java/srcJava_vishiaFpga/org/vishia/fpga/testutil/ ==========
-2022-05-25 11:11:14  x     TestSignalRecorder.java                  ::          4.956 -1371260597 
-2022-05-25 11:13:26  x     TestSignalRecorderSet.java               ::          1.291  0950314125 
+2022-05-30 21:33:44  x     CheckOper.java                           ::          1.374  1980886240 
+2022-05-30 11:06:40  x     TestSignalRecorder.java                  ::          9.624 -0843450805 
+2022-05-30 11:06:40  x     TestSignalRecorderSet.java               ::          3.631  0619273324 
 2022-05-16 17:19:25  x     TestSignalRecorderVertical.java          ::          1.622 -0828855472 
 2022-05-15 23:48:53  x     TestSignalVerticalAdd.java               ::           .322 -0057543795 
 
 ============================== src/main/java/srcJava_vishiaVhdlConv/ ===============================
 
 ============================== src/main/java/srcJava_vishiaVhdlConv/_make/ =========================
-2021-02-08 23:19:33  x     +genjavadoc_vishiaVhdlConv.sh            ::           .641  0551392742 
-2022-05-26 13:38:49  x     +makejar_vishiaVhdlConv.sh               ::          4.081 -1366002033 
+2022-05-28 11:43:18  x     +genjavadoc_vishiaVhdlConv.sh            ::           .779 -0821524720 
+2022-05-31 12:21:39  x     +makejar_vishiaVhdlConv.sh               ::          4.069 -1970284684 
 2020-03-18 20:51:28  x     vishiaVhdlConv.manifest                  ::           . 61 -2005899189 
 
 ============================== src/main/java/srcJava_vishiaVhdlConv/org/ ===========================
@@ -85,13 +95,21 @@
 2022-05-15 23:42:59  x     J2Vhdl_ConstDef.java                     ::           .396 -0896210286 
 2022-05-15 23:42:59  x     J2Vhdl_FpgaData.java                     ::          1.340 -0140695618 
 2022-05-15 23:43:00  x     J2Vhdl_ModuleInstance.java               ::          1.409  0745099488 
-2022-05-23 12:22:24  x     J2Vhdl_ModuleType.java                   ::          3.452 -1626902326 
+2022-05-30 22:12:05  x     J2Vhdl_ModuleType.java                   ::          3.472 -1327121508 
 2022-05-20 17:42:15  x     J2Vhdl_Operator.java                     ::          5.312  0498757600 
 2022-05-15 23:42:59  x     J2Vhdl_Variable.java                     ::          1.936  1915599024 
-2022-05-28 09:30:41  x     Java2Vhdl.java                           ::         62.570 -0301852366 
-2022-05-20 17:32:19  x     VhdlConv.java                            ::         59.727  1327139206 
-2022-05-27 22:34:03  x     VhdlExprTerm.java                        ::         26.911  0192285029 
+2022-05-30 23:03:41  x     Java2Vhdl.java                           ::         64.111 -1031510343 
+2022-05-30 22:13:26  x     VhdlConv.java                            ::         59.747 -1015519658 
+2022-05-30 22:13:42  x     VhdlExprTerm.java                        ::         26.921  0693002270 
 2022-05-01 19:36:22  x     VhdlTemplate.txt                         ::           .333 -0888383234 
+
+============================== src/main/java/srcJava_vishiaVhdlConv/org/vishia/java2Vhdl/parseJava/ ===
+2022-05-30 23:03:28  x     JavaParser.java                          ::          6.639 -0106571126 
+2022-05-30 22:04:15  x     JavaSrc.java                             ::         40.718  0050858659 
+2022-05-30 22:03:30  x     JavaSrc_Base.java                        ::        105.661  0031464402 
+2022-05-30 22:03:38  x     JavaSrc_Zbnf.java                        ::        197.836  0249160420 
+2022-05-15 13:58:40  x     JavaSyntax.zbnf                          ::         23.108 -0459551353 
+2022-05-30 22:03:06  x     package-info.java                        ::           .177 -0961468918 
 
 ============================== src/test/ ===========================================================
 
@@ -108,18 +126,11 @@
 ============================== src/test/java/testJava_VhdlConv/org/vishia/fpga/test/ ===============
 2022-05-15 23:49:39  x     ExmplVHDL.java                           ::          3.799  1535072396 
 2022-05-15 20:18:49  x     ParseExample.java                        ::          2.322  1213684188 
-2022-05-15 20:19:13  x     TestParseJava.java                       ::         16.577  1041280688 
-2022-05-15 23:42:59  x     Test_VhdlExpr.java                       ::         12.181  2051161350 
+2022-05-30 22:12:22  x     TestParseJava.java                       ::         16.597  0700476885 
+2022-05-30 22:12:38  x     Test_VhdlExpr.java                       ::         12.191 -0435588980 
 
 ============================== src/test/testResult_Ref/ ============================================
 
 ============================== src/test/testResult_Ref/Java2Vhdl/ ==================================
 2022-05-22 19:36:38  x     BlinkingLed2Vhdl_report.txt              ::          5.734 -0481242403 
 2022-05-28 09:31:47  x     BlinkingLed_Fpga.vhd                     ::          2.857 -0455819615 
-
-============================== tools/ =============================================================
-2022-05-23 14:14:03  x     +checkAndLoadTools.bat                   ::           .502  0940922530 
-2022-05-26 12:25:10  x     tools.bom                                ::           .584  0499390425 
-2022-05-26 12:32:30  x     vishiaBase.jar                           ::       1503.318 -0147518110 
-2022-05-26 12:16:44  x     vishiaMinisys.jar                        ::         94.017 -0476137619 
-2022-05-26 12:32:30  x     vishiaVhdlConv.jar                       ::         56.471 -1365344036 

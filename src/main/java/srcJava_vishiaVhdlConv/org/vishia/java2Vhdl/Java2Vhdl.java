@@ -18,8 +18,8 @@ import java.util.TreeMap;
 
 import javax.script.ScriptException;
 
-import org.vishia.parseJava.JavaParser;
-import org.vishia.parseJava.JavaSrc;
+import org.vishia.java2Vhdl.parseJava.JavaParser;
+import org.vishia.java2Vhdl.parseJava.JavaSrc;
 import org.vishia.util.Arguments;
 import org.vishia.util.Debugutil;
 import org.vishia.util.OutTextPreparer;
@@ -85,6 +85,8 @@ public class Java2Vhdl {
     public File dirTmpVhdl; 
     
     
+    public boolean bLogParsing, bParseResult, bJavaData;
+    
     /**The directory where all Java sources for Vhdl where placed.
      * It may contain the package path too. */
     public List<File> dirJavaVhdlSrc = new LinkedList<File>();
@@ -138,6 +140,24 @@ public class Java2Vhdl {
     }};
     
     
+    Arguments.SetArgument setLogParsing = new Arguments.SetArgument(){ @Override public boolean setArgument(String val){ 
+      Args.this.bLogParsing = true;
+      return true;
+    }};
+    
+    
+    Arguments.SetArgument setParseResult = new Arguments.SetArgument(){ @Override public boolean setArgument(String val){ 
+      Args.this.bParseResult = true;
+      return true;
+    }};
+    
+    
+    Arguments.SetArgument setJavaData = new Arguments.SetArgument(){ @Override public boolean setArgument(String val){ 
+      Args.this.bJavaData = true;
+      return true;
+    }};
+    
+    
     Args(){
       super.aboutInfo = "Java2Vhdl made by HSchorrig, 2022-02-16 - " + Java2Vhdl.sVersion;
       super.helpInfo=" see www.vishia.org/Fpga/html/Vhdl/Java2Vhdl_ToolsAndExample.html";
@@ -146,7 +166,13 @@ public class Java2Vhdl {
       addArg(new Argument("-top", ":pkg.path.VhdlTopModule ... the top level java file (without .java, as class path) ", this.setJavaVhdlSrc));
       addArg(new Argument("-sdir", ":path/to/srcJava  ... able to use more as one", this.setDirJavaVhdlSource));
       addArg(new Argument("-sl", " ... optional, if given, remark src and line", this.setSrcComment));
-      addArg(new Argument("-tmp", ":path/to/dirTmp", this.setDirTmpVhdl));
+      addArg(new Argument("-parseData", " ... optional, if given, writes the parser java data tree", this.setJavaData));
+      addArg(new Argument("-pd", " ... optional, same as -parseData", this.setParseResult));
+      addArg(new Argument("-parseResult", " ... optional, if given, writes the parser result", this.setParseResult));
+      addArg(new Argument("-pr", " ... optional, same as -parseResult", this.setParseResult));
+      addArg(new Argument("-parseLog", " ... optional only with -parseResult, writes an elaborately parser log file", this.setLogParsing));
+      addArg(new Argument("-pl", " ... optional, same as -parseLog", this.setLogParsing));
+      addArg(new Argument("-tmp", ":path/to/dirTmp for log and result", this.setDirTmpVhdl));
       addArg(new Argument("-rep", ":path/to/fileReport.txt   ... optional", this.setOutContentReport));
     }
 
@@ -472,7 +498,9 @@ public class Java2Vhdl {
       System.err.println("not found in -sdir:faultyPath " + pathSrcJava );
       return null;
     } else {
-      JavaSrc parseResult = this.parser.parseJava(fParse);
+      File tmpDir = null;
+      if(this.args.bParseResult) { tmpDir = this.args.dirTmpVhdl; } // if null, no parse result.
+      JavaSrc parseResult = this.parser.parseJava(fParse, tmpDir, this.args.bJavaData, this.args.bParseResult, this.args.bLogParsing);
       return parseResult;
     }
   }

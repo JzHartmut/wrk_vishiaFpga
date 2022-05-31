@@ -6,11 +6,11 @@ package org.vishia.fpga.exmplBlinkingLed.fpgatop;
  */
 public class BlinkingLed_IoAcc {
 
-  /**Set the reset pin with original level, 
-   * @param io FPGA io instance from the top level modules 
-   * @param val high is inactive, low active for reset.
-   */
-  public static void setResetPin(BlinkingLed_Fpga fpga, boolean val) { fpga.ref.ioPins.input.reset_Pin = val; }
+  /**Operation to set the reset Inpin, with the hint that this pin is low active.
+   * @param val the immediately pin value, true for high, inactive.  */
+  public static void setLowactive_reset_Inpin(BlinkingLed_Fpga fpga, boolean val) { 
+    fpga.ref.ioPins.input.reset_Pin = val; 
+  }
   
-
 }
+

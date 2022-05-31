@@ -8,8 +8,8 @@ import java.util.Deque;
 import java.util.Iterator;
 
 import org.vishia.genJavaOutClass.SrcInfo;
-import org.vishia.parseJava.JavaSrc;
-import org.vishia.parseJava.JavaSrc.ExprPart;
+import org.vishia.java2Vhdl.parseJava.JavaSrc;
+import org.vishia.java2Vhdl.parseJava.JavaSrc.ExprPart;
 import org.vishia.util.Debugutil;
 import org.vishia.util.StringFunctions;
 

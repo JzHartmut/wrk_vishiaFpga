@@ -33,9 +33,15 @@ public class BlinkingLed_FpgaInOutput {
   //end::InOutput[]
 
   //tag::ifcAccess[]
-  @Fpga.IfcAccess protected Reset_Inpin_ifc reset_Inpin = new Reset_Inpin_ifc () {
+  /**Get the reset pin as referenced interface access from a module.
+   * Using the {@link org.vishia.fpga.stdmodules.Reset} may be seen as recommended because it clarifies a longer reset signal.
+   */
+  @Fpga.IfcAccess public Reset_Inpin_ifc reset_Inpin = new Reset_Inpin_ifc () {
     @Override public boolean reset_Pin() { return BlinkingLed_FpgaInOutput.this.input.reset_Pin; }
   };
   //end::ifcAccess[]
+  
+  
+
   
 }

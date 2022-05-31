@@ -15,6 +15,8 @@ See also:
 
 * link:Java2Vhdl_Approaches.html[] - Basically information about the concept
 
+* link:Java2Vhdl_TranslatorInternals.html[] - Internals about the implementation
+
 * link:../../deploy/Example1_BlinkingLed-2022-05-26.zip[] A zip file containing an example and link to the tool base.  
 
 //link:Java2Vhdl_StyleGuide.html[] - How to work with Java for Fpga logic
@@ -109,7 +111,7 @@ src
        
 It means, if you want to use Eclipse as environment for Java development (recommended),
 you need three linked folders to work.
-For organization of eclipse projects, see also link:../../..//SwEng/html/EclipseWrk.de.html[] (unfortunately yet only in German).
+For organization of eclipse projects, see also link:../../../SwEng/html/EclipseWrk.de.html[] (unfortunately yet only in German).
 
 Inside the Java components you have the familiar Java package tree, starting in this case all with `org/vishia`.
 The Java package tree is familiar since the first Java development in the 1990^th^.
@@ -170,6 +172,17 @@ Getting the core of the job done usually doesn't require sprawling tools.
 
 It is recommended to use Eclipse, but also another IDE is possible as your choice.
 
+You can also use any text editor to view the sources.
+
+To compile and run the example independent of an IDE you can use the batch file compilation.
+But you need he `javac` compiler (part of JDK, Java Development Kit, link:https://www.oracle.com/java/technologies/downloads/[].
+
+Look at `src/main/java/srcJava_FpgaExmplBlinkingLed/_make/+makejar_exmplBlinkingLedFpga.sh`.
+
+The compile result will be written in the `build` folder. From there it can be run starting `src/test/bat/test_Example1_BlinkingLed.bat`.
+This is for your experience.
+
+
 == The translation Java to VHDL
 
 This is only the start of a command line execution, for the example:
@@ -190,6 +203,9 @@ REM info: one space after the label, then trim all trailing spaces also without 
 ::-top:org.vishia.fpga.exmplBlinkingLed.fpgatop.BlinkingLed_Fpga   ##top level file to translate in first source dir
 ::-o:build/BlinkingLed_Fpga.vhd                               ##output
 ::-tmp:build/  
+::-parseData                                                  ## The java data tree to view
+::-parseResult                                                ## The parse result list
+::---parseLog                                                 ## an elaborately parse log
 ::-rep:build/BlinkingLed2Vhdl_report.txt                      ##report with meta information
 pause
 ----
@@ -211,14 +227,20 @@ With this argument designation the arguments are well readable.
 A short explanation of the arguments comes if the converter is started without arguments:
 
 ----
-Java2Vhdl made by HSchorrig, 2022-02-16 - 2022-05-23
+Java2Vhdl made by HSchorrig, 2022-02-16 - 2022-05-31
  see www.vishia.org/Fpga/html/Vhdl/Java2Vhdl_ToolsAndExample.html
 -i:path/to/template.vhd  ...optional, if given, read this file to insert
 -o:path/to/output.vhd
 -top:pkg.path.VhdlTopModule ... the top level java file (without .java, as class path) 
 -sdir:path/to/srcJava  ... able to use more as one
 -sl ... optional, if given, remark src and line
--tmp:path/to/dirTmp
+-parseData ... optional, if given, writes the parser java data tree
+-pd ... optional, same as -parseData
+-parseResult ... optional, if given, writes the parser result
+-pr ... optional, same as -parseResult
+-parseLog ... optional only with -parseResult, writes an elaborately parser log file
+-pl ... optional, same as -parseLog
+-tmp:path/to/dirTmp for log and result
 -rep:path/to/fileReport.txt   ... optional
 ---- 
 
@@ -411,7 +433,9 @@ It is used as reference for the [J]`ct(..., BlinkingLed_Fpga.this.blinkingLedCfg
 [#toptest]
 ==== test output in the top level
 
-The top level does not need test output if it has no own PROCESS sub classes.  
+The top level does not need test output if it has no own PROCESS sub classes. 
+The output preparation for the main level can be done immediately in the test environment, see chapter <<#addSignalsMain>>.
+This has no meaning for the Java to VHDL translation, writing this stuff to the test java file unburdens this file for translation.
 
 
 
@@ -419,7 +443,7 @@ The top level does not need test output if it has no own PROCESS sub classes.
 === The FPGA pin description file
 
 It is a good idea to separate the Pin description source file from the top level file,
-because it is a possible use case that different inner FPGA designs are used with the same pinning. 
+because different inner FPGA designs can use the same pinning. 
 This is typical if you have a hardware board with a given layout, but the content of the FPGA should be varied.
 Then you need define the pinning only one time for the given layout.
 
@@ -436,6 +460,7 @@ The pin description file should be designated as [J]`ioPins` in the [J]`Modules`
 include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_Fpga.java[tag=ioPins]
 ----
 
+See also chapter <<#topModules>>.
 The designated class file is searched and translated especially for IO pinning. 
 
  
@@ -458,34 +483,14 @@ For this example the pin classes are short, for more pins it is a little bit mor
 include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_FpgaInOutput.java[tag=InOutput]
 ----
 
-If the same pin should be used both as input and output, then the same pin name should be defined in the [J]`Input` and in the [J]`Output` inner class.
+* If the same pin should be used both as input and output, then the same pin name should be defined in the [J]`Input` and in the [J]`Output` inner class.
 
-If a pin should have tristate character (often necessary on input/output switch), it should be designated as [J]`char` type
+* If a pin should have tristate character (often necessary on input/output switch), it should be designated as [J]`char` type
 and set with [J]`'0'`, [J]`'1'` and [J]`'Z'`. (TODO for the 2022-05 version).
 
-==== Interface access to the pins
+* The Input pins can be declared as __package private__ (without designation) if an interface access is defined here also to set the pins. See next chapter. Elsewhere they can be designated as [J]`public` for simple set accesses for tests.
 
-For that the link:Java2Vhdl_Approaches.html#IfcAccess[] should be used, of course. 
-For specific pins a specific interface also with more as one bit can be used. For common ordinary pins the 
-
-.Java: Bit_ifc
-[source,Java]
-----
-include::../../../main/java/srcJava_vishiaFpga/org/vishia/fpga/stdmodules/Bit_ifc.java[]
-----
-
-can be used. 
-
-In this example only the access to the only one [J]`reset_Pin` is necessary
-
-.Java: BlinkingLed_FpgaInOutput Input and Output
-[source,Java]
-----
-include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_FpgaInOutput.java[tag=ifcAccess]
-----
-
-This uses the [J]`Reset_Inpin_ifc` as used in the accessing module `org.vishia.fpga.stdmodules.Reset`, 
-see the [J]`Modules` definition in the top level file.
+* Output pins should be declared as [J]`public` for immediately access for test and to set from the different top level FPGA java file maybe in different packages.
 
 The output pins are written immediately in the [J]`update()` operation on the top level:
 
@@ -495,20 +500,53 @@ The output pins are written immediately in the [J]`update()` operation on the to
 include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_Fpga.java[tag=outPins]
 ----
 
-Hence this variables are [J]`public`. The input variables are also [J]`public` because they may be accessed by simple assignments too
-depending on the top level design. 
+
+==== Interface access to the Input pins
+
+The input pins are usual accessed via interface references from view of a module. 
+Hence the link:Java2Vhdl_Approaches.html#IfcAccess[] should be defined in a proper way for all input pins.  
+For specific pins a specific interface also with more as one bit can be used. For common ordinary pins the following simple interface is sufficient:
+
+.Java: Bit_ifc
+[source,Java]
+----
+include::../../../main/java/srcJava_vishiaFpga/org/vishia/fpga/stdmodules/Bit_ifc.java[]
+----
+
+In this example only the access to the only one [J]`reset_Pin` is necessary
+
+.Java: BlinkingLed_FpgaInOutput Interface access
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_FpgaInOutput.java[tag=ifcAccess]
+----
+
+This uses the [J]`Reset_Inpin_ifc` as used in the accessing module `org.vishia.fpga.stdmodules.Reset`, 
+see the [J]`Modules` definition in the top level file.
+
+To set this inpin a set operation is necessary because of the non public property of the pin variable.
+It is a good decision for overview (divide and conquer) to write this set operation in an extra file, but in the same package:
+
+.Java: BlinkingLed_IoAcc for test, the whole file:
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/BlinkingLed_IoAcc.java[]
+----
+
+
 
 
 [#mdllevel]
 === A module file
 
 All following code snippets comes from the 
-`main/java/srcJava_FpgaExmpl...../modules/BlinkingLedCt.java`.
+`main/java/srcJava_FpgaExmplBlinkingLed/
+org/vishia/fpga/modules/BlinkingLedCt.java`.
 
 [#mdlclass]
 ==== Package and class definition, import and module interface
 
-The principles in Java are already explained in <<#topclass>.
+The principles in Java are already explained in <<#topclass>>.
 
 .Java: module class definition
 [source,Java]
@@ -547,7 +585,7 @@ A module can also have sub modules to build a deeper tree of modules. It is adeq
 (TODO 2022-05 not tested, should work)
 
 [#mdlPrc]
-==== PROCESS inner classes in a module
+==== Inner static classes in a module which builds a TYPE RECORD and PROCESS in VHDL
 
 The following code snippet shows one PROCESS as a whole. 
 
@@ -559,8 +597,8 @@ include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBl
 
 This is the core functionality for VHDL and hence explained elaborately:
 
-* The sub class should be marked with the [J]`@Fpga.VHDL_PROCESS` annotation to detect as such from the Java2Vhdl translator.
-* Variables in the sub class are generated in a type record with the class name:
+* The inner class should be marked with the [J]`@Fpga.VHDL_PROCESS` annotation to detect as such from the Java2Vhdl translator.
+* Variables in the inner class are generated in a type record with the class name:
 
 ----
 include::../../../test/testResult_Ref/Java2Vhdl/BlinkingLed_Fpga.vhd[tag=BlinkingLedCt_Q_REC]
@@ -779,6 +817,226 @@ The source code of the modules offers Test output signal generation functionalit
 
 === The main test source
 
+==== Class definition and instances to test and used for test
+
 Look firstly to that `org/vishia/fpga/exmplBlinkingLed/test/Test_BlinkingLed.java` which contains the [J]`main` start routine:
 
+.Java: main test routine class definition
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/test/Test_BlinkingLed.java[tag=classDef]
+----
+
+You see on the depedencies ([J]`import` statements) that the test does not need knowledge about the modules.
+This is because the test signals are built independently in the modules, the access is via the [J]`TestSignalRecorder` interface.
+
+On top of the test class the [J]`BlinkingLed_Fpga fpga = new BlinkingLed_Fpga();` FPGA top level is instantiated one time.
+It is also possible to instantiate more as one FPGA to check interaction. 
+It is also possible to instantiate here some simulation replacements for environment hardware, all what's necessary.
+
+If this is a module test class, then the module(s) should be instantiated here with their test environment (test bed).
+
+[#outHmain]
+==== Instantiate a horizontal output recorder
+
+The horizontal output recorder is an instance of link:../../docuSrcJava_vishiaFpga/org/vishia/fpga/testutil/TestSignalRecorderSet.html[].
+
+
+.Java: output recorder instance and definiton in start of a test routine
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/test/Test_BlinkingLed.java[tag=outH]
+----
+
+The instance should be created new in any test routine for that test outputs.
+After them the desired link:../../docuSrcJava_vishiaFpga/org/vishia/fpga/testutil/TestSignalRecorder.html[TestSignalRecorder] 
+instances of the modules should be added.
+One module can have more as one instances of [J]`TestSignalRecorder`. 
+They are used to compile the desired output information. 
+For different test cases you can get just different output information.
+
+The detailed content of the output information is determined in the modules itself, see the chapter <<#addSignalsMdl>>.
+
+[#TestOrg]
+==== Organization of a checked test
+
+The next line shows only the creation of a test check support class, see link:../../../Java/docuSrcJava_vishiaBase/org/vishia/util/TestOrg.html[org.vishia.util.TestOrg].
+
+.Java: Instance of TestOrg in the test routine
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/test/Test_BlinkingLed.java[tag=TestOrg]
+----
+
+This class helps to organize some tests with a concise output for automatic test case evaluation.
+
+
+[#initStimuli]
+==== Initialize stimuli (signals) for the simulation
+
+This are the initials settings of all input pins. It can be set either immediately or via interface operations.
+
+.Java: Initialization stimulis / signals
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/test/Test_BlinkingLed.java[tag=initStimuli]
+----
+
+For this example only the reset pin is used. For the test it is hold to inactive high during the whole operation. 
+The functionality of the reset pin itself can be tested with another programmed test, or is already tested using the [J]`reset` module in other contexts.
+Hence, it is not important here.  
+
+
+[#runSimul]
+==== Run the simulation for this test case
+
+In the simulation loop all FPGA simulations and also conditions of inputs to the FPGA which are not constant (depends on outputs, own stimuli signals)
+should be calculated. 
+The basic step time is the clock. 
+
+.Java: statements to run the test
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/test/Test_BlinkingLed.java[tag=runSimul]
+----
+
+To simulate the FPGA(s) the appropriate [J]`step(time)` one after another and after them all [J]`update()` should be called. 
+After [J]`update()` the preparation of inputs to the test bed can be gotten from FPGA outputs of this step time.
+The test bed calculations can be done then in the next loop as first before the [J]`fpga.step()`. 
+Here nothing else is to do. 
+
+Also after all updates the [J]`outH.addSignals(time)` is called to record all signals in all modules,
+organized in the [J]`outH` of type [J]`TestSignalGeneratorSet`, see sub chapters above.
+
+Here it is shown that the [J]`addSignals(...)` is conditionally called only [J]`if ...ce`. 
+This means that the output signals are not resolved down to the individual clock level. 
+The [J]`ce` is the central clock enable for the most module functions,
+and only outputs regarded to this [J]`ce` are in focus. This may be important for longer runinng tests, such as here for more as 100 million steps.
+Usual, if the signals on any clock edge are interesting, the simulation time is lesser and focused on module functionality.
+This is not a principle approach, it is sensible.
+
+[#outputRecording]
+==== Output recorded signals
+
+The output of the recorded signals is only a simple writing of all StringBuilder registered in the [J]`TestSignalRecorder`
+in the order of registering. The output written to a text file can be edited for presentation also afterwards.
+
+.Java: output signals of horizontal recording usual for manually elaboration
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/test/Test_BlinkingLed.java[tag=outRecording]
+----
+
+It is also possible to produce output signals in a file with vertical recording (one line is one time stamp, signals in the line).
+This is not shown here yet. Especially this format can be converted to a signal graphic similar as the output of FPGA simulation tools,
+with the possibility of zoom etc. 
+
+
+[#testEval]
+==== Automatically evaluation of test results
+
+In the next code snippet two output lines of the horizontal signal recording are checked.
+The special function [J]`checkOutput(...)` as specific implementation for the check tests the pattern in the line:
+The signals should be a minimal and a maximal number written one after another. The evaluation starts after the first change,
+not from beginning, because elsewhere the minimal number of characters may be violated. 
+
+.Java: evaluation of test results for automatically test
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/test/Test_BlinkingLed.java[tag=testEval]
+----
+
+This test is programmed done. It produces with the following [J]`test.finish()` a concise state "__Test ok or ERROR__" 
+which can be simple automatically evaluated. It means this and more tests runs, and the result should be "__ok__" for all tests.
+
+With this approach it is possible to test whether the functionality is proper (for the test cases) after some changes in the sources.
+May be specific changes were done, and the results were checked manually.
+But now the question arises: Has the change side effects? Is everything else still running?
+
+To answer this, such tests, which can be elaborately, are important. 
+
+Of course, the test cases, the stimuli and the evaluation can also be faulty or incomplete.
+In conclusion, the effort for the test cases is often higher than the effort for the functionality itself.
+It depends on the type of use (long-term or intermittent) whether this expense is appropriate.
+
+
+
+[#testMain]
+==== The main routine for test
+
+The main routine is called immediately from command line level. 
+It creates the own class, and starts some tests. 
+
+The top level [J]`TestOrg` assembles all children [J]`TestOrg` for more tests and a summarized evaluation.
+
+.Java: TestSignalGenerator implementation complete for conditional output
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/test/Test_BlinkingLed.java[tag=main]
+----
+
+Generally a [J]`try ... catch` should be present to catch non expected exceptions. 
+With the stack trace the reason may be able to find also in non debugging environments. 
+For example any uninitialized stuff may cause a null pointer exception which is not necessarily a flaw in the logic, only a small programming mistake.
+In general, Java's try-catch capability is well proven.
+
+
+[#addSignalsMain]
+==== Test output preparation for the main level
+
+This is the contribution of test signal output from the main test or the whole fpga to view and also for automatically check the results.
+This top level output test results is not implemented in the top level FPGA java file (here `BlinkingLed_Fpga.java`), 
+instead in the test routine, to unburden the top level java file. 
+The access to the Pin signals is anytime possible in a public way, in opposite to the situation in the modules, see next chapter.    
+
+The code snippet shows the complete [J]`TestSignalRecorder`
+
+.Java: TestSignalRecorder implementation complete for conditional output
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/test/Test_BlinkingLed.java[tag=TestSignals]
+----
+
+* The Recorder should define StringBuilder for each test signal for store and output, here two lines.
+* The [J]`char cLed...` are only locally, it stores the values for complete the lines in [J]`endSignals(...)`.
+* The constructor has the name of the module as parameter. The hint in the comment is for the order, see chapter <<#outHmain>>.
+* The [J]`clean()` operation should be overridden in the shown kind, should register the locally [J]`StringBuilder` calling [J]`registerLine(...)`.
+* The [J]`addSignals(...)` operation is subordinate here, it writes the state of the Led output pins, but only if another module,
+here it is especially [J]`BlinkingLedCt` has written something. This is sufficient, because the Led signal is slow and long. 
+The other module produces enough time stamps to see what happens. But such decisions depends heavily on the test case.
+Hence the output should tuned to the test case. On the other hand the test cases are often similar in output requirements.
+* The [J]`endSignals(...)` is here overridden to produce the repeated character for the LED. The standard implementation writes a space
+to separate hexa values, which is often the requested use case. 
+
+
+[#testRecordingMdl]
+=== Test support in modules
+
+The decision which signals are to be output for the display of the test results can only be made in a module itself, since only the module knows its own signals. 
+This is often seen in a different way, namely that the test case itself should determine which signals should be displayed. 
+However, this assumes that the signals are known and not changed. It also violates the private/public encapsulation of content in modules.
+
+But of course the decision which signals to display may depend on the particular test case. 
+For such possibilities more as one [J]`TestSignalRecorder` inner class can be implemented. 
+The implementation can be done due to a specialized test case, but should be designed in a more universal way. 
+The question is which signals are interesting, for a detailed look at the module - or to get an overview.
+The structure of the module, not the specific opinion of the tester, should be determinative. 
+
+
+[#addSignalsMdl]
+==== Determination of information to record for output horizontal
+
+For this example a specific detail is programmed in the next code snippet:
+It is the elaborately view to the time spread where the low-bit counter overflows and triggers the high-bit counter. 
+All other occurrences are irrelevant, they are clarified. 
+This is the interesting point in the module, and may be also the interesting point for a global test view.
+ 
+.Java: TestSignalGenerator addSignals(...) with condition building
+[source,Java]
+----
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/BlinkingLedCt.java[tag=addSignals]
+----
+
+Here the output is triggered if the counter reaches the value 1, back counting before zero-crossing. 
+Details of this are also used to present the common approach in link:Java2Vhdl_Approaches.html#testOutp[].
 

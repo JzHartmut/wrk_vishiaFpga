@@ -85,13 +85,13 @@ public class BlinkingLedCt implements FpgaModule_ifc, BlinkingLed_ifc {
     
     //tag::Q-Process-ce[]
     @Fpga.VHDL_PROCESS Q(int time, Q z, Ref ref) {
-      Fpga.checkTime(time, ref.clkDiv.q.time, 1);          // generate a constraint, without 1 clock access.
+      Fpga.checkTime(time, ref.clkDiv.q.time, 1);  // for the ce signal, constraint with 1 clock delay.
       if(ref.clkDiv.q.ce) {
       //end::Q-Process-ce[]
         //tag::checktime[]
-        Fpga.checkTime(time, z.time, 20);     // check whether all signals are persistent since 20 time steps.
+        Fpga.checkTime(time, z.time, 20);        // check whether all own process signals are persistent since 20 time steps.
         Fpga.checkTime(time, ref.cfg.time(), 20);// check all signals from the referenced module. 
-        this.time = time;                        // all variables are declared as possible set with this condition.
+        this.time = time;                        // all variables are declared as possible set with this time stamp.
         //end::checktime[]
         //tag::Q-Process-ifcUsg[]
         if(ref.reset.reset(time, 20)) {          // interface access to assigned here unknown reset module
@@ -188,35 +188,34 @@ public class BlinkingLedCt implements FpgaModule_ifc, BlinkingLed_ifc {
 
     @Override public void clean() {
       super.clean();
-      super.startLine(this.sbCtLow, "ctLow");
-      super.startLine(this.sbCt, "ct");
-      super.startLine(this.sbtime, "time");
-    }
-    
-    @Override public boolean checkAdd ( int time ) {
-      return false; 
+      super.registerLine(this.sbCtLow, "ctLow");
+      super.registerLine(this.sbCt, "ct");
+      super.registerLine(this.sbtime, "time");
     }
     
     //tag::addSignals[]
     @Override public int addSignals ( int time, boolean bAdd ) throws IOException {
       BlinkingLedCt mdl = BlinkingLedCt.this;
-      int zAdd = 0;
-      if(mdl.ref.clkDiv.q.ce) {       //because the own states switches only with this ce, the signals should also recorded only then.
-        if(mdl.q.ctLow == 1) {
-          this.wrCt = 5;
+      int zCurr = this.sbCt.length(); // current length for this time
+      int zAdd = 0;                   // >0 then position of new length for this time
+      if(mdl.ref.clkDiv.q.ce) {       // because the own states switches only with this ce, the signals should also recorded only then.
+        if(mdl.q.ctLow == 1) {        // on this condition
+          this.wrCt = 5;              // switch on, write 5 steps info
         }
-        if(--this.wrCt >0) {
-          StringFunctions_C.appendHex(this.sbCtLow, mdl.q.ctLow,4).append(' ');
-          StringFunctions_C.appendHex(this.sbCt, mdl.q.ct,2);
-          zAdd = this.sbCtLow.length();
+        if(--this.wrCt >0) {          // if one of the 5 infos shouls be written:
+          StringFunctions_C.appendHex(this.sbCtLow, mdl.q.ctLow,4).append(' ');    //append info
+          StringFunctions_C.appendHex(this.sbCt, mdl.q.ct,2);                      //append info
+          if(checkLen(this.sbtime, zCurr)) {      // add the time information if here is space.
+            StringFunctions_C.appendIntPict(this.sbtime, time, "33'331.111.11");   // append time info
+          }
+          zAdd = this.sbCtLow.length();  //length of buffers for new time determined by the sbCtLow, the longest entry.
         } 
-        else if(this.wrCt ==0) {
-          zAdd = this.sbCtLow.length();  //though sbCtLow should determine the length of the output
-          this.sbCtLow.append("...");
-          StringFunctions_C.appendIntPict(this.sbtime, time, "33'331.111.11");
+        else if(this.wrCt ==0) {         // end of the 5 steps, append .... as separation
+          this.sbCtLow.append("..... ");
+          zAdd = this.sbCtLow.length();  //length of buffers for new time determined by the sbCtLow, the longest entry.
         }
       }// if ce
-      return zAdd;
+      return zAdd;       // will be used in TestSignalRecorderSet.addSignals(zAdd) to set all lines to this length
     }//addSignals
     //end::addSignals[]
   }// class TestSignals

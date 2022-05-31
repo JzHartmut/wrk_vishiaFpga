@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.vishia.util.StringFunctions;
+
 
 /**A base for a test signal recorder for horizontal time deterministic presentation of states. 
  * A proper derivation of this class should be implement in any module. 
@@ -31,7 +33,7 @@ public abstract class TestSignalRecorder {
    * @param ob any of the output buffer
    * @param signaleName the signal name on start of line will be combinded with the module name of the constructor. 
    */
-  protected void startLine(StringBuilder ob, String signaleName) {
+  protected void registerLine(StringBuilder ob, String signaleName) {
     ob.setLength(0);
     this.sbs.add(ob);
     ob.append(this.moduleName).append('.').append(signaleName);
@@ -41,42 +43,83 @@ public abstract class TestSignalRecorder {
     
   }
   
-  /**This operation should be implemented in a kind that all buffers should be reseted
-   * using the {@link #startLine(StringBuilder, String)} operation. 
+  /**This operation should be overridden in a kind that all buffers should be created and reseted
+   * using the {@link #registerLine(StringBuilder, String)} operation. 
+   * Example/Template: <pre>
+   *  @Override public void clean() {
+      super.clean();
+      super.startLine(this.sbCtLow, "ctLow");
+      super.startLine(this.sbCt, "ct");
+      super.startLine(this.sbtime, "time");
+    }
+   * </pre>
+   * Note: This operation <code>super.clean();</code> should be called at first, it creates newly the container 
+   * used in {@link #registerLine(StringBuilder, String)}.
    */
   public void clean() {
     this.sbs = new LinkedList<StringBuilder>();
   }
   
-  /**This operation can be overridden if the module should determine whether {@link #addSignals(int)}
-   * from all modules should be called, it means somewhat should be added.
-   * @param time
-   * @return
-   */
-  public boolean checkAdd(int time) {
-    return true;
-  }
   
   
   
-  /**This operation should be implemented to add all signals to all existing lines. 
-   * Each line should have its own StringBuilder buffer.
+  /**This operation should be implemented to add the necessary signals to all existing lines
+   * which are created or cleaned in the overridden {@link #clean()} and registered with {@link #registerLine(StringBuilder, String)}.
+   *   Usage example/pattern:<pre>
+    (at)Override public int addSignals ( int time, boolean bAdd ) throws IOException {
+      BlinkingLedCt mdl = BlinkingLedCt.this;
+      int zCurr = this.sbCt.length(); // current length for this time
+      int zAdd = 0;                   // >0 then position of new length for this time
+      if(mdl.ref.clkDiv.q.ce) {       // because the own states switches only with this ce, the signals should also recorded only then.
+        if(mdl.q.ctLow == 1) {        // on this condition
+          this.wrCt = 5;              // switch on, write 5 steps info
+        }
+        if(--this.wrCt >0) {          // if one of the 5 infos shouls be written:
+          StringFunctions_C.appendHex(this.sbCtLow, mdl.q.ctLow,4).append(' ');    //append info
+          StringFunctions_C.appendHex(this.sbCt, mdl.q.ct,2);                      //append info
+          if(checkLen(this.sbtime, zCurr)) {      // add the time information if here is space.
+            StringFunctions_C.appendIntPict(this.sbtime, time, "33'331.111.11");   // append time info
+          }
+          zAdd = this.sbCtLow.length();  //length of buffers for new time determined by the sbCtLow, the longest entry.
+        } 
+        else if(this.wrCt ==0) {      // end of the 5 steps, append .... as separation
+          this.sbCtLow.append("..... ");
+          zAdd = this.sbCtLow.length();  //length of buffers for new time determined by the sbCtLow, the longest entry.
+        }
+      }// if ce
+      return zAdd;       // will be used in TestSignalRecorderSet.addSignals(zAdd) to set all lines to this length
+    }//addSignals
+   * </pre>
+   * Here signals are only added if the ce of the other module is set. Elsewhere the operation returns 0.
+   * This is sensible because signals either changes only with this ce, or they are interesting only in ce steps.
+   * <br>
+   * Furthermore not in any step signals are added, only after a trigger value. And then 5 times.
+   * <br>
+   * Last not least a time information is added as second or millisecond presentation value.
+   *    
    * @param time the system time may be used for output
    * @param bAdd true then other TestSignalsRecorders have added an information in this step time before.
    *   This information can be used to decide whether to add.
-   *   But it depends of the order of registering in {@link TestSignalRecorderSet#addRecorder(TestSignalRecorder)}.
-   *   If you want to use this function, this test generator is subordinate, it accepts the behavior of the recorders before.
-   * @return 0 if no signal is added. Elsewhere the length of all the internal buffer.  
-   * @throws IOException */
+   *   But it depends on the order of registering in {@link TestSignalRecorderSet#registerRecorder(TestSignalRecorder)}.
+   *   If you want to use this function, this test generator is subordinate, it accepts the behavior of the recorders before
+   *   delivered in the return value of this operation. 
+   *   If the return value of all called before addSignals(...) operation is 0, then this value is false
+   *   on usage of {@link TestSignalRecorderSet#addSignals(int)}.
+   * @return 0 if no signal is added. Elsewhere the length of the longest yet written internal buffer.  
+   * @throws IOException 
+   */
   public abstract int addSignals ( int time, boolean bAdd) throws IOException;
   
+  /**Simple for with bAdd = true, see {@link #addSignals(int, boolean)}
+   */
   public final int addSignals ( int time) throws IOException { return addSignals(time, true);}
   
   
   
   
-  /**This operation should be implemented to add all signals to all existing lines. 
-   * Each line should have its own StringBuilder buffer.
+  /**This operation fills all registered StringBuilder to the same length. 
+   * It can be called manually, but it is automatically called for all TestSignalRecorder
+   * using the {@link TestSignalRecorderSet#addSignals(int)}.
    * @throws IOException */
   protected void endSignals ( int pos) throws IOException {
     this.pos = pos;
@@ -85,12 +128,34 @@ public abstract class TestSignalRecorder {
     }
   }
   
-  protected boolean checkLen ( StringBuilder sb, int currentLength) {
-    int zsb = sb.length();
-    if(zsb == currentLength && sb.charAt(zsb-1) !='X') {
-      sb.append('X');
+  
+  
+  
+  /**This operation can be used to decide whether the StringBuilder has place for a new longer information,
+   * for example a bus value (hexa). See Example in {@link #addSignals(int, boolean)}  
+   * @param sb the StringBuilder should be used for append
+   * @param zTime The length of relevant other StringBuilder lines for this time step.
+   *   It is the length before writing an information to the other StringBuilder in this step time, 
+   *   not the position after writing as used for {@link #endSignals(int)}.
+   *   It means it should be gathered first before fill any other buffer, see example on {@link #addSignals(int, boolean)}.
+   *   If the <code>sb.length()</code> of this StringBuilder is lesser, 
+   *   then firstly the content is padded with spaces to ensure the same position as given for zTime. 
+   *   But this is also done if {@link #endSignals(int)} was called also for this buffer.
+   * @return true if there is space to add an information. The sb is not longer as zTime, and the last character is a space. 
+   *   false if sb is longer as the zTime position, or it does not contain at least one space for separation on the last position. 
+   *   It means do not write into.
+   */
+  protected boolean checkLen ( StringBuilder sb, int zTime) {
+    int zsb = sb.length();                   //length of sb
+    if(zsb >= zTime && sb.charAt(zsb-1) !=' ') {    // >= because should at least one space
+      return false;             // do not write to this buffer, no space for the zTime position.
     }
-    return zsb < currentLength;
+    else {
+      while(++zsb <= zTime) {   // padding with spaces till zTime
+        sb.append(' ');         // append spaces till the current position of the time
+      }
+      return true;              // can append
+    }
   }
   
   
@@ -110,6 +175,21 @@ public abstract class TestSignalRecorder {
       }
     }
   }
+  
+  
+  
+  public StringBuilder getLine(String id) {
+    if(!id.startsWith(this.moduleName)) return null;
+    int zid = id.length();
+    for(StringBuilder sb: this.sbs) {
+      if(   StringFunctions.startsWith(sb, id)
+         && (sb.charAt(zid) == '_' || sb.charAt(zid) == ':') 
+        )
+        return sb;
+    }
+    return null;   //not found
+  }
+
   
   
   /**With this class a member of {@link TestSignalRecorderSet} can be built

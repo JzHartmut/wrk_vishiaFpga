@@ -6,7 +6,7 @@ import java.util.NoSuchElementException;
 
 import org.vishia.genJavaOutClass.SrcInfo;
 import org.vishia.java2Vhdl.J2Vhdl_Variable;
-import org.vishia.parseJava.JavaSrc;
+import org.vishia.java2Vhdl.parseJava.JavaSrc;
 import org.vishia.util.Debugutil;
 import org.vishia.util.StringFunctions;
 

@@ -292,9 +292,8 @@ in a Java specific form (organization of the test frame).
 
 == How to translate in VHDL
 
-Of course, for translation of this Java code into VHDL 
-an approach with "__evalating the source code with regular expression__" in any proper language
-is not sufficient. 
+Of course, an approach as "__evalating the source code with regular expression__" in any proper language
+is not sufficient for translation of this Java code into VHDL. 
 Only a complete parsing of the Java code with the known Java language syntax
 and the synthesis of the VHDL code from the parsed data is sufficient. 
 

@@ -3,8 +3,8 @@ package org.vishia.java2Vhdl;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.vishia.parseJava.JavaSrc;
-import org.vishia.parseJava.JavaSrc.Expression;
+import org.vishia.java2Vhdl.parseJava.JavaSrc;
+import org.vishia.java2Vhdl.parseJava.JavaSrc.Expression;
 
 /**This class contains and prepares data relevant for one module instance in Java to generate VHDL.
  * Representation of a module type of a javaSrc which is used anywhere as type of a module instance from the top level. 

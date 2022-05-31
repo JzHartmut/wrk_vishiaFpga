@@ -15,6 +15,8 @@ See also:
 
 * link:Java2Vhdl_ToolsAndExample.html[]
 
+* link:Java2Vhdl_TranslatorInternals.html[] - Internals about the implementation
+
 * link:../../deploy/Example1_BlinkingLed-2022-05-26.zip[] A zip file containing an example and link to the tool base.  
 
 //link:Java2Vhdl_StyleGuide.html[] How to work with Java for Fpga logic
@@ -90,8 +92,8 @@ not only for translation.
 
 See the examples and patterns. 
 
-<<<
-== Writing hardware logic in Java
+
+== Writing hardware logic in Java, principles
 
 There are two different approaches for Fpga content:
 
@@ -135,7 +137,68 @@ Q~n+1~ = fn( Q~n~)
 Whereby the input signals are also part of the Q (means all FlipFlop states). 
 The fn (function) is a logical relation.
 
-The time to build the logical output from given inputs should be lesser than the time between the clock edges.
+To do the same in any sequential programming language, firstly all new states should be calculated from the current states
+**without using the new states itself for calcualtion**.
+That should be done for the whole functionality (not only module per module), 
+because elsewhere new states from already calculated modules may be used by mistake.
+This new states are the representation of the signal levels on the D inputs of the FlipFlops.
+
+Then the clock edge comes in hardware, that is in software the copy process to declare the new calculated states as current ones.
+This should be done without logic combinations, only the values are copied.
+
+After that, output values can be calculated from the new current states. 
+Alternatively the output values can also be calculated as the D inputs firstly as new output values, and then copied to the current state of outputs.
+That are immediately clocked outputs. 
+
+For that some `step()` operations are used in the Java sources, and after them `update()`.
+
+.Java: Principle for step and update with new instances
+[source,Java]
+----
+  mdl1.step();
+  mdl2.step();
+  mdl1.update();
+  mdl2.update();
+----
+
+Using Java, some advantages can be uses:
+
+* The `final` keyword in Java allows to control settings of variables only one time in a unique kind.
+Any variable is exactly defined in any control branch. 
+This property of Java can be used to write a clean code.
+
+But the `final` approach regarding the old (current) states and new states can be only used in the constructors of a class (construction of the instance).
+Applicated to the above shown `step(); update()` approach it means:
+
+* The `step()` create a new instance using the `final` approach. The new instance is not used for other `step()`.
+* The `update()` copies the new calculated values in the new instances to the current one. 
+In Java all variable to instances are references. Hence it means, the new instances are created with `new` in the heap, 
+and referenced with an own reference,
+and the update copies only the references.
+
+.Java: Principle for step and update with new instances
+[source,Java]
+----
+ Type state = new Type();    //initial settings (reset state)
+ Type state_d;               //yet null
+ 
+ ... in a loop:
+ state_d = new Type(state, ... more other states );
+ ... done firstly for all modules, the step() operations
+ state = state_d;            // establish the new states as current
+ ... done for all modules, the update() operations.
+----
+
+This is the schema to work in Java for hardware simulation, 
+and also the writing style for translation to VHDL. 
+
+
+
+
+=== Timing relations
+
+The time to build the logical output from given inputs in the combinatoric logic and lines in the FPGA 
+should be lesser than the time between the clock edges.
 Then the logical functionality is also the real functionality. 
 
 If delays are longer, the behavior is undefined. 
@@ -157,7 +220,7 @@ If this in input is 0, then the signal on the D input has no effect.
 The FF does not change its state. 
 It means, you can free a FF for switching with a longer period though the clock frequency is high.
 Only the CE signal should be provided in the required speed for the clock period. 
-The other signals to build the logic need only the CE period. 
+The other signals to build the logic need only the CE period respectively the time between two CE='1'. 
 
 image:../../img/Fpga/CE_Scope.png[Scope CE signal and delay]
 
@@ -173,7 +236,7 @@ In this example the red signal in the first track switches after any rising cloc
 not guarded with CE. But the green signal switches with clock and CE.
 The next track shows a long delayed signal. It is presented here as ramp,
 because for simulation Simulink ((C) Mathworks) is used (not VHDL and a FPGA tool suite).
-But before the next CE clock edge, the signal arrives its necessary state, and that is sufficient. 
+But before the next CE guarded clock edge, the signal arrives its necessary state, and that is sufficient. 
 So the next CE-enabled clock edge gets the state of the delayed signal without failure
 and produces the next dark green output. 
 This output can also in turn have a delay to its next output, feeding the D input of a FF etc. pp.  
@@ -212,14 +275,49 @@ END PROCESS
 ----
 
 There is another signal as `IF` condition, here named as `steadyState`. 
-Then the routing process can integrate this signal also to build the CE for the FF inputs.
+Then the routing process can assemble this signal also to build the CE for the FF inputs.
 For example if you have a register of 16 or more FF instead the single Q2 and Q1, 
-it saves a lot of routing ressources to do so. 
+it saves a lot of routing resources to do so. 
 
 image:../../img/Fpga/CEsteadySynchrLogic.png[synchron logic with CE, align="right"]
 
 Above you see which may be produced by the router, drawn with ordinary gatter logic.
 In the real FPGA LUTs (Look Up Tables) are used instead gatter, of course. 
+
+**How this is related to writing logic in Java**
+
+The goal is, determine timeing constrains (see next chapter) for some paths.
+In Java you can measure the number of clocks between changing signals,
+respectively the number of clocks how long is a given signal in the steady state.
+It is very simple. If the signal (variable) is written newly, similar the current time is also stored.
+The time is a simple incremented [J]`int` value (32 bit, sufficient for 1 billion clock steps). 
+Also a [J]`long` value may be usable, but seems to be not necessary.
+
+If the signal is used for combinatoric, the current time is compared with the stored time of the input signals.
+Yet an assertion or warning message can be built if this time difference is lesser than expected.
+
+If you know your own logic, then you know that some signals are set a certain way in respect to the clock because of their functionality. 
+Then you can check in all tests (simulation) whether this programmed and expected behavior is really true - for the test cases.
+Of course, it depends on the completeness of the tests whether all possible situations are considered.
+But the logic should not be so complicated that it is non obviously.
+
+
+.Java: Principle check timing and constrains
+[source,Java]
+----
+Process ( int time, ....) {    //The constructor for new values (see above)
+  Fpga.checkTime(time, ref.time, 1);   //assertion with the referenced signal, only 1 clock cycle admissible
+  if(ref.ce) {                 //your logic, use a clock enable
+    Fpga.checkTime(time, z.time, 10);  //assertion with the own signals, here delay 10 clock cycle admissible
+    this.time = time;          //store the time due to the timestamp of possible signal change
+    
+    this.signal = z.a && z.b;  //a combinatoric, build a new value, example.
+----
+
+Of course, not every single signal is to be checked, rather the signals are combined into groups with a timestamp in the group.
+See also chapter <<#timeCnstrn>>
+
+The expected delay checked with assertions can be used to formulate timing constrains, see following chapter. 
 
 
 [#BasicTiming]
@@ -1103,16 +1201,17 @@ The adequate form in the Java src is similar:
 ----
 //fpga/exmpl/modules/BlinkingLedCt.java
 include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/BlinkingLedCt.java[tag=Q-Process-ce]
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/BlinkingLedCt.java[tag=checktime]
       //.... logic working only if ce is set
     }
 ----
 
-Supposed, this `ce` signal comes with a cycle of 160 ns as in the example, you can write a constrain
+Supposed, this `ce` signal comes with a cycle of 200 ns as in the example, you can write a constrain
 in the lpf file of the lattice Diamond tool:
 
 ----
 PERIOD PORT "clk" 10.000000 ns ;
-MULTICYCLE FROM GROUP "ct_q" TO GROUP "ct_q" 16.0 X;
+MULTICYCLE FROM GROUP "ct_q" TO GROUP "ct_q" 20.0 X;
 ----
 
 It means that the routing regards the basic clock frequency of 100 MHz or 10 ns cycle,
@@ -1125,9 +1224,27 @@ But it is precisely because slower paths are allowed, because the possible cycle
 But the remaining quest is: How to build the groups?
 
 Here the Java notification and the test at Java level helps. 
+The [J]`Fpga.checkTime(...)` statements are evaluated. The second argument is the [J]`time` variable in the group, it designates the source group.
+The destination group is the from the own process. The constrain is the third argument, as mulitply of clock cycles or steps in the simulation.  
 
-TODO supplement the example with timing check, to document. 
+If the same constraints are detected with different [J]`Fpga.checkTime(...)` statements, then of course these groups can be combined.
 
+Also using an interface access (see chapter <<#ifc>> allows the assertion with the access time. This is the importance for module interconnection:
+
+.Java: time constrain using an interface access
+[source,Java]
+----
+//fpga/exmpl/modules/BlinkingLedCt.java
+include::../../../main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/BlinkingLedCt.java[tag=Q-Process-ifcUsg]
+----
+
+The first argument is the current time, the second one the maximal delay. The check itself is (should be) done in the interface implementing operation, 
+for the simulation. The constrain generator does not recognize it. It does regocnize the interface access with this two arguments.
+The source time group is the referenced module (left of interface call, here [J]`ref.reset` with the resolving of the reference to the real module. 
+The desination time group is the own, the constrain is the second argument. 
+
+In the version 2022-05 the time constrains are not yet automatically generated, this is todo in the nearer future. 
+But the constrains are used for simulation, manuall written than for the place and route. 
 
 [#test]
 == Test
@@ -1255,6 +1372,13 @@ This results can be compared with expected results in a very more proper way bec
 
 You can use several test environment approaches. It is recommended to use the simple `org.vishia.util.TestOrg`,
 see link:../../../Java/docuSrcJava_vishiaBase/org/vishia/util/TestOrg.html[]
+
+Last not least the link to the so named __StimuliSelector__ should be also offered here:
+
+link:../../../StimuliSel/html/StimuliSel.html[]
+
+This tool is not used yet for the FPGA test, but it is possible. It is used yet for Simulink tests, 
+for algorithm tests in {cp}, see link:../../../emc/html/TestOrg/testStrategie_en.html#testStrategies[] and more.
 
 
 [#wstyle]
@@ -1553,12 +1677,20 @@ The executed statements are not executed, instead they produce VHDL code.
 This is another approach, currently not supported by the Java2VHDL concept, maybe done in future.   
 
 
-
-== Literatur
-
-
+[#lit]
+== Literature, links
 
 
-link:https://www.elektronikpraxis.vogel.de/fpgas-mit-cc-programmieren-herausforderungen-bei-hls-design-flows-a-826858/[]
+
+
+* link:https://www.elektronikpraxis.vogel.de/fpgas-mit-cc-programmieren-herausforderungen-bei-hls-design-flows-a-826858/[] +
+This is a german article, describing the problems of using {cpp} for the adequate approach. 
+Tools using {cpp} as description language for hardware to VHDL are familiar since ~2005.
+
+* link:http://synthesijer.sourceforge.net/[] +
+This tool seems to have a similar approach, but it is not tested by me yet. (Too less approach-explaining documentation.)
+
+
+
 
 
