@@ -1,0 +1,105 @@
+
+== J2Vhdl_ModuleType: {@link J2Vhdl_FpgaData#idxModuleTypes}
+ ModuleType         |  ifcOperation()                       | access    {@link J2Vhdl_ModuleType#idxIfcOperation} 
+--------------------+---------------------------------------+------------------------------------------------
+BlinkingLedCt       | ct()                                  | this.q..??refct @; 
+                    | getLedFast.getBit()                   | Fpga.getBits(...) ==; 0b000 @; 
+                    | ledBlinking()                         | this.q..??refled @; 
+--------------------+---------------------------------------+------------------------------------------------
+BlinkingLed_Fpga    | blinkingLedCfg.onDuration_BlinkingLed(| BlinkingLed_Fpga_onDuration_BlinkingLed
+                    | blinkingLedCfg.time_BlinkingLed()     | BlinkingLed_Fpga_time_BlinkingLed
+--------------------+---------------------------------------+------------------------------------------------
+BlinkingLed_FpgaInOu| reset_Inpin.reset_Pin()               | this.input..??ref.BlinkingLed_FpgaInOutput.reset_Pin @; 
+--------------------+---------------------------------------+------------------------------------------------
+BlinkingLed_FpgaInOutput_Input
+--------------------+---------------------------------------+------------------------------------------------
+BlinkingLed_FpgaInOutput_Output
+--------------------+---------------------------------------+------------------------------------------------
+ClockDivider
+--------------------+---------------------------------------+------------------------------------------------
+Reset               | reset()                               | this.q..??refres @; 
+--------------------+---------------------------------------+------------------------------------------------
+
+== Module: BlinkingLed_Fpga
+  localName         | accessed module     {@link J2Vhdl_ModuleInstance#idxAggregatedModules}
+--------------------+----------------
+  ce                | ce.null : ClockDivider
+  ct                | ct.null : BlinkingLedCt
+  ioPins            | ioPins.null : BlinkingLed_FpgaInOutput
+  res               | res.null : Reset
+--------------------+----------------
+
+== Module: BlinkingLed_FpgaInOutput.input
+  localName         | accessed module     {@link J2Vhdl_ModuleInstance#idxAggregatedModules}
+--------------------+----------------
+--------------------+----------------
+
+== Module: BlinkingLed_FpgaInOutput.output
+  localName         | accessed module     {@link J2Vhdl_ModuleInstance#idxAggregatedModules}
+--------------------+----------------
+--------------------+----------------
+
+== Module: ce
+  localName         | accessed module     {@link J2Vhdl_ModuleInstance#idxAggregatedModules}
+--------------------+----------------
+--------------------+----------------
+
+== Module: ct
+  localName         | accessed module     {@link J2Vhdl_ModuleInstance#idxAggregatedModules}
+--------------------+----------------
+  cfg               | BlinkingLed_Fpga.blinkingLedCfg : BlinkingLed_Fpga
+  clkDiv            | ce.null : ClockDivider
+  reset             | res.null : Reset
+--------------------+----------------
+
+== Module: ioPins
+  localName         | accessed module     {@link J2Vhdl_ModuleInstance#idxAggregatedModules}
+--------------------+----------------
+--------------------+----------------
+
+== Module: res
+  localName         | accessed module     {@link J2Vhdl_ModuleInstance#idxAggregatedModules}
+--------------------+----------------
+  resetInp          | ioPins.reset_Inpin : BlinkingLed_FpgaInOutput
+--------------------+----------------
+
+== Variables: 
+  search-name                           | VHDL access : type 
+----------------------------------------+----------------
+  BlinkingLed_FpgaInOutput.input.reset_Pin | reset_Pin : BIT
+  BlinkingLed_FpgaInOutput.output.led1  | led1 : BIT
+  BlinkingLed_FpgaInOutput.output.led2  | led2 : BIT
+  BlinkingLed_FpgaInOutput.output.led3  | led3 : BIT
+  ce.q.ce                               | ce_Q.ce : BIT
+  ce.q.ct                               | ce_Q.ct : STD_LOGIC_VECTOR(3 DOWNTO 0)
+  ct.q.ct                               | ct_Q.ct : STD_LOGIC_VECTOR(7 DOWNTO 0)
+  ct.q.ctLow                            | ct_Q.ctLow : STD_LOGIC_VECTOR(15 DOWNTO 0)
+  ct.q.led                              | ct_Q.led : BIT
+  res.q.res                             | res_Q.res : BIT
+  res.q.resetCount                      | res_Q.resetCount : STD_LOGIC_VECTOR(3 DOWNTO 0)
+----------------------------------------+----------------
+
+== Type Variables: 
+  search-name                           | VHDL access : type 
+----------------------------------------+----------------
+  BlinkingLedCt_Q.ct                    | ct_Q.ct : STD_LOGIC_VECTOR(7 DOWNTO 0)
+  BlinkingLedCt_Q.ctLow                 | ct_Q.ctLow : STD_LOGIC_VECTOR(15 DOWNTO 0)
+  BlinkingLedCt_Q.led                   | ct_Q.led : BIT
+  BlinkingLed_FpgaInOutput.input.reset_Pin | reset_Pin : BIT
+  BlinkingLed_FpgaInOutput.output.led1  | led1 : BIT
+  BlinkingLed_FpgaInOutput.output.led2  | led2 : BIT
+  BlinkingLed_FpgaInOutput.output.led3  | led3 : BIT
+  ClockDivider_Q.ce                     | ce_Q.ce : BIT
+  ClockDivider_Q.ct                     | ce_Q.ct : STD_LOGIC_VECTOR(3 DOWNTO 0)
+  Reset_Q.res                           | res_Q.res : BIT
+  Reset_Q.resetCount                    | res_Q.resetCount : STD_LOGIC_VECTOR(3 DOWNTO 0)
+----------------------------------------+----------------
+
+
+== Constants:        {@link J2Vhdl_ModuleType#idxConstDef}
+  search-name                           | VHDL access : value 
+-----------------------------------+----------------------------------------+----------------
+  BlinkingLed_Fpga_onDuration_BlinkingLed | BlinkingLed_Fpga_onDuration_BlinkingLed  | INTEGER := 10
+  BlinkingLed_Fpga_time_BlinkingLed | BlinkingLed_Fpga_time_BlinkingLed     | BIT_VECTOR(7 DOWNTO 0) := x"64"
+-----------------------------------+----------------------------------------+----------------
+
