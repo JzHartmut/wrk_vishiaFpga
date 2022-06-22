@@ -101,13 +101,13 @@ public class Test_BlinkingLed {
     }
 
     /**cleans all StringBuilder line and registered it. */
-    @Override public void clean() {
+    @Override public void registerLines ( ) {
       super.clean();
       super.registerLine(this.sbLedA, "ledA");
       super.registerLine(this.sbLedB, "ledB");
     }
     
-    @Override public int addSignals ( int time , boolean bAdd) throws IOException {
+    @Override public int addSignals ( int time, int lenCurr, boolean bAdd) throws IOException {
       BlinkingLed_Fpga fpga = Test_BlinkingLed.this.fpga;
       if(bAdd) {                                  //only calculate state if another line has additional information.
         if(fpga.ref.ioPins.output.led1) {

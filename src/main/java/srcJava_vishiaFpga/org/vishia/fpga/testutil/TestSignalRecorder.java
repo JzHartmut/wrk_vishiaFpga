@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.vishia.util.StringFunctions;
+import org.vishia.util.StringFunctions_C;
 
 
 /**A base for a test signal recorder for horizontal time deterministic presentation of states. 
@@ -15,6 +16,40 @@ import org.vishia.util.StringFunctions;
  * */
 public abstract class TestSignalRecorder {
 
+  /**Version, history and license.
+   * <ul>
+   * <li>2022-06-31 Some renaming for better semantic.
+   * <li>2022-05-11 Hartmut created.
+   * </ul>
+   * <br><br>
+   * <b>Copyright/Copyleft</b>:
+   * For this source the LGPL Lesser General Public License,
+   * published by the Free Software Foundation is valid.
+   * It means:
+   * <ol>
+   * <li> You can use this source without any restriction for any desired purpose.
+   * <li> You can redistribute copies of this source to everybody.
+   * <li> Every user of this source, also the user of redistribute copies
+   *    with or without payment, must accept this license for further using.
+   * <li> But the LPGL is not appropriate for a whole software product,
+   *    if this source is only a part of them. It means, the user
+   *    must publish this part of source,
+   *    but don't need to publish the whole source of the own product.
+   * <li> You can study and modify (improve) this source
+   *    for own using or for redistribution, but you have to license the
+   *    modified sources likewise under this LGPL Lesser General Public License.
+   *    You mustn't delete this Copyright/Copyleft inscription in this source file.
+   * </ol>
+   * If you are intent to use this sources without publishing its usage, you can get
+   * a second license subscribing a special contract with the author. 
+   * 
+   * @author Hartmut Schorrig = hartmut.schorrig@vishia.de
+   */
+  public final static String sVersion = "2022-06-11"; 
+
+  /**The length of the title of a line, after clean. */
+  public static int lenClean = 20;
+  
   /**Registered module name to build the line title. */
   protected final String moduleName;
   
@@ -37,7 +72,7 @@ public abstract class TestSignalRecorder {
     ob.setLength(0);
     this.sbs.add(ob);
     ob.append(this.moduleName).append('.').append(signaleName);
-    while(ob.length() <18) { ob.append('_'); }
+    while(ob.length() < (lenClean-1)) { ob.append('_'); }
     ob.append(':');
     this.pos = ob.length();
     
@@ -56,10 +91,13 @@ public abstract class TestSignalRecorder {
    * Note: This operation <code>super.clean();</code> should be called at first, it creates newly the container 
    * used in {@link #registerLine(StringBuilder, String)}.
    */
-  public void clean() {
+  public final void clean() {
     this.sbs = new LinkedList<StringBuilder>();
   }
   
+  
+  
+  public abstract void registerLines();
   
   
   
@@ -98,6 +136,8 @@ public abstract class TestSignalRecorder {
    * Last not least a time information is added as second or millisecond presentation value.
    *    
    * @param time the system time may be used for output
+   * @param lenCurr the current length of the StringBuilder lines before adding for this timestamp.
+   *   This parameter can be used for {@link #checkLen(StringBuilder, int)}.
    * @param bAdd true then other TestSignalsRecorders have added an information in this step time before.
    *   This information can be used to decide whether to add.
    *   But it depends on the order of registering in {@link TestSignalRecorderSet#registerRecorder(TestSignalRecorder)}.
@@ -108,11 +148,11 @@ public abstract class TestSignalRecorder {
    * @return 0 if no signal is added. Elsewhere the length of the longest yet written internal buffer.  
    * @throws IOException 
    */
-  public abstract int addSignals ( int time, boolean bAdd) throws IOException;
+  public abstract int addSignals ( int time, int lenCurr, boolean bAdd) throws IOException;
   
   /**Simple for with bAdd = true, see {@link #addSignals(int, boolean)}
    */
-  public final int addSignals ( int time) throws IOException { return addSignals(time, true);}
+  public final int addSignals ( int time) throws IOException { return addSignals(time, 0, true);}
   
   
   
@@ -123,9 +163,10 @@ public abstract class TestSignalRecorder {
    * @throws IOException */
   protected void endSignals ( int pos) throws IOException {
     this.pos = pos;
+    if(this.sbs !=null) {
     for(StringBuilder sb : this.sbs) {
       while(sb.length() < pos) { sb.append(' '); }
-    }
+    } }
   }
   
   
@@ -145,9 +186,9 @@ public abstract class TestSignalRecorder {
    *   false if sb is longer as the zTime position, or it does not contain at least one space for separation on the last position. 
    *   It means do not write into.
    */
-  protected boolean checkLen ( StringBuilder sb, int zTime) {
+  protected static boolean checkLen ( StringBuilder sb, int zTime) {
     int zsb = sb.length();                   //length of sb
-    if(zsb >= zTime && sb.charAt(zsb-1) !=' ') {    // >= because should at least one space
+    if(zsb >= zTime && (sb.charAt(zsb-1) !=' ' && zsb != TestSignalRecorder.lenClean)) {    // >= because should at least one space
       return false;             // do not write to this buffer, no space for the zTime position.
     }
     else {
@@ -192,6 +233,73 @@ public abstract class TestSignalRecorder {
 
   
   
+  
+  public static class Time extends TestSignalRecorder {
+
+    StringBuilder sbTime = new StringBuilder(500);
+    
+    String format;
+    
+    int timeStep = -1;
+    int timeStep5 = 9999999, timeStep10 = 9999999;
+    
+    
+    int time0 = -1;
+    
+    int posNum;
+    
+    /**
+     * @param format
+     * @param factor
+     */
+    public Time ( String format, int factor) {
+      super("Time");
+      this.format = format;
+    }
+
+    @Override
+    public void registerLines() {
+      super.clean();
+      super.registerLine(this.sbTime, "time");
+      
+    }
+
+    @Override
+    public int addSignals(int time, int lenCurr, boolean bAdd) throws IOException {
+      if(this.time0 == -1) { this.time0 = time; }
+      if(checkLen(this.sbTime, lenCurr)) {
+        if(lenCurr > lenClean && this.timeStep == -1) {    // initialize timeStep first.
+          int timediff = time - this.time0;
+          int timeStep = 10;
+          while(timediff > timeStep) {
+            timeStep *=10;
+          }
+          this.timeStep = timeStep;
+          this.timeStep10 = 10* timeStep;
+          this.timeStep5 = 5* timeStep;
+        }
+        int timefrac = time % this.timeStep10;
+        if(lenCurr == lenClean || timefrac ==0) {
+          StringFunctions_C.appendIntPict(this.sbTime, time, format);
+        }
+        else {
+          if((timefrac % this.timeStep5)==0) {
+            this.sbTime.append('^');
+          }
+          else if((timefrac % this.timeStep)==0) {
+            this.sbTime.append('|');
+          }
+        }
+        
+      }
+      return 0;
+    }
+    
+  }
+  
+  
+  
+  
   /**With this class a member of {@link TestSignalRecorderSet} can be built
    * which produces a separation line. 
    *
@@ -210,10 +318,14 @@ public abstract class TestSignalRecorder {
       this.lineSep = lineSep;
     }
 
+    @Override public void registerLines() {
+      // nothing, no lines
+    }
+
     /**This operation is empty, does nothing, returns 0, no contribution for presentation.
      *
      */
-    @Override public int addSignals(int time, boolean bAdd) throws IOException {
+    @Override public int addSignals(int time, int lenCurr, boolean bAdd) throws IOException {
       return 0;
     }
     

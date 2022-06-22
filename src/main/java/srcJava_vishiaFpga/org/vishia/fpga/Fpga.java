@@ -125,7 +125,7 @@ public class Fpga {
    */
   public static int concatbits(int high, int bitPos, int low) {
     assert( (low & ~((1<<bitPos)-1)) ==0);  //high bits from low are all 0.
-    return (high << bitPos) | low;
+    return (high << bitPos) | (low & ((1<<(bitPos))-1));
   }
   
   
@@ -168,7 +168,8 @@ public class Fpga {
    * @param min minimal difference.
    */
   public static void checkTime(int time, int ztime, int min) {
-    assert(time > ztime);        //detect errors with faulty call, 
+    if(time==0 || min ==0) return;  //no check yet. 
+    assert(time > ztime);           //detect errors with faulty call, 
     if(time - ztime < min) {
       Debugutil.stop();
       

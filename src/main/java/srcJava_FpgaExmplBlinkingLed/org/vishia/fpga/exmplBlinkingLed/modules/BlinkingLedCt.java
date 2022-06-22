@@ -186,7 +186,7 @@ public class BlinkingLedCt implements FpgaModule_ifc, BlinkingLed_ifc {
     }
 
 
-    @Override public void clean() {
+    @Override public void registerLines ( ) {
       super.clean();
       super.registerLine(this.sbCtLow, "ctLow");
       super.registerLine(this.sbCt, "ct");
@@ -194,17 +194,17 @@ public class BlinkingLedCt implements FpgaModule_ifc, BlinkingLed_ifc {
     }
     
     //tag::addSignals[]
-    @Override public int addSignals ( int time, boolean bAdd ) throws IOException {
-      BlinkingLedCt mdl = BlinkingLedCt.this;
+    @Override public int addSignals ( int time, int lenCurr, boolean bAdd ) throws IOException {
+      BlinkingLedCt thism = BlinkingLedCt.this;
       int zCurr = this.sbCt.length(); // current length for this time
       int zAdd = 0;                   // >0 then position of new length for this time
-      if(mdl.ref.clkDiv.q.ce) {       // because the own states switches only with this ce, the signals should also recorded only then.
-        if(mdl.q.ctLow == 1) {        // on this condition
+      if(thism.ref.clkDiv.q.ce) {       // because the own states switches only with this ce, the signals should also recorded only then.
+        if(thism.q.ctLow == 1) {        // on this condition
           this.wrCt = 5;              // switch on, write 5 steps info
         }
         if(--this.wrCt >0) {          // if one of the 5 infos shouls be written:
-          StringFunctions_C.appendHex(this.sbCtLow, mdl.q.ctLow,4).append(' ');    //append info
-          StringFunctions_C.appendHex(this.sbCt, mdl.q.ct,2);                      //append info
+          StringFunctions_C.appendHex(this.sbCtLow, thism.q.ctLow,4).append(' ');    //append info
+          StringFunctions_C.appendHex(this.sbCt, thism.q.ct,2);                      //append info
           if(checkLen(this.sbtime, zCurr)) {      // add the time information if here is space.
             StringFunctions_C.appendIntPict(this.sbtime, time, "33'331.111.11");   // append time info
           }
