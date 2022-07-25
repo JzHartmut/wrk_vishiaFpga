@@ -66,6 +66,23 @@ public class BlinkingLedCt implements FpgaModule_ifc, BlinkingLed_ifc {
   }
   //end::init[]
 
+  
+  
+  enum State {
+    fast(0x1, 1),     //The value of the state should be 1 of n, given in the correct number format as in BITVECTOR(n) necessary.
+    slow(0x2, 2),     // use 0b01101 if vector size is not able to divide by 4
+    off(0x4, 3),
+    nonInit(0x0, 0);  // The init value = 0 should be always present.
+    
+    final int _val_;
+    
+    final int bitNr;
+    
+    @Fpga.BITVECTOR(4) State(int val, int bitNr){ this._val_ = val; this.bitNr = bitNr; }
+    
+  }
+  
+  
   //tag::Prc[]
   //tag::Qdecl[]
   @Fpga.VHDL_PROCESS private static final class Q{
@@ -74,6 +91,7 @@ public class BlinkingLedCt implements FpgaModule_ifc, BlinkingLed_ifc {
     @Fpga.STDVECTOR(8) final int ct;
     final boolean led;
     int time; 
+    @Fpga.STDVECTOR(4) final State state;
     
     //end::Qdecl[]
     Q() {
@@ -81,6 +99,7 @@ public class BlinkingLedCt implements FpgaModule_ifc, BlinkingLed_ifc {
       this.ct = 0;
       this.led = false;
       this.time = 0;
+      this.state = State.nonInit;
     }
     
     //tag::Q-Process-ce[]
@@ -97,7 +116,8 @@ public class BlinkingLedCt implements FpgaModule_ifc, BlinkingLed_ifc {
         if(ref.reset.reset(time, 20)) {          // interface access to assigned here unknown reset module
           this.ct = ref.cfg.time_BlinkingLed();
           //end::Q-Process-ifcUsg[]
-          this.ctLow = 0x0000;    
+          this.ctLow = 0x0000;
+          this.state = z.state;
         }                                     // underflow detection to 111.... as simple hardware-saving solution. The counter itself can use a carry-logic. 
         else if(Fpga.getBits(z.ctLow, 15, 13)==0b111) {    // check only 3 bits and not all bits =0
           this.ctLow = 0x61a7;  // 24999;                  // Period 25 ms, hint cannot use the range 0xe000..0xffff to prevent immediately underflow detection
@@ -107,10 +127,12 @@ public class BlinkingLedCt implements FpgaModule_ifc, BlinkingLed_ifc {
           } else {
             this.ct = z.ct -1;                   // high counter normally count down automatically proper implemented in FPGA
           }
+          this.state = State.fast;
         }
         else {
           this.ctLow = z.ctLow -1;               // count down automatically proper implemented in FPGA
           this.ct = z.ct;                        // high counter copy the state (not generated to VHDL, it is implicitely there)
+          this.state = z.state;
         }
         this.led = z.ct < ref.cfg.onDuration_BlinkingLed(); //set FF after comparison with 8 bit.
       }
@@ -118,6 +140,7 @@ public class BlinkingLedCt implements FpgaModule_ifc, BlinkingLed_ifc {
         this.ct = z.ct;                          // copy the state (not generated in VHDL)
         this.ctLow = z.ctLow;
         this.led = z.led;
+        this.state = z.state;
         this.time = z.time;
       }
     }
@@ -171,6 +194,12 @@ public class BlinkingLedCt implements FpgaModule_ifc, BlinkingLed_ifc {
   };
   //end::mdlifcacc[]
   
+  public @Fpga.IfcAccess Bit_ifc getStateFast = new Bit_ifc ( ) {
+    @Override public boolean getBit() {
+      return BlinkingLedCt.this.q.state == State.fast;
+    }
+  };
+
   //tag::TestSignalRecorderHead[]
   public class TestSignals extends TestSignalRecorder {
   //end::TestSignalRecorderHead[]

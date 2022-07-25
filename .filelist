@@ -3,12 +3,14 @@
 2022-05-31 20:43:01  x     +gen_Vhdl_Example1.bat                   ::          1.570 -0238222829 
 
 ============================== build/ =============================================================
-2022-06-21 23:02:03  x     readme.txt                               ::           . 20 -0078393849 
-2022-06-21 23:02:12  x     test_BlinkingLed_Signals.txt             ::         31.175  1964495296 
+2022-07-17 22:35:59  x     BlinkingLed2Vhdl_report.txt              ::          7.959  0437477740 
+2022-07-17 22:36:09  x     BlinkingLed_Fpga.vhd                     ::          3.213  0489111323 
+2022-07-17 17:36:13  x     readme.txt                               ::           . 20 -0078393849 
 
 ============================== genVHDL_cmp/ =======================================================
-2022-05-27 22:36:04  x     BlinkingLed2Vhdl_report.txt              ::          5.945 -0816292792 
-2022-05-31 20:42:22  x     BlinkingLed_Fpga.vhd                     ::          2.522 -1354682218 
+2022-07-17 22:40:17  x     BlinkingLed2Vhdl_report.txt              ::          7.959  0437477740 
+2022-07-17 22:38:38  x     BlinkingLed_Fpga.vhd                     ::          3.213  0489111323 
+2022-07-17 23:13:33  x     FpgaTop_SpeA.vhd                         ::         54.817 -1120304160 
 
 ============================== src/ ===============================================================
 
@@ -38,13 +40,13 @@
 ============================== src/main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/ ===
 
 ============================== src/main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/ ===
-2022-05-28 09:19:37  x     BlinkingLed_Fpga.java                    ::          2.878 -1884154169 
-2022-05-30 19:02:39  x     BlinkingLed_FpgaInOutput.java            ::          1.558 -1610774629 
+2022-07-17 19:41:42  x     BlinkingLed_Fpga.java                    ::          2.947  0289678163 
+2022-07-17 19:40:12  x     BlinkingLed_FpgaInOutput.java            ::          1.564 -1747286876 
 2022-05-30 19:04:04  x     BlinkingLed_IoAcc.java                   ::           .495 -2012932088 
 
 ============================== src/main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/ ===
 2022-05-28 09:04:09  x     BlinkingLedCfg_ifc.java                  ::           .649 -0680227105 
-2022-06-04 17:56:08  x     BlinkingLedCt.java                       ::          8.971  0124657385 
+2022-07-17 20:14:43  x     BlinkingLedCt.java                       ::          9.824 -0090778616 
 2022-05-23 10:18:21  x     BlinkingLed_ifc.java                     ::           .369  2121074132 
 2022-05-28 09:22:16  x     ClockDivider.java                        ::          1.893 -0482708883 
 
@@ -61,7 +63,7 @@
 ============================== src/main/java/srcJava_vishiaFpga/org/vishia/ ========================
 
 ============================== src/main/java/srcJava_vishiaFpga/org/vishia/fpga/ ===================
-2022-06-19 09:45:45  x     Fpga.java                                ::          8.365  1454614389 
+2022-07-25 22:22:35  x     Fpga.java                                ::          8.500  0432976626 
 2022-05-15 23:48:02  x     FpgaModule_ifc.java                      ::          1.603 -0300165073 
 
 ============================== src/main/java/srcJava_vishiaFpga/org/vishia/fpga/stdmodules/ ========
@@ -73,7 +75,7 @@
 ============================== src/main/java/srcJava_vishiaFpga/org/vishia/fpga/testutil/ ==========
 2022-06-06 19:58:59  x     CheckOper.java                           ::          4.544  0763340468 
 2022-06-04 14:01:14  x     StateStoreFpga.java                      ::          6.902 -1865498966 
-2022-06-22 22:56:56  x     TestSignalRecorder.java                  ::         13.238 -1877722153 
+2022-07-25 23:01:20  x     TestSignalRecorder.java                  ::         13.741  0802644741 
 2022-06-22 22:58:20  x     TestSignalRecorderSet.java               ::          5.213 -0186814221 
 2022-05-16 17:19:25  x     TestSignalRecorderVertical.java          ::          1.622 -0828855472 
 2022-05-15 23:48:53  x     TestSignalVerticalAdd.java               ::           .322 -0057543795 

@@ -18,6 +18,7 @@ public abstract class TestSignalRecorder {
 
   /**Version, history and license.
    * <ul>
+   * <li>2022-07-10 new possible operation {@link #explainSignals(String)} proper usable but optional only
    * <li>2022-06-31 Some renaming for better semantic.
    * <li>2022-05-11 Hartmut created.
    * </ul>
@@ -99,7 +100,11 @@ public abstract class TestSignalRecorder {
   
   public abstract void registerLines();
   
-  
+  /**Optional operation can output a String which explains the signals of the module.
+   * @param which String to control which should be output, specific usable.
+   * @return empty string, then nothing is output additionally, or a whole line ending with line feed "\n" with adequate content.  
+   */
+  public String explainSignals(String which) { return ""; }
   
   /**This operation should be implemented to add the necessary signals to all existing lines
    * which are created or cleaned in the overridden {@link #clean()} and registered with {@link #registerLine(StringBuilder, String)}.
@@ -211,6 +216,7 @@ public abstract class TestSignalRecorder {
     if(this.sbs.size()==0) {
       out.append('\n');
     } else {
+      out.append(explainSignals(""));
       for(StringBuilder sb: this.sbs) {
         out.append(sb).append('\n');
       }

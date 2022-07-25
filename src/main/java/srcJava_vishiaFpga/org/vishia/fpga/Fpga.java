@@ -82,7 +82,7 @@ public class Fpga {
   /**Shifts a vector 1 to left and replaces the bit 0 with low value.
    * In Vhdl it is vector(14 DOWNTO 0) & low
    * @param vector the previous state (z)
-   * @param nrBits valid number of bits to shift
+   * @param nrBits valid number of bits to shift, in example 15 to get vector(14 downto 0)
    * @param low It should present a boolean for a Vhdl: BIT
    * @return new value.
    */
@@ -169,7 +169,7 @@ public class Fpga {
    */
   public static void checkTime(int time, int ztime, int min) {
     if(time==0 || min ==0) return;  //no check yet. 
-    assert(time > ztime);           //detect errors with faulty call, 
+    //assert(time > ztime);           //detect errors with faulty call, 
     if(time - ztime < min) {
       Debugutil.stop();
       
@@ -197,9 +197,12 @@ public class Fpga {
    */
   public @interface GetterVhdl{  }
 
-  /**Defines a sub module in another module which is only responsible to implement an interface
+  /**Defines an inner class as implementor of an interface 
    * as access point to the containing module. */
   public @interface IfcAccess{  }
+
+  /**Defines an operation which is called only for simulation, not relevant for VHDL code. */
+  public @interface OnlySim{  }
 
   /**Defines an numeric variable in VHDL as BIT_VECTOR(<value-1> DOWNTO 0)
    * This allows only specific routines in this class or assignments.

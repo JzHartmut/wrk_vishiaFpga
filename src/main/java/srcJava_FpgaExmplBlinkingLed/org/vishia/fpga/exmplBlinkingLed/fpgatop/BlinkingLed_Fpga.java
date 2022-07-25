@@ -69,6 +69,7 @@ public class BlinkingLed_Fpga implements FpgaModule_ifc {
     this.ref.ioPins.output.led1 = this.ref.ct.ledBlinking();
     this.ref.ioPins.output.led2 = this.ref.ct.getLedFast.getBit();
     this.ref.ioPins.output.led3 = Fpga.getBits(this.ref.ct.ct(), 2,0) != 0b000;
+    this.ref.ioPins.output.led4 = this.ref.ct.getStateFast.getBit();
     //end::outPins[]
   }
   //end::step_update[]  

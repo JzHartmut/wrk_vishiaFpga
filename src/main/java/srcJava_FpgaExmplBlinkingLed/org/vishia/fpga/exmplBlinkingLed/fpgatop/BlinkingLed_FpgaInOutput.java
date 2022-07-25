@@ -20,7 +20,7 @@ public class BlinkingLed_FpgaInOutput {
   public static class Output {
     
     /**Ordinary output pins, use public in responsible to top level design sources. */
-    public boolean led1, led2, led3;
+    public boolean led1, led2, led3, led4;
   }
   
   /**This instances are final and public accessible. 

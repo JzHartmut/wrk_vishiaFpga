@@ -2,14 +2,15 @@
 == J2Vhdl_ModuleType: {@link J2Vhdl_FpgaData#idxModuleTypes}
  ModuleType         |  ifcOperation()                       | access    {@link J2Vhdl_ModuleType#idxIfcOperation} 
 --------------------+---------------------------------------+------------------------------------------------
-BlinkingLedCt       | ct()                                  | this.q..??refct @; 
-                    | getLedFast.getBit()                   | Fpga.getBits(...) ==; 0b000 @; 
-                    | ledBlinking()                         | this.q..??refled @; 
+BlinkingLedCt       | ct()                                  | ??refthis.q..ct @BlinkingLedCt.java:185  @;  @BlinkingLedCt.java:185 
+                    | getLedFast.getBit()                   | Fpga.getBits(...) @BlinkingLedCt.java:193  ==; 0b000 @BlinkingLedCt.java:193  @;  @BlinkingLedCt.java:193 
+                    | getStateFast.getBit()                 | BlinkingLedCt.??refthis.q...state @BlinkingLedCt.java:200  ==; State.fast @BlinkingLedCt.java:200  @;  @BlinkingLedCt.java:200 
+                    | ledBlinking()                         | ??refthis.q..led @BlinkingLedCt.java:176  @;  @BlinkingLedCt.java:176 
 --------------------+---------------------------------------+------------------------------------------------
-BlinkingLed_Fpga    | blinkingLedCfg.onDuration_BlinkingLed(| BlinkingLed_Fpga_onDuration_BlinkingLed
-                    | blinkingLedCfg.time_BlinkingLed()     | BlinkingLed_Fpga_time_BlinkingLed
+BlinkingLed_Fpga    | blinkingLedCfg.onDuration_BlinkingLed(| BlinkingLed_Fpga_blinkingLedCfg_onDuration_BlinkingLed
+                    | blinkingLedCfg.time_BlinkingLed()     | BlinkingLed_Fpga_blinkingLedCfg_time_BlinkingLed
 --------------------+---------------------------------------+------------------------------------------------
-BlinkingLed_FpgaInOu| reset_Inpin.reset_Pin()               | this.input..??ref.BlinkingLed_FpgaInOutput.reset_Pin @; 
+BlinkingLed_FpgaInOu| reset_Inpin.reset_Pin()               | BlinkingLed_FpgaInOutput.??refthis.input...reset_Pin @BlinkingLed_FpgaInOutput.java:41  @;  @BlinkingLed_FpgaInOutput.java:41 
 --------------------+---------------------------------------+------------------------------------------------
 BlinkingLed_FpgaInOutput_Input
 --------------------+---------------------------------------+------------------------------------------------
@@ -17,7 +18,9 @@ BlinkingLed_FpgaInOutput_Output
 --------------------+---------------------------------------+------------------------------------------------
 ClockDivider
 --------------------+---------------------------------------+------------------------------------------------
-Reset               | reset()                               | this.q..??refres @; 
+Reset               | reset()                               | ??refthis.q..res @Reset.java:122  @;  @Reset.java:122 
+                    | stubFalse.getBit()                    | Reset_stubFalse_getBit
+                    | stubTrue.getBit()                     | Reset_stubTrue_getBit
 --------------------+---------------------------------------+------------------------------------------------
 
 == Module: BlinkingLed_Fpga
@@ -70,11 +73,13 @@ Reset               | reset()                               | this.q..??refres @
   BlinkingLed_FpgaInOutput.output.led1  | led1 : BIT
   BlinkingLed_FpgaInOutput.output.led2  | led2 : BIT
   BlinkingLed_FpgaInOutput.output.led3  | led3 : BIT
+  BlinkingLed_FpgaInOutput.output.led4  | led4 : BIT
   ce.q.ce                               | ce_Q.ce : BIT
   ce.q.ct                               | ce_Q.ct : STD_LOGIC_VECTOR(3 DOWNTO 0)
   ct.q.ct                               | ct_Q.ct : STD_LOGIC_VECTOR(7 DOWNTO 0)
   ct.q.ctLow                            | ct_Q.ctLow : STD_LOGIC_VECTOR(15 DOWNTO 0)
   ct.q.led                              | ct_Q.led : BIT
+  ct.q.state                            | ct_Q.state : STD_LOGIC_VECTOR(3 DOWNTO 0)
   res.q.res                             | res_Q.res : BIT
   res.q.resetCount                      | res_Q.resetCount : STD_LOGIC_VECTOR(3 DOWNTO 0)
 ----------------------------------------+----------------
@@ -85,10 +90,12 @@ Reset               | reset()                               | this.q..??refres @
   BlinkingLedCt_Q.ct                    | ct_Q.ct : STD_LOGIC_VECTOR(7 DOWNTO 0)
   BlinkingLedCt_Q.ctLow                 | ct_Q.ctLow : STD_LOGIC_VECTOR(15 DOWNTO 0)
   BlinkingLedCt_Q.led                   | ct_Q.led : BIT
+  BlinkingLedCt_Q.state                 | ct_Q.state : STD_LOGIC_VECTOR(3 DOWNTO 0)
   BlinkingLed_FpgaInOutput.input.reset_Pin | reset_Pin : BIT
   BlinkingLed_FpgaInOutput.output.led1  | led1 : BIT
   BlinkingLed_FpgaInOutput.output.led2  | led2 : BIT
   BlinkingLed_FpgaInOutput.output.led3  | led3 : BIT
+  BlinkingLed_FpgaInOutput.output.led4  | led4 : BIT
   ClockDivider_Q.ce                     | ce_Q.ce : BIT
   ClockDivider_Q.ct                     | ce_Q.ct : STD_LOGIC_VECTOR(3 DOWNTO 0)
   Reset_Q.res                           | res_Q.res : BIT
@@ -99,7 +106,22 @@ Reset               | reset()                               | this.q..??refres @
 == Constants:        {@link J2Vhdl_ModuleType#idxConstDef}
   search-name                           | VHDL access : value 
 -----------------------------------+----------------------------------------+----------------
-  BlinkingLed_Fpga_onDuration_BlinkingLed | BlinkingLed_Fpga_onDuration_BlinkingLed  | INTEGER := 10
-  BlinkingLed_Fpga_time_BlinkingLed | BlinkingLed_Fpga_time_BlinkingLed     | BIT_VECTOR(7 DOWNTO 0) := x"64"
+  BlinkingLed_Fpga_blinkingLedCfg_onDuration_BlinkingLed | BlinkingLed_Fpga_blinkingLedCfg_onDuration_BlinkingLed  | INTEGER := 10
+  BlinkingLed_Fpga_blinkingLedCfg_time_BlinkingLed | BlinkingLed_Fpga_blinkingLedCfg_time_BlinkingLed  | BIT_VECTOR(7 DOWNTO 0) := x"64"
+  Reset_stubFalse_getBit           | Reset_stubFalse_getBit                 | BIT := '0'
+  Reset_stubTrue_getBit            | Reset_stubTrue_getBit                  | BIT := '1'
+  ct.State.fast                    | BlinkingLedCt_BlinkingLedCt_State_fast  | BIT_VECTOR(3 DOWNTO 0) := x"1"
+  ct.State.nonInit                 | BlinkingLedCt_BlinkingLedCt_State_nonInit  | BIT_VECTOR(3 DOWNTO 0) := x"0"
+  ct.State.off                     | BlinkingLedCt_BlinkingLedCt_State_off  | BIT_VECTOR(3 DOWNTO 0) := x"4"
+  ct.State.slow                    | BlinkingLedCt_BlinkingLedCt_State_slow  | BIT_VECTOR(3 DOWNTO 0) := x"2"
+----------------------------------------+----------------
+
+
+== enumConstants:    {@link J2Vhdl_ModuleType#idxEnumBitDef}
+  search-name                           | VHDL access : value 
+-----------------------------------+----------------------------------------+----------------
+  BlinkingLedCt_State_fast         | 1
+  BlinkingLedCt_State_off          | 3
+  BlinkingLedCt_State_slow         | 2
 -----------------------------------+----------------------------------------+----------------
 
