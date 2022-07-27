@@ -1,85 +1,32 @@
 2022-05-31 17:07:27  x     +clean.bat                               ::           .446  2128324022 
 2022-05-31 17:13:03  x     +clean_mkLinkBuild.bat                   ::          1.022 -0971608567 
 2022-05-31 20:43:01  x     +gen_Vhdl_Example1.bat                   ::          1.570 -0238222829 
+2022-06-05 15:06:58  x     _pushGithub.sh                           ::           .523  1271112732 
+2020-03-16 21:09:38  x     _resyncRepository.jz.cmd                 ::           .663 -0317671191 
 
-============================== build/ =============================================================
-2022-07-17 22:35:59  x     BlinkingLed2Vhdl_report.txt              ::          7.959  0437477740 
-2022-07-17 22:36:09  x     BlinkingLed_Fpga.vhd                     ::          3.213  0489111323 
-2022-07-17 17:36:13  x     readme.txt                               ::           . 20 -0078393849 
+============================== java/ ==============================================================
 
-============================== genVHDL_cmp/ =======================================================
-2022-07-17 22:40:17  x     BlinkingLed2Vhdl_report.txt              ::          7.959  0437477740 
-2022-07-17 22:38:38  x     BlinkingLed_Fpga.vhd                     ::          3.213  0489111323 
+============================== java/org/ ===========================================================
 
-============================== src/ ===============================================================
+============================== java/org/vishia/ ====================================================
 
-============================== src/load_tools/ =====================================================
-2022-05-31 16:53:31  x     +checkAndLoadTools.bat                   ::           .668 -1184903984 
-2022-05-31 20:39:35  x     tools.bom                                ::           .584  0167575816 
-2022-05-31 20:25:32  x     vishiaMinisys.jar                        ::         85.297 -1538870130 
-
-============================== src/main/ ===========================================================
-
-============================== src/main/java/ ======================================================
-
-============================== src/main/java/srcJava_FpgaExmplBlinkingLed/ =========================
-
-============================== src/main/java/srcJava_FpgaExmplBlinkingLed/_make/ ===================
-2022-05-31 20:23:40  x     +makejar_exmplBlinkingLedFpga.sh         ::          3.277 -1693425432 
-2022-05-31 22:29:49  x     -makejar-coreScript.sh                   ::          6.691 -1549028725 
-2021-06-28 23:34:15  x     JAVAC_HOME.sh                            ::          1.154 -1792697615 
-2020-03-18 20:51:28  x     exmplBlinkingLedFpga.manifest            ::           . 61 -2005899189 
-
-============================== src/main/java/srcJava_FpgaExmplBlinkingLed/org/ =====================
-
-============================== src/main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/ ==============
-
-============================== src/main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/ =========
-
-============================== src/main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/ ===
-
-============================== src/main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/fpgatop/ ===
-2022-07-17 19:41:42  x     BlinkingLed_Fpga.java                    ::          2.947  0289678163 
-2022-07-17 19:40:12  x     BlinkingLed_FpgaInOutput.java            ::          1.564 -1747286876 
-2022-05-30 19:04:04  x     BlinkingLed_IoAcc.java                   ::           .495 -2012932088 
-
-============================== src/main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/modules/ ===
-2022-05-28 09:04:09  x     BlinkingLedCfg_ifc.java                  ::           .649 -0680227105 
-2022-07-17 20:14:43  x     BlinkingLedCt.java                       ::          9.824 -0090778616 
-2022-05-23 10:18:21  x     BlinkingLed_ifc.java                     ::           .369  2121074132 
-2022-05-28 09:22:16  x     ClockDivider.java                        ::          1.893 -0482708883 
-
-============================== src/main/java/srcJava_FpgaExmplBlinkingLed/org/vishia/fpga/exmplBlinkingLed/test/ ===
-2022-06-03 14:49:47  x     Test_BlinkingLed.java                    ::          4.986  2016296807 
-
-============================== src/main/java/srcJava_vishiaFpga/ ===================================
-
-============================== src/main/java/srcJava_vishiaFpga/_make/ =============================
-2022-05-28 11:49:28  x     +genjavadoc_vishiaFpga.sh                ::           .775  1678536902 
-
-============================== src/main/java/srcJava_vishiaFpga/org/ ===============================
-
-============================== src/main/java/srcJava_vishiaFpga/org/vishia/ ========================
-
-============================== src/main/java/srcJava_vishiaFpga/org/vishia/fpga/ ===================
+============================== java/org/vishia/fpga/ ===============================================
 2022-07-25 22:22:35  x     Fpga.java                                ::          8.500  0432976626 
 2022-05-15 23:48:02  x     FpgaModule_ifc.java                      ::          1.603 -0300165073 
 
-============================== src/main/java/srcJava_vishiaFpga/org/vishia/fpga/stdmodules/ ========
-2022-05-20 20:41:34  x     Bit_ifc.java                             ::           .918 -1836885076 
-2022-06-22 23:01:35  x     Reset.java                               ::          5.825  0519303925 
-2022-04-19 19:37:22  x     Reset_Inpin_ifc.java                     ::           .265  0656561910 
-2022-05-28 09:06:45  x     Reset_ifc.java                           ::           .380  0036476361 
+============================== java/org/vishia/fpga/stdmodules/ ====================================
+2022-07-28 00:01:33  x     Bit_ifc.java                             ::           .918 -1836885076 
+2022-07-28 00:01:33  x     Reset.java                               ::          5.825  0519303925 
+2022-07-28 00:01:33  x     Reset_Inpin_ifc.java                     ::           .265  0656561910 
+2022-07-28 00:01:33  x     Reset_ifc.java                           ::           .380  0036476361 
 
-============================== src/main/java/srcJava_vishiaFpga/org/vishia/fpga/testutil/ ==========
-2022-06-06 19:58:59  x     CheckOper.java                           ::          4.544  0763340468 
-2022-06-04 14:01:14  x     StateStoreFpga.java                      ::          6.902 -1865498966 
-2022-07-25 23:01:20  x     TestSignalRecorder.java                  ::         13.741  0802644741 
-2022-06-22 22:58:20  x     TestSignalRecorderSet.java               ::          5.213 -0186814221 
-2022-05-16 17:19:25  x     TestSignalRecorderVertical.java          ::          1.622 -0828855472 
-2022-05-15 23:48:53  x     TestSignalVerticalAdd.java               ::           .322 -0057543795 
+============================== java/org/vishia/fpga/testutil/ ======================================
+2022-07-28 00:01:33  x     CheckOper.java                           ::          4.544  0763340468 
+2022-07-28 00:01:33  x     StateStoreFpga.java                      ::          6.902 -1865498966 
+2022-07-28 00:01:33  x     TestSignalRecorder.java                  ::         13.741  0802644741 
+2022-07-28 00:01:33  x     TestSignalRecorderSet.java               ::          5.213 -0186814221 
+2022-07-28 00:01:33  x     TestSignalRecorderVertical.java          ::          1.622 -0828855472 
+2022-07-28 00:01:33  x     TestSignalVerticalAdd.java               ::           .322 -0057543795 
 
-============================== src/test/ ===========================================================
-
-============================== src/test/bat/ =======================================================
-2022-05-31 22:31:34  x     test_Example1_BlinkingLed.bat            ::           .135  1620806702 
+============================== makeScripts/ =======================================================
+2022-05-28 11:49:28  x     +genjavadoc_vishiaFpga.sh                ::           .775  1678536902 
