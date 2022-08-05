@@ -8,4 +8,5 @@ public interface Reset_ifc {
    * @return true then reset active, false: normal operation.
    */
   public boolean reset ( int time, int max);
+  
 }

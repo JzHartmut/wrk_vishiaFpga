@@ -3,7 +3,6 @@ package org.vishia.fpga.stdmodules;
 import org.vishia.fpga.Fpga;
 import org.vishia.fpga.FpgaModule_ifc;
 import org.vishia.fpga.testutil.StateStoreFpga;
-import org.vishia.spehw.fpga.DataCmdSpe_ifc;
 
 //tag::classdef[]
 public class Reset implements FpgaModule_ifc, Reset_ifc {

@@ -14,6 +14,7 @@ public class Fpga {
   
   /**Version, history and license.
    * <ul>
+   * <li>2022-05-08 new {@link #clk}, and more as enhancements for Java2Vhdl features. 
    * <li>2022-05-02 {@link #setBits(int, int, int, int)} without 5th argument.
    * <li>2022-02-14 Hartmut created.
    * </ul>
@@ -41,7 +42,14 @@ public class Fpga {
    * 
    * @author Hartmut Schorrig = hartmut.schorrig@vishia.de
    */
-  public final static String sVersion = "2022-02-08"; 
+  public final static String sVersion = "2022-08-05"; 
+  
+  
+  
+  /**This is the central clock in the FPGA adequate the step in Java.
+   * It is only here to wire for included module. No meaning for simulation.    
+   */
+  public static boolean clk; 
 
   /**Gets one bit from a vector. Vhdl: vector(7)
    * @param vector variable which presents a Vhdl vector
@@ -130,6 +138,32 @@ public class Fpga {
   
   
   
+  /**Concatenate a bit and a bit vector
+   * @param high
+   * @param bitPos Position where high should be placed in result. 
+   *   This should be exact the length of low, checked in assertion. 
+   * @param low
+   * @return
+   */
+  public static int concatbits(boolean high, int bitPos, int low) {
+    assert( (low & ~((1<<bitPos)-1)) ==0);  //high bits from low are all 0.
+    return ((high ? 1 : 0) << bitPos) | (low & ((1<<(bitPos))-1));
+  }
+  
+  
+  /**Concatenate a bit vector and a right side bit
+   * @param high
+   * @param bitPos Position where high should be placed in result. 
+   *   This should be exact the length of low, checked in assertion. 
+   * @param low
+   * @return
+   */
+  public static int concatbits(int high, boolean low) {
+    return (high << 1) | (low ? 1 : 0);
+  }
+  
+
+  
   public static void measTime(int[] tgroup, int ixGroup, int tdiff) {
     if(tgroup[ixGroup] > tdiff) { tgroup[ixGroup] = tdiff; }
   }
@@ -204,6 +238,10 @@ public class Fpga {
   /**Defines an operation which is called only for simulation, not relevant for VHDL code. */
   public @interface OnlySim{  }
 
+  /**Defines an boolean variable in VHDL as STD_LOGIC
+   */
+  public @interface STD_LOGIC{  }
+
   /**Defines an numeric variable in VHDL as BIT_VECTOR(<value-1> DOWNTO 0)
    * This allows only specific routines in this class or assignments.
    * Arithmetic operations are not supported.
@@ -215,10 +253,19 @@ public class Fpga {
    */
   public @interface STDVECTOR{ int value(); }
 
-  /**Defines an numeric variable in VHDL as STD_LOGIC_VECTOR(<value-1> DOWNTO 0)
-   * This is necessary if numeric operations are done.
+  /**Defines a class and also its constructor to build a VHDL PROCESS
    */
   public @interface VHDL_PROCESS{  }
+
+  /**Defines a class and also its constructor to build a call to another VHDL module.
+   * It means a included sub module. 
+   */
+  public @interface VHDL_CALL{  }
+
+  
+  /**Defines a class which is used as included module. 
+   */
+  public @interface VHDL_MODULE{  }
 
   
 }
