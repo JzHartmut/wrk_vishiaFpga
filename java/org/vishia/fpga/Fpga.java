@@ -225,47 +225,47 @@ public class Fpga {
    * If both, the non clocked and the clocked input should be used, then the FF for clock should be a part of a module.
    * Generally non clocked and clocked signals should only used for one specific logic part.
    */
-  public @interface ClockedInput{  }
+  public @interface ClockedInput {  }
 
   /**Defines that an Operation is existing in the module class to access data from  RECORD instance (associated to a PROCESS).
    */
-  public @interface GetterVhdl{  }
+  public @interface GetterVhdl {  }
 
   /**Defines an inner class as implementor of an interface 
    * as access point to the containing module. */
-  public @interface IfcAccess{  }
+  public @interface IfcAccess {  }
 
   /**Defines an operation which is called only for simulation, not relevant for VHDL code. */
-  public @interface OnlySim{  }
+  public @interface OnlySim {  }
 
   /**Defines an boolean variable in VHDL as STD_LOGIC
    */
-  public @interface STD_LOGIC{  }
+  public @interface STD_LOGIC {  }
 
   /**Defines an numeric variable in VHDL as BIT_VECTOR(<value-1> DOWNTO 0)
    * This allows only specific routines in this class or assignments.
    * Arithmetic operations are not supported.
    */
-  public @interface BITVECTOR{ int value(); }
+  public @interface BITVECTOR { int value(); }
 
   /**Defines an numeric variable in VHDL as STD_LOGIC_VECTOR(<value-1> DOWNTO 0)
    * This is necessary if numeric operations are done.
    */
-  public @interface STDVECTOR{ int value(); }
+  public @interface STDVECTOR { int value(); }
 
   /**Defines a class and also its constructor to build a VHDL PROCESS
    */
-  public @interface VHDL_PROCESS{  }
+  public @interface VHDL_PROCESS {  }
 
   /**Defines a class and also its constructor to build a call to another VHDL module.
    * It means a included sub module. 
    */
-  public @interface VHDL_CALL{  }
+  public @interface LINK_VHDL_MODULE { String value(); }
 
   
-  /**Defines a class which is used as included module. 
+  /**Defines a class which is the presenter of a included module. 
    */
-  public @interface VHDL_MODULE{  }
+  public @interface VHDL_MODULE {  }
 
   
 }
