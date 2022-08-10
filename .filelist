@@ -14,7 +14,7 @@
 2022-08-04 22:59:36  x     Ce_ifc.java                              ::           . 87  0018899245 
 2022-08-05 15:31:23  x     CrcGenSerial_Inpifc.java                 ::           .218  1071842334 
 2022-08-05 16:04:36  x     CrcGenSerial_Outifc.java                 ::           .121 -1769113829 
-2022-08-08 20:26:40  x     CrcGeneratorSerial.java                  ::          2.938  2035120197 
+2022-08-10 16:24:03  x     CrcGeneratorSerial.java                  ::          2.953  2140362411 
 2022-07-28 17:34:35  x     Reset.java                               ::          5.780 -0111341198 
 2022-04-19 19:37:22  x     Reset_Inpin_ifc.java                     ::           .265  0656561910 
 2022-08-04 22:58:50  x     Reset_ifc.java                           ::           .383  0655247664 
