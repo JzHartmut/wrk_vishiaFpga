@@ -15,14 +15,15 @@
 2022-08-05 15:31:23  x     CrcGenSerial_Inpifc.java                 ::           .218  1071842334 
 2022-08-05 16:04:36  x     CrcGenSerial_Outifc.java                 ::           .121 -1769113829 
 2022-08-10 16:24:03  x     CrcGeneratorSerial.java                  ::          2.953  2140362411 
-2022-07-28 17:34:35  x     Reset.java                               ::          5.780 -0111341198 
+2022-08-18 16:13:40  x     Reset.java                               ::          6.169 -1005216419 
 2022-04-19 19:37:22  x     Reset_Inpin_ifc.java                     ::           .265  0656561910 
 2022-08-04 22:58:50  x     Reset_ifc.java                           ::           .383  0655247664 
+2022-08-15 23:57:47  x     Word_ifc.java                            ::           .201  0420946102 
 
 ============================== java/org/vishia/fpga/testutil/ ======================================
 2022-06-06 19:58:59  x     CheckOper.java                           ::          4.544  0763340468 
 2022-06-04 14:01:14  x     StateStoreFpga.java                      ::          6.902 -1865498966 
-2022-07-25 23:01:20  x     TestSignalRecorder.java                  ::         13.741  0802644741 
+2022-10-20 13:18:57  x     TestSignalRecorder.java                  ::         15.327  0980685624 
 2022-06-22 22:58:20  x     TestSignalRecorderSet.java               ::          5.213 -0186814221 
 2022-05-16 17:19:25  x     TestSignalRecorderVertical.java          ::          1.622 -0828855472 
 2022-05-15 23:48:53  x     TestSignalVerticalAdd.java               ::           .322 -0057543795 

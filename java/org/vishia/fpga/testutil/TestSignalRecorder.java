@@ -18,6 +18,7 @@ public abstract class TestSignalRecorder {
 
   /**Version, history and license.
    * <ul>
+   * <li>2022-09-xx better operation {@link #checkLen(StringBuilder)}  
    * <li>2022-07-10 new possible operation {@link #explainSignals(String)} proper usable but optional only
    * <li>2022-06-31 Some renaming for better semantic.
    * <li>2022-05-11 Hartmut created.
@@ -51,9 +52,14 @@ public abstract class TestSignalRecorder {
   /**The length of the title of a line, after clean. */
   public static int lenClean = 20;
   
+  protected int posStart = lenClean;
+  
   /**Registered module name to build the line title. */
   protected final String moduleName;
   
+  /**The normal position in the StringBuilder, set on {@link #endSignals(int)}.
+   * All StringBuilder are filled till this pos in {@link #endSignals(int)}
+   */
   protected int pos;
   
   private List<StringBuilder> sbs;
@@ -65,18 +71,18 @@ public abstract class TestSignalRecorder {
     this.moduleName = moduleName;
   }
 
-  /**Helper operation to resets one line.
+  /**Helper operation to register and resets one line.
    * @param ob any of the output buffer
-   * @param signaleName the signal name on start of line will be combinded with the module name of the constructor. 
+   * @param signaleName the signal name on start of line will be combined with the module name of the constructor. 
    */
   protected void registerLine(StringBuilder ob, String signaleName) {
     ob.setLength(0);
     this.sbs.add(ob);
     ob.append(this.moduleName).append('.').append(signaleName);
-    while(ob.length() < (lenClean-1)) { ob.append('_'); }
+    while(ob.length() < (this.posStart-1)) { ob.append('_'); }
     ob.append(':');
-    this.pos = ob.length();
-    
+    this.pos = ob.length();                                // increase posStart if one line description is longer,
+    if(this.posStart < this.pos) { this.posStart = pos; }  // it is then valid for all following lines.
   }
   
   /**This operation should be overridden in a kind that all buffers should be created and reseted
@@ -191,7 +197,7 @@ public abstract class TestSignalRecorder {
    *   false if sb is longer as the zTime position, or it does not contain at least one space for separation on the last position. 
    *   It means do not write into.
    */
-  protected static boolean checkLen ( StringBuilder sb, int zTime) {
+  @Deprecated protected static boolean checkLen ( StringBuilder sb, int zTime) {
     int zsb = sb.length();                   //length of sb
     if(zsb >= zTime && (sb.charAt(zsb-1) !=' ' && zsb != TestSignalRecorder.lenClean)) {    // >= because should at least one space
       return false;             // do not write to this buffer, no space for the zTime position.
@@ -204,6 +210,32 @@ public abstract class TestSignalRecorder {
     }
   }
   
+  
+  
+  /**Checks whether there is space for a longer information.
+   * It presumes that {@link #endSignals(int)} was called in the steps before.
+   * It means the StringBuilder is filled maybe with spaces at least till {@link #pos}.
+   * The information should be written only if there is at least one space on end. 
+   * If there is no spaces, first time "..." is added to show the situation, but of course only one time on overfilled buffer.
+   * @param sb 
+   * @return
+   */
+  protected boolean checkLen(StringBuilder sb) { 
+    int zsb = sb.length();                   //length of sb
+    char cLast = sb.charAt(zsb-1);
+    if(zsb > this.posStart 
+      && ( zsb > this.pos 
+         || zsb == this.pos && ((cLast) !=' ')    // >= because should at least one space
+      )  ) {
+      if(cLast != '.') {
+        sb.append("...");  // to show there is too much content.
+      }
+      return false;             // do not write to this buffer, no space for the zTime position.
+    }
+    else {   //filled till pos with at least one space on end, see endSignals(int).
+      return true;
+    }
+  }
   
   
   /**This operation outputs all lines.

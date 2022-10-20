@@ -167,6 +167,14 @@ public class Reset implements FpgaModule_ifc, Reset_ifc {
     @Override public boolean getBit () { return true; } 
   };
 
+  /**This is a stub to return always a value of 0 . 
+   * It is associated to the Reset module because this module is usual in use. 
+   * TODO maybe also support a static ifc-implementation. Then it can be associated in the Bit_ifc itself.
+   */
+  public @Fpga.IfcAccess Word_ifc stubWord16 = new Word_ifc() {
+    @Override public int getWord( int time, int min ) { return 0x0000; }
+  };
+
 
   
   
