@@ -259,13 +259,23 @@ public class Fpga {
 
   /**Defines a class and also its constructor to build a call to another VHDL module.
    * It means a included sub module. 
+   * The name of this class should follow the schema "Vhdlink_<linkedModuleName>"
+   * whereas <linkedModuleName> is exactly the name of the module variable in the inner "class Modules { ......" definition.
+   * <br>
+   * The type of the included module is defined by the type of the argument "vhdlMdl" of the constructor.
+   * The constructor should have the form:<pre>
+    @Fpga.LINK_VHDL_MODULE Vhdlink_Combinatoric ( int time, <ModuleClass> thism, <ClassOfLinkedVhdlModule> vhdlMdl) {
+   * </pre>
+   * <ClassOfLinkedVhdlModule> should have the annotation "VHDL_MODULE"
+   * see #VHDL_MODULE
    */
-  public @interface LINK_VHDL_MODULE { String value(); }
+  public @interface LINK_VHDL_MODULE { }
 
   
   /**Defines a class which is the presenter of a included module. 
+   * @param vhdlEntity name of the VHDL file and also name of its entity definition. 
    */
-  public @interface VHDL_MODULE {  }
+  public @interface VHDL_MODULE { String vhdlEntity(); }
 
   
 }
