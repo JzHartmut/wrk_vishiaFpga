@@ -1,11 +1,18 @@
 package org.vishia.fpga;
 
 //tag::classhead[]
+/**This interface should unify a module for FPGA.
+ * The here defined operations are necessary especially for test in Java.
+ * Not necessary for VHDL translation. 
+ * @author Hartmut Schorrig www.vishia.org
+ *
+ */
 public interface FpgaModule_ifc {
 //end::classhead[]
 
   /**Version, history and license.
    * <ul>
+   * <li>2012-12-04 Hartmut add reset 
    * <li>2022-02-17 Hartmut created: 
    * </ul>
    * <br><br>
@@ -36,9 +43,37 @@ public interface FpgaModule_ifc {
 
 
 //tag::body[]
-  void step(int time);
   
-  void update();
+  /**Creates an initial state as after hardware reset.
+   * Usual the default ctors should be called here.
+   * The operation should be called first on start of simulation.
+   * Especially necessary on reusing of a given instance (without new construction)
+   * for several tests.
+   * Pattern: <pre>
+   * void reset ( ) {
+   *   this.my = new My();
+   * }</pre>
+   */
+  void reset ( );
+  
+  /**This operation should prepare all D-inputs of flipflops. It is the creation of the q_d instances.
+   * Pattern: <pre>
+   * void step ( int time) {
+   *   this.my_d = new My(time, this.my, this, ref);
+   * }</pre>
+   * 
+   * @param time
+   */
+  void step ( int time);
+  
+  /**This operation should update the Q-Outputs of flipflop from D
+   * and can also output signals to ports.
+   * Pattern: <pre>
+   * void update ( ) {
+   *   this.my = this.my_d;
+   * }</pre>
+   */
+  void update ( );
   
   
 }

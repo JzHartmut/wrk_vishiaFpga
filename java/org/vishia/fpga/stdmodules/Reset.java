@@ -107,6 +107,11 @@ public class Reset implements FpgaModule_ifc, Reset_ifc {
   //public Clr_ifc q ( ) {return this.q; }
   
   @Override
+  public void reset( ) {
+    this.q = new Q();
+  }
+
+  @Override
   public void step(int time) {
     this.d_q = new Q(time, this.q, this.ref);
   }

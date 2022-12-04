@@ -108,9 +108,9 @@ public abstract class TestSignalRecorder {
   
   /**Optional operation can output a String which explains the signals of the module.
    * @param which String to control which should be output, specific usable.
-   * @return empty string, then nothing is output additionally, or a whole line ending with line feed "\n" with adequate content.  
+   * @return null or empty string, then nothing is output additionally, or a whole line ending with line feed "\n" with adequate content.  
    */
-  public String explainSignals(String which) { return ""; }
+  public String explainSignals(String which) { return null; }
   
   /**This operation should be implemented to add the necessary signals to all existing lines
    * which are created or cleaned in the overridden {@link #clean()} and registered with {@link #registerLine(StringBuilder, String)}.
@@ -248,7 +248,10 @@ public abstract class TestSignalRecorder {
     if(this.sbs.size()==0) {
       out.append('\n');
     } else {
-      out.append(explainSignals(""));
+      String explain = explainSignals("");
+      if(explain !=null) {
+        out.append(explain);
+      }
       for(StringBuilder sb: this.sbs) {
         out.append(sb).append('\n');
       }

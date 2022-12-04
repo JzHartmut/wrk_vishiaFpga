@@ -76,6 +76,10 @@ public class CrcGeneratorSerial implements FpgaModule_ifc, CrcGenSerial_Outifc {
     this.ref = new Ref(ce, inp);
   } 
   
+  @Override public void reset ( ) {
+    this.q = new Q();
+  }
+
   @Override public void step ( int time ) {
     this.q_d = new Q(time, this.q, this.ref);
   }

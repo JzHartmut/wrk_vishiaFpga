@@ -51,11 +51,15 @@ public class Fpga {
    */
   public static boolean clk; 
 
-  /**Gets one bit from a vector. Vhdl: vector(7)
-   * @param vector variable which presents a Vhdl vector
+  /**Sets one bit from a vector. 
+   * <br>Vhdl result: "vector(7)=value" if bit = 7
+   * <br>In Java it is sufficient to set the whole vector as final in construction from the given vector,
+   *   only changed the dedicated bit.
+   *   
+   * @param vector variable which presents a Vhdl vector. Can be @Fpga.BITVECTOR or @Fpga.STDVECTOR
    * @param bit bit number set in vector output in the return value, should be a simple const number.
    * @param value the value to set to this bits. An ordinary expression of bool type.
-   *   On VHDL an automatic conversion to STD_VECTOR will be done if necessary. 
+   *   On VHDL an automatic conversion to STD_VECTOR or BIT_VECTOR will be done if necessary. 
    */
   public static int setBit(int vector, int bit, boolean value) { 
     int mask = 1<<bit;
