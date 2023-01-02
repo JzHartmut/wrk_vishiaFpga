@@ -122,7 +122,7 @@ public class Reset implements FpgaModule_ifc, Reset_ifc {
   }
 
   //tag::reset()[]
-  @Override public boolean reset ( int time, int max) { return this.q.res; }
+  @Override public boolean res ( int time, int max) { return this.q.res; }
   //end::reset()[]
   
   //tag::Store[]
