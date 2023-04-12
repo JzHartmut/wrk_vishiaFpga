@@ -3,6 +3,7 @@ package org.vishia.fpga;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
+import org.vishia.fpga.stdmodules.CeTime_ifc;
 import org.vishia.util.Debugutil;
 
 /**This class contains hardware related opeations for FPGA simulation
@@ -130,14 +131,36 @@ public class Fpga {
   
   /**Concatenate two bit vectors
    * @param high
+   * @param nrBitLow number of Bits of Low or Position where high should be placed in result. 
+   *   This should be exact the length of low, checked in assertion. 
+   * @param low
+   * @return
+   */
+  public static int concatbits(int high, int nrBitLow, int low) {
+    assert( (low & ~((1<<nrBitLow)-1)) ==0);  //high bits from low are all 0.
+    return (high << nrBitLow) | (low & ((1<<(nrBitLow))-1));
+  }
+  
+  
+  
+  /**Concatenate two or more bit vectors
+   * @param high
    * @param bitPos Position where high should be placed in result. 
    *   This should be exact the length of low, checked in assertion. 
    * @param low
    * @return
    */
-  public static int concatbits(int high, int bitPos, int low) {
-    assert( (low & ~((1<<bitPos)-1)) ==0);  //high bits from low are all 0.
-    return (high << bitPos) | (low & ((1<<(bitPos))-1));
+  public static int concatBits(int high, int ... nrBitRight) {
+    //assert( (low & ~((1<<bitPos)-1)) ==0);  //high bits from low are all 0.
+    int ret = high;
+    int nrofExprRight = nrBitRight.length;
+    int ix = 0;
+    while(ix < nrofExprRight -2) {
+      int nrBit = nrBitRight[ix++];
+      int right = nrBitRight[ix++];
+      ret = ret << nrBit | right & ((1<<nrBit)-1); 
+    }
+    return ret;
   }
   
   
@@ -204,13 +227,31 @@ public class Fpga {
    * @param time current time of access
    * @param ztime time of the accessed variable
    * @param min minimal difference.
+   * @return time itself to allow simple writing <code>this.time_ = Fpga.checkTime(time, z.time_, 7);</code>
    */
-  public static void checkTime(int time, int ztime, int min) {
-    if(time==0 || min ==0) return;  //no check yet. 
+  public static int checkTime(int time, int ztime, int min) {
+    if(time==0 || min ==0) return 0;  //no check yet. 
     //assert(time > ztime);           //detect errors with faulty call, 
     if(time - ztime < min) {
       Debugutil.stop();
-      
+      //throw new IllegalArgumentException("timing error");
+    }
+    return time;
+  }
+  
+  
+  /**Check the time. This operation is used to generate timing constrains, 
+   * and also used in simulation for check the time.
+   * @param time current time of access
+   * @param ztime time of the accessed variable
+   * @param min minimal difference.
+   */
+  public static void checkTime(int time, CeTime_ifc timeIfc, int min) {
+    if(time==0 || min ==0) return;  //no check yet. 
+    //assert(time > ztime);           //detect errors with faulty call, 
+    if(time - timeIfc.time() < min) {
+      Debugutil.stop();
+      throw new IllegalArgumentException("timing error");
       //TODO set breakpoint, or conditional invoke a test assertion. 
     }
   }

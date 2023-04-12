@@ -12,10 +12,10 @@ public class CrcGeneratorSerial implements FpgaModule_ifc, CrcGenSerial_Outifc {
   
   
   static class Ref {
-    Ce_ifc ce;
+    CeTime_ifc ce;
     CrcGenSerial_Inpifc inp;
     
-    public Ref(Ce_ifc ce, CrcGenSerial_Inpifc inp) {
+    public Ref(CeTime_ifc ce, CrcGenSerial_Inpifc inp) {
       this.ce = ce;
       this.inp = inp;
     }
@@ -62,17 +62,17 @@ public class CrcGeneratorSerial implements FpgaModule_ifc, CrcGenSerial_Outifc {
     
   }
   
-  Q q_d, q = new Q();
+  Q q = new Q(), q_d = q ;
   
   public CrcGeneratorSerial ( ) {
   } 
   
-  public CrcGeneratorSerial ( Ce_ifc ce, CrcGenSerial_Inpifc inp) {
+  public CrcGeneratorSerial ( CeTime_ifc ce, CrcGenSerial_Inpifc inp) {
     this.ref = new Ref(ce, inp);
   } 
   
   
-  public void init ( Ce_ifc ce, CrcGenSerial_Inpifc inp) {
+  public void init ( CeTime_ifc ce, CrcGenSerial_Inpifc inp) {
     this.ref = new Ref(ce, inp);
   } 
   

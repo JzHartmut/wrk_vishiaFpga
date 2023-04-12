@@ -172,11 +172,11 @@ public abstract class TestSignalRecorder {
    * It can be called manually, but it is automatically called for all TestSignalRecorder
    * using the {@link TestSignalRecorderSet#addSignals(int)}.
    * @throws IOException */
-  protected void endSignals ( int pos) throws IOException {
-    this.pos = pos;
+  protected void endSignals ( int lenCurr) throws IOException {
+    this.pos = lenCurr;
     if(this.sbs !=null) {
     for(StringBuilder sb : this.sbs) {
-      while(sb.length() < pos) { sb.append(' '); }
+      while(sb.length() < lenCurr) { sb.append(' '); }
     } }
   }
   

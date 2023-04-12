@@ -4,15 +4,25 @@ import org.vishia.fpga.Fpga;
 import org.vishia.fpga.FpgaModule_ifc;
 import org.vishia.fpga.testutil.StateStoreFpga;
 
-//tag::classdef[]
-public class Reset implements FpgaModule_ifc, Reset_ifc {
+/**This FPGA module starts after hard reset with a reset signal at holding till two ce signals are recognized.
+ * This assures using a synchronous reset in logic with this ce clock or a ce clock which is related to this one.
+ * It means the reset logic can be more complex, there are enough time for the logic by proper timing constraints.
+ * The reset signal follows the time group given by the ce reference.
+ * <br>
+ * Note, that ce have to be proper also in the reset state of this block. It should not use the reset of this block itself,
+ * elsewhere it is a deadlock.  
+ * @author Hartmut Schorrig
+ *
+ */
+public class ResetCe  implements FpgaModule_ifc, Reset_ifc {
 //end::classdef[]
 
   /**Version, history and license.
    * <ul>
+   * <li>2023-04-12 Derived from the {@link Reset} without Ce, which should now be designated as deprecated. 
    * <li>2022-06-11 The accesses for stubFalse and stubTrue are added here, often used, and this module is also often used. 
    *   TODO Better create a specfic Module only for stubs.
-   * <li>2022-05- Hartmut created.
+   * <li>2022-05- Hartmut created the originally reset.
    * </ul>
    * <br><br>
    * <b>Copyright/Copyleft</b>:
@@ -45,19 +55,11 @@ public class Reset implements FpgaModule_ifc, Reset_ifc {
     
     final CeTime_ifc ce;
     
-    final Word_ifc resetime;
-    
-    public Ref(Reset_Inpin_ifc resetInp, CeTime_ifc ce, Word_ifc resetime) {
+    public Ref(Reset_Inpin_ifc resetInp, CeTime_ifc ce) {
       this.resetInp = resetInp;
       this.ce = ce;
-      this.resetime = resetime;
     }
 
-    public Ref(Reset_Inpin_ifc resetInp) {
-      this.resetInp = resetInp;
-      this.ce = null;
-      this.resetime = null;
-    }
   }
   
   final Ref ref;
@@ -67,17 +69,19 @@ public class Reset implements FpgaModule_ifc, Reset_ifc {
    */
   @Fpga.VHDL_PROCESS private static final class Q{
 
-    @Fpga.STDVECTOR(4) final int resetCount;
+    //@Fpga.BITVECTOR(2) final int resetSh;
 
+    
     /**This is the variable of the record accessed from outside, but access via interface.
      * Hence it can be private (package private but the class is private). 
      */
-    final boolean res;
+    final boolean res, res1;
     
     final int time_;
     
     Q() {
-      this.resetCount = 0;
+      //this.resetSh = 0;
+      this.res1 = false;
       this.res = false;
       this.time_ = 0;
     }
@@ -85,16 +89,23 @@ public class Reset implements FpgaModule_ifc, Reset_ifc {
     @Fpga.VHDL_PROCESS Q(int time, Q z, Ref ref) {
       Fpga.checkTime(time, z.time_, 1);                 // need be a fast logic
       this.time_ = time;
-      if(ref.resetInp.reset_Pin() == false) {              // lo active clear pin
-        this.resetCount = 0b0000;                
+      if(ref.ce.ce()) {
+        if(ref.resetInp.reset_Pin() == false) {              // lo active clear pin
+          this.res1 = true;
+          this.res = true;
+        }
+        else if(z.res1) {
+          this.res1 = false;
+          this.res = z.res;
+        }
+        else {
+          this.res = z.res1;
+          this.res1 = z.res1;
+        }
+      } else {
+        this.res = z.res;
+        this.res1 = z.res1;
       }
-      else if(z.res) {
-        this.resetCount = z.resetCount +1;
-      }
-      else {
-        this.resetCount = z.resetCount;
-      }
-      this.res = z.resetCount < 0b1110;                  // hi active internal clear signal if clrCount = 0...13
     }
 
     
@@ -111,8 +122,8 @@ public class Reset implements FpgaModule_ifc, Reset_ifc {
    * Note: The arguments should have the exact same name and type as in the {@link Ref#Ref(Reset_ifc, ClockDivider)} inner class.
    * @param resetInp this should be immediately the inputFpga port block.
    */
-  public Reset(Reset_Inpin_ifc resetInp) {
-    this.ref = new Ref(resetInp);
+  public ResetCe(Reset_Inpin_ifc resetInp, CeTime_ifc ce) {
+    this.ref = new Ref(resetInp, ce);
   }
   
   
@@ -145,7 +156,7 @@ public class Reset implements FpgaModule_ifc, Reset_ifc {
   /**Stores the state for special tests.
    * You can use this implementation as template for your modules.
    */
-  public static class Store extends StateStoreFpga < Reset > {
+  public static class Store extends StateStoreFpga < ResetCe > {
     final Q q;
 
     /**Creates a Store instance, which refers the data from the {@link Reset#q} instance,
@@ -154,7 +165,7 @@ public class Reset implements FpgaModule_ifc, Reset_ifc {
      * @param time The time stamp of the simulation
      * @param src The reference to the module.
      */
-    public Store(int time, Reset src) {
+    public Store(int time, ResetCe src) {
       super(time, src);
       this.q = src.q;
     }
@@ -199,4 +210,6 @@ public class Reset implements FpgaModule_ifc, Reset_ifc {
 
   
   
+
+
 }

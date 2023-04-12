@@ -83,11 +83,11 @@ public class TestSignalRecorderSet {
    * Expect lines which are not regarded in the zAdd return value. See example on {@link TestSignalRecorder#addSignals(int, boolean)}.  
    */
   public void addSignals(int time) throws IOException {
-    int zLine = 0;
+    int zLine = 0;                               // remain 0 if no signals are added
     for(TestSignalRecorder rec: this.recs) {
-      boolean bAdd = zLine >0;                             // if any recorder has added somewhat before, then true
-      int zLine1 = rec.addSignals(time, this.lenCurr, bAdd);             // bAdd==false can prevent addition
-      if(zLine < zLine1) {                                 // if has added somewhat, zLine is the longest line
+      boolean bAdd = zLine >0;                   // if any recorder has added somewhat before, then true
+      int zLine1 = rec.addSignals(time, this.lenCurr, bAdd);   // bAdd==false can prevent addition
+      if(zLine < zLine1) {                       // if has added somewhat, zLine is the longest line
         zLine = zLine1;
       }
     }
