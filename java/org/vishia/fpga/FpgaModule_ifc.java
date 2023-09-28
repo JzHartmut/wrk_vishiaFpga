@@ -53,6 +53,7 @@ public interface FpgaModule_ifc {
    * void reset ( ) {
    *   this.my = new My();
    * }</pre>
+   * @since 2022-12-04 Hint for older version rename {@link org.vishia.fpga.stdmodules.Reset#res(int, int)} from older name reset().
    */
   void reset ( );
   

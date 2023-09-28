@@ -137,7 +137,10 @@ public class Reset implements FpgaModule_ifc, Reset_ifc {
   }
 
   //tag::reset()[]
-  /**This is the access operation for the reset line.*/
+  /**This is the access operation for the reset line.
+   * @since 2022-12-04 rename from reset(). {@link #reset()} has gotten another functionality. 
+   * @since 2022-05 existing, later with 2 arguments.
+   * @since */
   @Override public boolean res ( int time, int max) { return this.q.res; }
   //end::reset()[]
   
